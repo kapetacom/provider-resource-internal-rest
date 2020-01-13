@@ -1,0 +1,11 @@
+kind: core.blockware.com/v1/ResourceType/Internal
+metadata:
+  id: rest.blockware.com/v1/API
+  name: REST API
+  description: Provides REST API in your plans
+---
+kind: core.blockware.com/v1/ResourceType/Internal
+metadata:
+  id: rest.blockware.com/v1/Client
+  name: REST Client
+  description: Provides REST Clients in your plans

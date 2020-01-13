@@ -1,0 +1,85 @@
+.rest-method-erasure {
+    font-size: 14px;
+    line-height: 22px;
+    overflow: hidden;
+
+    .method,
+    .path {
+        text-overflow: ellipsis;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .method {
+        font-family: monospace;
+        margin:5px 0;
+        white-space: nowrap;
+
+
+        .type {
+            color: #082360;
+        }
+
+        .name {
+            color: #17601c;
+        }
+
+        .method-name {
+            font-weight: 600;
+        }
+
+        .method-definition-start,
+        .method-definition-end {
+            color: #666;
+        }
+
+        .method-argument, .type,.name {
+            margin:0 2px;
+
+        }
+
+        .transport {
+            color: #999;
+            margin-left: 2px;
+        }
+
+        .method-argument:last-child {
+            .separator {
+                display: none;
+            }
+        }
+    }
+
+    .path {
+        font-family: monospace;
+        text-overflow: ellipsis;
+
+        .label {
+            color: #999;
+            font-weight: 600;
+        }
+
+        .http-method {
+            margin-left: 5px;
+            color: #082360;
+        }
+
+        .http-path {
+            margin-left: 5px;
+            color: #17601c;
+        }
+    }
+
+    &.compact {
+        .path {
+            display: none;
+        }
+        .method-argument {
+            .type-separator,
+            .transport,
+            .type {
+                display: none;
+            }
+        }
+    }
+}

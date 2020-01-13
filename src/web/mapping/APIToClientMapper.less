@@ -1,0 +1,126 @@
+@import "~@blockware/ui-web-components/styles/values";
+@import "~@blockware/ui-web-components/styles/functions";
+
+.rest-resource-to-client-mapper {
+    .no-select();
+
+    .source,
+    .target {
+        line-height: 32px;
+        display: flex;
+        min-width: 80px;
+        padding:0 5px;
+        flex:1;
+        border: 1px solid #efefef;
+        background-color: white;
+
+        .rest-method-erasure {
+            flex: 1;
+        }
+
+        > .actions {
+            max-width: 30px;
+            min-width: 30px;
+        }
+    }
+
+    .method-mapping,
+    .header {
+        display: flex;
+        line-height: 32px;
+        margin:5px 0;
+
+        > .mapping-seperator {
+            max-width: 22px;
+            min-width: 22px;
+            text-align: center;
+
+            i {
+                font-size: 14px;
+                color: @blue-dark;
+            }
+        }
+    }
+
+    .method-mapping {
+        font-size: 14px;
+
+        &.unmapped-target  {
+            .target {
+                visibility: hidden;
+            }
+        }
+
+        &.unmapped-source {
+            > .source {
+                .rest-method-erasure {
+                    opacity: 0.3;
+                }
+                border-color: @red-light;
+            }
+
+            .mapping-seperator i {
+                color: @red-dark;
+            }
+        }
+
+        .dropzone {
+
+            &.dnd-zone-dragging {
+                background-color: @gray-xlight;
+                border-color: @green-dark;
+            }
+
+            &.dnd-zone-hovering {
+                background-color: @green-dark;
+                color: white !important;
+                span {
+                    color: white !important;
+                }
+
+                .rest-method-erasure {
+                    opacity: 0.6;
+                }
+
+            }
+        }
+    }
+
+    .header {
+        line-height: 44px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .draggable {
+        cursor: move;
+        flex:1;
+        font-size: 14px;
+
+        &.dragging-source {
+            background-color: @gray-xlight;
+            .rest-method-erasure, .actions {
+                visibility: hidden;
+            }
+        }
+
+        &.dragging-handle,
+        &:hover {
+            background-color: @gray-light;
+        }
+
+        &.dragging-handle {
+            .drop-shadow();
+            .transform(rotate(1deg));
+
+            .actions {
+                .pointer-event-none();
+                opacity: 0.2;
+            }
+        }
+    }
+
+    .rest-method-erasure {
+        font-size: 12px;
+    }
+}
