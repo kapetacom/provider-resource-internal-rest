@@ -7,6 +7,10 @@
         "rest",
         "resource-type"
     ],
+    "private": false,
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "prepublishOnly": "npm run build",
         "build": "webpack"
