@@ -1,0 +1,100 @@
+@import "~@blockware/ui-web-components/styles/values";
+@import "~@blockware/ui-web-components/styles/functions.less";
+
+
+.inspect-connection-payload {
+    font-size: 12px;
+
+    .overview {
+        .container();
+
+        margin-bottom:15px;
+        font-size: 16px;
+        border:1px solid @gray;
+        padding:10px;
+        background-color: @gray-xlight;
+
+        span {
+            display: inline-block;
+            padding:5px;
+        }
+
+        .method {
+            font-weight: 500;
+            padding-right: 3px;
+            color:@blue-dark;
+            line-height: 28px;
+        }
+
+        .url {
+            color: @green-dark;
+            line-height: 28px;
+        }
+
+        .status {
+            border:1px solid @gray;
+            float: right;
+            background-color: white;
+            font-size: 12px;
+            vertical-align: middle;
+            .code {
+                font-weight: bold;
+            }
+        }
+
+    }
+
+    table {
+        table-layout: fixed;
+        width:100%;
+        border-right: 1px solid @gray;
+        border-left: 1px solid @gray;
+
+        td, th {
+            padding:5px;
+            border-bottom: 1px solid @gray;
+            text-align: left;
+            font-size: inherit;
+        }
+
+        tr:first-child {
+            th,td {
+                border-top: 1px solid @gray;
+            }
+        }
+
+        td {
+            vertical-align: middle;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 22px;
+        }
+
+        tbody {
+
+            tr:nth-child(2n) {
+                background-color: @gray-light;
+            }
+        }
+
+        th {
+            width:120px;
+            font-weight: 500;
+        }
+
+        &.headers {
+            th {
+                text-align: right;
+                &:after {
+                    content:':'
+                }
+            }
+        }
+    }
+
+    pre.body {
+        padding:15px;
+        background-color: @gray-light;
+    }
+}

@@ -22,6 +22,7 @@ import {
 import {getCounterValue, hasMethod, resolveEntities, validate} from "./RESTUtils";
 import RestAPIEditorComponent from "./RESTEditorComponent";
 import APIToClientMapper from "./mapping/APIToClientMapper";
+import InspectConnectionContent from "./inspectors/InspectConnectionContent";
 
 const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> = {
     kind: KIND_REST_CLIENT,
@@ -32,7 +33,8 @@ const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> =
     converters: [
         {
             fromKind: KIND_REST_API,
-            componentType: APIToClientMapper,
+            mappingComponentType: APIToClientMapper,
+            inspectComponentType: InspectConnectionContent,
             createFrom: (data: ResourceKind) => {
                 return {...data, kind: KIND_REST_CLIENT}
             },

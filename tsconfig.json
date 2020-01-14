@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "outDir": "build/lib",
+    "target": "esnext",
     "lib": [
       "dom",
       "dom.iterable",
@@ -24,7 +23,6 @@
     "moduleResolution": "node",
     "rootDirs": [
       "src",
-      "stories",
       "definitions"
     ],
     "baseUrl": "src",
@@ -41,7 +39,6 @@
   },
   "include": [
     "definitions",
-    "stories",
     "src",
     "src/**/*"
   ],
