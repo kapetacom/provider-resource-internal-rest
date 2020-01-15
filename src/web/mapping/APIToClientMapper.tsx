@@ -39,7 +39,7 @@ interface RestResourceToClientMapperProps extends ResourceMapperProps<RESTResour
 
 
 @observer
-export default class RestResourceToClientMapper extends Component<RestResourceToClientMapperProps> {
+export default class APIToClientMapper extends Component<RestResourceToClientMapperProps> {
 
     private methods: MappedMethod[] = [];
 
