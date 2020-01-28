@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import _ from 'lodash';
 import { observer } from "mobx-react";
-import { action } from "mobx";
+import {action, observable} from "mobx";
 
 import {
     convertToEditMethod,
@@ -41,6 +41,7 @@ interface RestResourceToClientMapperProps extends ResourceMapperProps<RESTResour
 @observer
 export default class APIToClientMapper extends Component<RestResourceToClientMapperProps> {
 
+    @observable
     private methods: MappedMethod[] = [];
 
     private sourceName: string = '';
@@ -302,11 +303,6 @@ export default class APIToClientMapper extends Component<RestResourceToClientMap
                 {this.renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}
             </>
         );
-    }
-
-
-    componentDidUpdate() {
-        this.refreshMethods();
     }
 
     componentWillMount() {
