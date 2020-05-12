@@ -32,7 +32,7 @@ const method:RESTMethod = {
 };
 
 const method2:RESTMethod = {
-  path:'/some/where/else',
+  path:'itasks/{userId}/{id}',
   method: HTTPMethod.POST,
   description: 'My other method',
   arguments: {
@@ -54,7 +54,8 @@ const RESTApiResource:ResourceKind<RESTResourceSpec, RESTResourceMetadata> = {
   },
   spec: {
     methods: {
-      test: method
+      test: method,
+      addTask: method2
     }
   }
 };
@@ -178,7 +179,9 @@ export default {
   title: 'REST'
 };
 
-export const Editor = () => <RESTEditorComponent {...RESTApiResource}  block={block} />;
+export const Editor = () =>  <div style={{padding:'10px',width:'450px', backgroundColor:'white', border:'1px solid gray'}}>
+      <RESTEditorComponent {...RESTApiResource} block={block} />
+    </div>;
 
 export const MethodView = () => <RestMethodView compact={false} method={convertToEditMethod('test', method)} />;
 
