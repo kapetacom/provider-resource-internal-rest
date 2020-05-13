@@ -370,23 +370,27 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
 
         return (
             <>
-                <SingleLineInput
-                    name={key + '_method.id'}
-                    value={method.id}
-                    label={'Method name'}
-                    validation={['required', validateMethodName]}
-                    help={'This will be used when generating code. E.g. getSomething'}
-                    onChange={(name: string, input: string) => this.setMethodField(method, 'id', input.trim())}
-                />
+                <div className="form-horizontal-rows">
+                    <SingleLineInput
+                        name={key + '_method.id'}
+                        value={method.id}
+                        label={'Method name'}
+                        validation={['required', validateMethodName]}
+                        help={'This will be used when generating code. E.g. getSomething'}
+                        onChange={(name: string, input: string) => this.setMethodField(method, 'id', input.trim())}
+                    />
+                </div>
 
-                <MultiLineInput
-                    name={key + '_method.description'}
-                    value={method.description}
-                    label={'Description'}
-                    validation={[]}
-                    help={'Describe your method so others understand what it does'}
-                    onChange={(name: string, input: string) => this.setMethodField(method, 'method', HTTPMethod[input.trim()])}
-                />
+                <div className="form-horizontal-rows">
+                    <MultiLineInput
+                        name={key + '_method.description'}
+                        value={method.description}
+                        label={'Description'}
+                        validation={[]}
+                        help={'Describe your method so others understand what it does'}
+                        onChange={(name: string, input: string) => this.setMethodField(method, 'method', HTTPMethod[input.trim()])}
+                    />
+                </div>
 
                 <div className={'rest-method-path form-horizontal-rows'}>
 

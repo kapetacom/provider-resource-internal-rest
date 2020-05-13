@@ -15,34 +15,9 @@
         .fade-in(0.2);
     }
 
-    .form-element-container {
-        input {
-            height: 26px;
-        }
-        .label {
-            top: 4px;
-            text-overflow: ellipsis;
-
-            &.zoom-out {
-                top: -7px;
-                font-size: 10px;
-            }
-        }
-        .message {
-            font-size: 10px;
-        }
-        .arrow-icon {
-            top: 1px;
-        }
-
-        .status-icon {
-            right: 3px;
-            top: 6px;
-        }
-        &:first-of-type {
-            width: auto;
-            margin: 15px 10px;
-        }
+    >.form-element-container {
+        width: auto;
+        margin: 15px 10px;
     }
 
     .methods-container {
@@ -63,13 +38,6 @@
             }
         }
 
-        .form-buttons{
-            padding-top: 30px;
-            text-align: center;
-            .blockware-button {
-                padding:0;
-            }
-        }
 
         .rest-method {
 
@@ -80,6 +48,14 @@
                 .border-radius(3px);
                 &:hover {
                     .drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.24));
+                }
+            }
+
+            .form-container {
+                padding: 10px;
+
+                > .form-horizontal-rows {
+                    padding: 10px 0px;
                 }
             }
 
@@ -119,13 +95,7 @@
                     font-weight: 500;
                     line-height: 24px;
                     color: @gray-xdark;
-                    margin: 10px 15px 5px 10px;
-                }
-
-                .form-element-container {
-                    min-width: 100px;
-                    width: calc(100% - 20px);
-                    margin: 20px 10px;
+                    margin: 10px 15px 5px 5px;
                 }
 
                 .delete-icon {
@@ -166,7 +136,6 @@
                     }
                 }
 
-
                 .method-argument {
                     display: flex;
                     flex-wrap: nowrap;
@@ -199,6 +168,7 @@
                         background-color: inherit;
                         min-width: 160px;
                         flex: 0;
+                        padding-right: 10px;
                         
                         input {
                             padding-right: 30px;
@@ -208,9 +178,6 @@
                     > .rest-http-path {
                         background-color: inherit;
                         flex: 1;
-                    }
-                    &.form-horizontal-rows {
-                        margin: -20px 0;
                     }
                 }
             }
