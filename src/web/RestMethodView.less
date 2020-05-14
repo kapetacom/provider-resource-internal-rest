@@ -1,7 +1,11 @@
+@import "~@blockware/ui-web-components/styles/values.less";
+@import "~@blockware/ui-web-components/styles/functions.less";
+
 .rest-method-erasure {
     font-size: 14px;
     line-height: 22px;
     overflow: hidden;
+    padding: 0 50px 0 15px;
 
     .method,
     .path {
@@ -12,20 +16,20 @@
 
     .method {
         font-family: monospace;
-        margin:5px 0;
         white-space: nowrap;
 
 
         .type {
-            color: #082360;
+            color: @blue-dark;
         }
 
         .name {
-            color: #17601c;
+            color: @green-xlight;
         }
 
         .method-name {
             font-weight: 600;
+            color: @gray-xdark;
         }
 
         .method-definition-start,
@@ -55,18 +59,18 @@
         text-overflow: ellipsis;
 
         .label {
-            color: #999;
+            color: @gray-xdark;
             font-weight: 600;
         }
 
         .http-method {
             margin-left: 5px;
-            color: #082360;
+            color: @blue-dark;
         }
 
         .http-path {
             margin-left: 5px;
-            color: #17601c;
+            color: @green-xlight;
         }
     }
 

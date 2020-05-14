@@ -4,10 +4,14 @@ import { action, observable, toJS } from "mobx";
 import _ from "lodash";
 
 import {
-    FormRow,
     EntityPicker,
     FormContainer,
-    FormButtons
+    FormButtons,
+    SingleLineInput,
+    DropdownInput,
+    MultiLineInput,
+    Button,
+    ButtonType
 } from "@blockware/ui-web-components";
 import {
     typeValue,
@@ -28,6 +32,33 @@ import {
 import RestMethodView from "./RestMethodView";
 
 import './RESTEditorComponent.less';
+
+const EditIcon = () =>
+    <svg className="svg-icon" width="15" height="15" viewBox="0 0 15 15" fill="none" >
+        <path fill-rule="evenodd" clipRule="evenodd" d="M2 0C0.89543 0 0 0.895431 0 2V13C0 14.1046 0.895431 15 2 15H13C14.1046 15 15 14.1046 15 13V2C15 0.89543 14.1046 0 13 0H2Z" fill="#009AA9" />
+        <path d="M9.77012 2.76391C10.1373 2.31805 10.7964 2.25425 11.2422 2.62142C11.6881 2.9886 11.7519 3.64769 11.3847 4.09355L6.09357 10.5187L4.47896 9.18905L9.77012 2.76391Z" fill="white" />
+        <path d="M3.93768 9.84631L5.55229 11.176L3.21064 12.3743L3.93768 9.84631Z" fill="white" />
+    </svg>;
+
+const DeleteIcon = () =>
+    <svg className="svg-icon" width="15" height="15" viewBox="0 0 15 15" fill="none" >
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M2 0C0.89543 0 0 0.895431 0 2V13C0 14.1046 0.895431 15 2 15H13C14.1046 15 15 14.1046 15 13V2C15 0.89543 14.1046 0 13 0H2Z" fill="#FA7B6E" />
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M10.7488 4.79167H4.24883V11.2917C4.24883 11.8897 4.73416 12.375 5.3327 12.375H9.66549C10.2646 12.375 10.7488 11.8897 10.7488 11.2917V4.79167ZM8.85385 2.62445H6.14552L5.60439 3.16666H4.24968C3.95122 3.16666 3.70856 3.40933 3.70856 3.70778V4.24999H11.2919V3.70778C11.2919 3.40933 11.0492 3.16666 10.7497 3.16666H9.39606L8.85385 2.62445Z" fill="white" />
+    </svg>;
+
+const showArgumentsCheckbox = (isChecked: boolean) =>
+    <div>
+        {isChecked ?
+            <svg className="arguments-checkbox" width="17" height="17" viewBox="0 0 13 13" fill="none" >
+                <path d="M0 1.95C0 0.873044 0.873045 0 1.95 0H11.05C12.127 0 13 0.873045 13 1.95V11.05C13 12.127 12.127 13 11.05 13H1.95C0.873044 13 0 12.127 0 11.05V1.95Z" fill="#009AA9" />
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.20044 9.75L1.95044 6.625L2.86044 5.75L5.20044 8L10.1404 3.25L11.0504 4.125L5.20044 9.75Z" fill="#F5F1EE" />
+            </svg> :
+            <svg className="arguments-checkbox" width="17" height="17" viewBox="0 0 13 13" fill="none" >
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.05 1.3H1.95C1.59101 1.3 1.3 1.59101 1.3 1.95V11.05C1.3 11.409 1.59101 11.7 1.95 11.7H11.05C11.409 11.7 11.7 11.409 11.7 11.05V1.95C11.7 1.59101 11.409 1.3 11.05 1.3ZM1.95 0C0.873045 0 0 0.873044 0 1.95V11.05C0 12.127 0.873044 13 1.95 13H11.05C12.127 13 13 12.127 13 11.05V1.95C13 0.873045 12.127 0 11.05 0H1.95Z" fill="#908988" />
+            </svg>
+        }
+        <span>Arguments</span>
+    </div>;
 
 function validateApiName(fieldName: string, name: string) {
     if (!name) {
@@ -64,10 +95,6 @@ function validatePath(fieldName: string, name: string) {
     if (!/^(\/[a-z{]([}a-z0-9_-]*))+\/?$/i.test(name)) {
         throw new Error('Invalid path');
     }
-}
-
-function asValue(evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-    return evt.target.value.trim();
 }
 
 function createEmptyMethod(): RESTMethodEdit {
@@ -116,6 +143,9 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
 
     @observable
     private showCreateForm = false;
+
+    @observable
+    private showArguments: boolean = false;
 
     constructor(props: ResourceConfigProps<RESTResourceMetadata, RESTResourceSpec>) {
         super(props);
@@ -186,8 +216,8 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
     }
 
     @action
-    private handleMetaDataChanged(evt: ChangeEvent<HTMLInputElement>) {
-        this.metadata[evt.target.name] = evt.target.value.trim();
+    private handleMetaDataChanged(name: string, input: string) {
+        this.metadata[name] = input.trim();
 
         this.triggerChange();
     }
@@ -302,56 +332,34 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
         return (
             <>
                 <div className={"form-horizontal-rows"}>
-                    <FormRow label={'Name'}
-                        validation={['required', validateArgumentName]} >
-                        <input type="text" placeholder="E.g. myId"
-                            name={key + '_method.argument.' + ix + '.id'}
-                            autoComplete={"off"}
-                            value={argument.id}
-                            onChange={(evt) => {
-                                this.setArgumentField(method, argument, 'id', asValue(evt));
-                            }} />
-                    </FormRow>
+                    <SingleLineInput
+                        name={key + '_method.argument.' + ix + '.id'}
+                        value={argument.id}
+                        label={'Name'}
+                        validation={['required', validateArgumentName]}
+                        help={''}
+                        onChange={(name: string, input: string) => this.setArgumentField(method, argument, 'id', input.trim())}
+                    />
 
-                    <FormRow label={'Type'}
+                    <EntityPicker name={key + '_method.argument.' + ix + '.type'}
+                        value={typeValue(argument.type)}
+                        entities={this.props.block.getEntityNames()}
+                        onEntityCreated={(newEntity) => this.props.block.addEntity(newEntity)}
+                        onChange={(value: any) => {
+                            this.setArgumentField(method, argument, 'type', value);
+
+                        }} />
+
+                    <DropdownInput
+                        name={key + '_method.argument.' + ix + '.transport'}
+                        value={argument.transport ? argument.transport.toUpperCase() : HTTPTransport.QUERY}
+                        label={'Transport'}
                         validation={['required']}
-                    >
-                        {/* <input type="text" placeholder="E.g. string or User"
-                               name={key + '_method.argument.' + ix + '.type'}
-                               autoComplete={"off"}
-                               value={typeName(argument.type)}
-                               onChange={(evt) => {
-                                   this.setArgumentField(method, argument, 'type', asValue(evt));
-                               }}/> */}
-                        <EntityPicker name={key + '_method.argument.' + ix + '.type'}
-                            value={typeValue(argument.type)}
-                            entities={this.props.block.getEntityNames()}
-                            onEntityCreated={(newEntity) => this.props.block.addEntity(newEntity)}
-                            onChange={(value: any) => {
-                                console.log(value);
-                                this.setArgumentField(method, argument, 'type', value);
+                        help={"This tells the code generation process which target programming language to use."}
+                        onChange={(name: string, input: string) => this.setArgumentField(method, argument, 'transport', HTTPTransport[input.trim()])}
+                        options={Object.keys(HTTPTransport).map((methodName) => methodName)}
+                    />
 
-                            }} />
-                    </FormRow>
-
-                    <FormRow label={'Transport'}
-                        validation={['required']}>
-                        <select name={key + '_method.argument.' + ix + '.transport'}
-                            value={argument.transport ? argument.transport.toUpperCase() : HTTPTransport.QUERY}
-                            onChange={(evt) => {
-                                this.setArgumentField(method, argument, 'transport', HTTPTransport[asValue(evt)]);
-                            }}>
-
-                            {
-                                Object.keys(HTTPTransport).map((methodName) => {
-                                    return (
-                                        <option key={methodName}>{methodName}</option>
-                                    )
-                                })
-                            }
-
-                        </select>
-                    </FormRow>
                 </div>
             </>
         )
@@ -362,80 +370,69 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
 
         return (
             <>
-                <FormRow label={"Method name"}
-                    validation={['required', validateMethodName]}
-                    help="Name the method name - this will be used when generating code">
-
-                    <input type="text" placeholder="E.g. getSomething"
+                <div className="form-horizontal-rows">
+                    <SingleLineInput
                         name={key + '_method.id'}
-                        autoComplete={"off"}
                         value={method.id}
-                        onChange={(evt) => {
-                            this.setMethodField(method, 'id', asValue(evt));
-                        }} />
-                </FormRow>
-
-                <FormRow label={"Description"}
-                    help="Describe your method so others understand what it does">
-                    <textarea
-                        placeholder="E.g. Gets something from somewhere"
-                        name={key + '_method.description'}
-                        value={method.description}
-                        onChange={(evt) => {
-                            this.setMethodField(method, 'description', evt.target.value);
-                        }} />
-                </FormRow>
-
-                <div className={'rest-method-path form-horizontal-rows'}>
-                    <FormRow label={"HTTP Method"}
-                        validation={['required']}
-                        className={"rest-http-method"}
-                        help="Choose your HTTP method">
-                        <select name={key + '_method.method'}
-                            value={method.method}
-                            onChange={(evt) => {
-                                this.setMethodField(method, 'method', HTTPMethod[asValue(evt)]);
-                            }}>
-
-                            {
-                                Object.keys(HTTPMethod).map((methodName) => {
-                                    return (
-                                        <option key={methodName}>{methodName}</option>
-                                    )
-                                })
-                            }
-
-                        </select>
-                    </FormRow>
-
-                    <FormRow label={"Path"}
-                        className={"rest-http-path"}
-                        validation={['required', validatePath]}
-                        help="Write your path name. Path variables are denoted with { and } - e.g. /my/{id}">
-
-                        <input type="text" placeholder="E.g. /something/{id}"
-                            name={key + '_method.path'}
-                            autoComplete={"off"}
-                            value={method.path}
-                            onChange={(evt) => {
-                                this.setMethodField(method, 'path', asValue(evt));
-                            }} />
-                    </FormRow>
+                        label={'Method name'}
+                        validation={['required', validateMethodName]}
+                        help={'This will be used when generating code. E.g. getSomething'}
+                        onChange={(name: string, input: string) => this.setMethodField(method, 'id', input.trim())}
+                    />
                 </div>
 
-                <FormRow label={"Response type"}
-                    validation={['required']}
-                    help="Choose your response type - this is the methods return type.">
+                <div className="form-horizontal-rows">
+                    <MultiLineInput
+                        name={key + '_method.description'}
+                        value={method.description}
+                        label={'Description'}
+                        validation={[]}
+                        help={'Describe your method so others understand what it does'}
+                        onChange={(name: string, input: string) => this.setMethodField(method, 'method', HTTPMethod[input.trim()])}
+                    />
+                </div>
 
-                    <EntityPicker name={key + '_method.responseType'}
-                        value={typeValue(method.responseType)}
-                        entities={this.props.block.getEntityNames()}
-                        onEntityCreated={(newEntity) => this.props.block.addEntity(newEntity)}
-                        allowVoid={true}
-                        onChange={(value: any) => {
-                            this.setMethodField(method, 'responseType', value);
-                        }} />
-                </FormRow>
+                <div className={'rest-method-path form-horizontal-rows'}>
+
+                    <div className={"rest-http-method"}>
+                        <DropdownInput
+                            name={key + '_method.method'}
+                            value={method.method}
+                            label={'HTTP Method'}
+                            validation={['required']}
+                            help={'Choose your HTTP method'}
+                            onChange={(name: string, input: string) => this.setMethodField(method, 'method', HTTPMethod[input.trim()])}
+                            options={Object.keys(HTTPMethod).map((methodName) => methodName)}
+                        />
+                    </div>
+
+                    <div className={"rest-http-path"}>
+                        <SingleLineInput
+                            name={key + '_method.path'}
+                            value={method.path}
+                            label={'Path'}
+                            validation={['required', validatePath]}
+                            help={'Path variables are denoted with { and } - e.g. /my/{id}'}
+                            onChange={(name: string, input: string) => this.setMethodField(method, 'path', input.trim())}
+                        />
+                    </div>
+                </div>
+
+                <EntityPicker name={key + '_method.responseType'}
+                    value={typeValue(method.responseType)}
+                    entities={this.props.block.getEntityNames()}
+                    onEntityCreated={(newEntity) => this.props.block.addEntity(newEntity)}
+                    allowVoid={true}
+                    onChange={(value: any) => this.setMethodField(method, 'responseType', value)}
+                    label={"Response type"}
+                    help={"Choose your response type - this is the methods return type."}
+                />
+
+                <hr></hr>
+
+                <div className="container-checkbox" onClick={()=> this.showArguments = !this.showArguments}>
+                    {showArgumentsCheckbox(this.showArguments)}
+                </div>
 
                 <div className={'form-section arguments'}>
                     <h4>Arguments</h4>
@@ -486,15 +483,13 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
             <div className={"rest-method " + (editing ? 'editing' : 'viewing')}>
                 {!editing &&
                     <>
-                        <div className={"actions form-buttons"}>
-                            <button type={'button'}
-                                onClick={() => this.editMethod(method)}>Edit</button>
-
-                            {!this.isEditingMode() &&
-                                <button type={'button'}
-                                    onClick={() => this.deleteMethod(method)}>Delete</button>
-                            }
-
+                        <div className={"actions"}>
+                            <div className={"edit-icon"} onClick={() => this.editMethod(method)}>
+                                <EditIcon />
+                            </div>
+                            <div className={"delete-icon"} onClick={() => this.deleteMethod(method)}>
+                                <DeleteIcon />
+                            </div>
                         </div>
                         <RestMethodView method={method} />
                     </>
@@ -523,19 +518,17 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
         return (
             <>
                 <div className={"rest-resource-editor"}>
-                    <FormRow label="Name"
-                        help="Name your REST API"
-                        validation={['required', validateApiName]}>
 
-                        <input type="text" placeholder="E.g. MyApi"
-                            name="name"
-                            autoComplete={"off"}
-                            value={this.metadata.name}
-                            onChange={(evt) => {
-                                this.handleMetaDataChanged(evt)
-                            }} />
+                    <SingleLineInput
+                        name={"name"}
+                        value={this.metadata.name}
+                        label={"Name"}
+                        validation={['required', validateApiName]}
+                        help={"Name your REST API. E.g. MyApi"}
+                        onChange={(name: string, input: string) => this.handleMetaDataChanged(name, input)}
+                    />
 
-                    </FormRow>
+
 
                     <div className={"methods-container"}>
                         <ul className={"methods"}>
@@ -549,37 +542,35 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
                                 })
                             }
 
-                            {!this.isEditingMode() &&
-                                <li className={"new rest-method editing"}>
-                                    {this.methods.length > 0 &&
-                                        !this.showCreateForm &&
-                                        <button type={'button'}
-                                                className={'form-button'}
-                                                onClick={() => this.toggleCreateForm()}>
-                                            Create method
-                                        </button>
-                                    }
+                            {!this.isEditingMode() && this.showCreateForm &&
+                                <li className={"rest-method editing"}>
+                                    <span className={"method-label"}>Create New Method</span>
+                                    <div className={"delete-icon"} onClick={() => this.toggleCreateForm()}>
+                                        <DeleteIcon />
+                                    </div>
+                                    <FormContainer onSubmit={() => this.addMethod()}>
+                                        {this.renderMethodForm(this.newMethod, 'new_method')}
 
-                                    {this.showCreateForm &&
-                                        <FormContainer onSubmit={() => this.addMethod()}>
-                                            {this.renderMethodForm(this.newMethod, 'new_method')}
-
-                                            <FormButtons>
-                                                {this.methods.length > 0 &&
-                                                    <button type={"button"}
-                                                        onClick={() => this.toggleCreateForm()}>
-                                                        Cancel
+                                        <FormButtons>
+                                            {this.methods.length > 0 &&
+                                                <button type={"button"}
+                                                    onClick={() => this.toggleCreateForm()}>
+                                                    Cancel
                                                     </button>
-                                                }
-                                                <button type={"submit"}>
-                                                    <i className={"fa fa-plus"} />
-                                                    <span>Save</span>
-                                                </button>
-                                            </FormButtons>
+                                            }
+                                            <button type={"submit"}>
+                                                <i className={"fa fa-plus"} />
+                                                <span>Save</span>
+                                            </button>
+                                        </FormButtons>
 
-                                        </FormContainer>
-                                    }
+                                    </FormContainer>
                                 </li>
+                            }
+                            {!this.isEditingMode() && this.methods.length > 0 && !this.showCreateForm &&
+                                <FormButtons>
+                                    <Button buttonType={ButtonType.PROCEED} width={130} onClick={() => this.toggleCreateForm()} text="Create method" />
+                                </FormButtons>
                             }
                         </ul>
                     </div>
