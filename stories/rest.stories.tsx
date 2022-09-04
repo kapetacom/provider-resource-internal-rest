@@ -105,7 +105,7 @@ const trafficLines:Traffic[] = [
     id:'1',
     providerMethodId:'test',
     error:'',
-    request: {
+    request: {
       headers: {},
       body:'',
       url:'/some/where',
@@ -124,7 +124,7 @@ const trafficLines:Traffic[] = [
     id:'2',
     providerMethodId:'test',
     error:'',
-    request: {
+    request: {
       headers: {},
       body:'',
       url:'/some/where',
@@ -143,7 +143,7 @@ const trafficLines:Traffic[] = [
     id:'3',
     providerMethodId:'test',
     error:'',
-    request: {
+    request: {
       headers: {},
       body:'',
       url:'/some/where',
@@ -162,7 +162,7 @@ const trafficLines:Traffic[] = [
     id:'4',
     providerMethodId:'otherTest',
     error:'',
-    request: {
+    request: {
       headers: {},
       body:'',
       url:'/some/where',
