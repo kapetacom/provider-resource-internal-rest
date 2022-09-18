@@ -3,9 +3,9 @@ import { observer } from "mobx-react";
 
 import { ResourceRole } from "@blockware/ui-web-types";
 import { Traffic } from "@blockware/ui-web-context";
+import { countdown } from "@blockware/ui-web-utils";
 import {toClass, httpStatusPhrase} from "@blockware/ui-web-utils";
 
-import countdown from 'countdown';
 import byteSize from 'byte-size'
 
 import "./InspectConnectionTraffic.less";

@@ -355,7 +355,7 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
                         value={argument.transport ? argument.transport.toUpperCase() : HTTPTransport.QUERY}
                         label={'Transport'}
                         validation={['required']}
-                        help={"This tells the code generation process which target programming language to use."}
+                        help={"How this argument should be transported."}
                         onChange={(name: string, input: string) => this.setArgumentField(method, argument, 'transport', HTTPTransport[input.trim()])}
                         options={Object.keys(HTTPTransport).map((methodName) => methodName)}
                     />
@@ -569,7 +569,7 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
                             }
                             {!this.isEditingMode() && this.methods.length > 0 && !this.showCreateForm &&
                                 <FormButtons>
-                                    <Button buttonType={ButtonType.PROCEED} width={130} onClick={() => this.toggleCreateForm()} text="Create method" />
+                                    <Button type={ButtonType.BUTTON} width={150} onClick={() => this.toggleCreateForm()} text="Create method" />
                                 </FormButtons>
                             }
                         </ul>
