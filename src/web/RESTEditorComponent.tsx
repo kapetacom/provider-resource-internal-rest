@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
-import React, { ChangeEvent, Component } from "react";
-import { action, observable, toJS } from "mobx";
+import React, { Component } from "react";
+import {action, makeObservable, observable, toJS} from "mobx";
 import _ from "lodash";
 
 import {
@@ -35,15 +35,15 @@ import './RESTEditorComponent.less';
 
 const EditIcon = () =>
     <svg className="svg-icon" width="15" height="15" viewBox="0 0 15 15" fill="none" >
-        <path fill-rule="evenodd" clipRule="evenodd" d="M2 0C0.89543 0 0 0.895431 0 2V13C0 14.1046 0.895431 15 2 15H13C14.1046 15 15 14.1046 15 13V2C15 0.89543 14.1046 0 13 0H2Z" fill="#009AA9" />
+        <path fillRule="evenodd" clipRule="evenodd" d="M2 0C0.89543 0 0 0.895431 0 2V13C0 14.1046 0.895431 15 2 15H13C14.1046 15 15 14.1046 15 13V2C15 0.89543 14.1046 0 13 0H2Z" fill="#009AA9" />
         <path d="M9.77012 2.76391C10.1373 2.31805 10.7964 2.25425 11.2422 2.62142C11.6881 2.9886 11.7519 3.64769 11.3847 4.09355L6.09357 10.5187L4.47896 9.18905L9.77012 2.76391Z" fill="white" />
         <path d="M3.93768 9.84631L5.55229 11.176L3.21064 12.3743L3.93768 9.84631Z" fill="white" />
     </svg>;
 
 const DeleteIcon = () =>
     <svg className="svg-icon" width="15" height="15" viewBox="0 0 15 15" fill="none" >
-        <path fill-rule="evenodd" clip-rule="evenodd" d="M2 0C0.89543 0 0 0.895431 0 2V13C0 14.1046 0.895431 15 2 15H13C14.1046 15 15 14.1046 15 13V2C15 0.89543 14.1046 0 13 0H2Z" fill="#FA7B6E" />
-        <path fill-rule="evenodd" clip-rule="evenodd" d="M10.7488 4.79167H4.24883V11.2917C4.24883 11.8897 4.73416 12.375 5.3327 12.375H9.66549C10.2646 12.375 10.7488 11.8897 10.7488 11.2917V4.79167ZM8.85385 2.62445H6.14552L5.60439 3.16666H4.24968C3.95122 3.16666 3.70856 3.40933 3.70856 3.70778V4.24999H11.2919V3.70778C11.2919 3.40933 11.0492 3.16666 10.7497 3.16666H9.39606L8.85385 2.62445Z" fill="white" />
+        <path fillRule="evenodd" clipRule="evenodd" d="M2 0C0.89543 0 0 0.895431 0 2V13C0 14.1046 0.895431 15 2 15H13C14.1046 15 15 14.1046 15 13V2C15 0.89543 14.1046 0 13 0H2Z" fill="#FA7B6E" />
+        <path fillRule="evenodd" clipRule="evenodd" d="M10.7488 4.79167H4.24883V11.2917C4.24883 11.8897 4.73416 12.375 5.3327 12.375H9.66549C10.2646 12.375 10.7488 11.8897 10.7488 11.2917V4.79167ZM8.85385 2.62445H6.14552L5.60439 3.16666H4.24968C3.95122 3.16666 3.70856 3.40933 3.70856 3.70778V4.24999H11.2919V3.70778C11.2919 3.40933 11.0492 3.16666 10.7497 3.16666H9.39606L8.85385 2.62445Z" fill="white" />
     </svg>;
 
 const showArgumentsCheckbox = (isChecked: boolean) =>
@@ -51,10 +51,10 @@ const showArgumentsCheckbox = (isChecked: boolean) =>
         {isChecked ?
             <svg className="arguments-checkbox" width="17" height="17" viewBox="0 0 13 13" fill="none" >
                 <path d="M0 1.95C0 0.873044 0.873045 0 1.95 0H11.05C12.127 0 13 0.873045 13 1.95V11.05C13 12.127 12.127 13 11.05 13H1.95C0.873044 13 0 12.127 0 11.05V1.95Z" fill="#009AA9" />
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.20044 9.75L1.95044 6.625L2.86044 5.75L5.20044 8L10.1404 3.25L11.0504 4.125L5.20044 9.75Z" fill="#F5F1EE" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M5.20044 9.75L1.95044 6.625L2.86044 5.75L5.20044 8L10.1404 3.25L11.0504 4.125L5.20044 9.75Z" fill="#F5F1EE" />
             </svg> :
             <svg className="arguments-checkbox" width="17" height="17" viewBox="0 0 13 13" fill="none" >
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.05 1.3H1.95C1.59101 1.3 1.3 1.59101 1.3 1.95V11.05C1.3 11.409 1.59101 11.7 1.95 11.7H11.05C11.409 11.7 11.7 11.409 11.7 11.05V1.95C11.7 1.59101 11.409 1.3 11.05 1.3ZM1.95 0C0.873045 0 0 0.873044 0 1.95V11.05C0 12.127 0.873044 13 1.95 13H11.05C12.127 13 13 12.127 13 11.05V1.95C13 0.873045 12.127 0 11.05 0H1.95Z" fill="#908988" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M11.05 1.3H1.95C1.59101 1.3 1.3 1.59101 1.3 1.95V11.05C1.3 11.409 1.59101 11.7 1.95 11.7H11.05C11.409 11.7 11.7 11.409 11.7 11.05V1.95C11.7 1.59101 11.409 1.3 11.05 1.3ZM1.95 0C0.873045 0 0 0.873044 0 1.95V11.05C0 12.127 0.873044 13 1.95 13H11.05C12.127 13 13 12.127 13 11.05V1.95C13 0.873045 12.127 0 11.05 0H1.95Z" fill="#908988" />
             </svg>
         }
         <span>Arguments</span>
@@ -149,6 +149,7 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
 
     constructor(props: ResourceConfigProps<RESTResourceMetadata, RESTResourceSpec>) {
         super(props);
+        makeObservable(this);
 
         this.metadata = !_.isEmpty(this.props.metadata) ? _.cloneDeep(this.props.metadata) : {
             name: 'New'

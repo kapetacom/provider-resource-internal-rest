@@ -12,11 +12,11 @@
         "access": "public"
     },
     "scripts": {
-        "start": "npm run watch",
         "prepublishOnly": "npm run build",
         "build": "webpack",
         "storybook": "start-storybook",
         "build-storybook": "build-storybook",
+        "start": "npm run watch",
         "watch": "webpack --watch"
     },
     "devDependencies": {
@@ -46,12 +46,12 @@
         "css-loader": "^3.4.2",
         "guid-typescript": "^1.0.9",
         "json-loader": "^0.5.7",
+        "yaml-loader": "^0.5.0",
         "less": "^3.10.3",
         "less-loader": "^11.0.0",
         "lodash": "^4.17.15",
         "style-loader": "^1.1.2",
         "webpack": "^5.74.0",
-        "webpack-cli": "^4.10.0",
-        "yaml-loader": "^0.5.0"
+        "webpack-cli": "^4.10.0"
     }
 }
