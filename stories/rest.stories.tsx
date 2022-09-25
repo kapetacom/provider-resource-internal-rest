@@ -179,7 +179,7 @@ export default {
   title: 'REST'
 };
 
-export const Editor = () =>  <div style={{padding:'10px',width:'450px', backgroundColor:'white', border:'1px solid gray'}}>
+export const Editor = () =>  <div style={{padding:'10px',width:'850px', backgroundColor:'white', border:'1px solid gray'}}>
       <RESTEditorComponent {...RESTApiResource} block={block} />
     </div>;
 
