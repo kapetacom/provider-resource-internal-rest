@@ -19,10 +19,11 @@ import '@blockware/ui-web-components/styles/index.less';
 const API_KIND = 'rest.blockware.com/v1/API';
 const CLIENT_KIND = 'rest.blockware.com/v1/Client';
 
-const method:RESTMethod = {
-  path:'/some/where',
-  method: HTTPMethod.POST,
-  description: 'My rest method',
+const getTaskMethod:RESTMethod = {
+  path:'/tasks/{id}',
+  method: HTTPMethod.GET,
+  description: 'Get a task by id',
+  responseType: {$ref: 'Task'},
   arguments: {
     id: {
       transport: 'PATH',
@@ -31,18 +32,18 @@ const method:RESTMethod = {
   }
 };
 
-const method2:RESTMethod = {
-  path:'itasks/{userId}/{id}',
+const addTaskMethod:RESTMethod = {
+  path:'/tasks/{id}',
   method: HTTPMethod.POST,
-  description: 'My other method',
+  description: 'Adds a task to the system',
   arguments: {
     id: {
       transport: 'PATH',
       type: 'string'
     },
-    name: {
-      transport: 'QUERY',
-      type: 'string'
+    task: {
+      transport: 'BODY',
+      type: {$ref:'Task'}
     }
   }
 };
@@ -54,8 +55,8 @@ const RESTApiResource:ResourceKind<RESTResourceSpec, RESTResourceMetadata> = {
   },
   spec: {
     methods: {
-      test: method,
-      addTask: method2
+      test: getTaskMethod,
+      addTask: addTaskMethod
     }
   }
 };
@@ -67,7 +68,7 @@ const RESTClientResource:ResourceKind<RESTResourceSpec, RESTResourceMetadata> = 
   },
   spec: {
     methods: {
-      otherTest: method2
+      otherTest: addTaskMethod
     }
   }
 };
@@ -82,7 +83,7 @@ const block:BlockWrapper<any> = {
   setData: () => {
 
   },
-  getEntityNames: () => ['entity1', 'entity2']
+  getEntityNames: () => ['Task', 'TestType']
 };
 
 const mapping:ConnectionMethodsMapping = {
@@ -180,12 +181,14 @@ export default {
 };
 
 export const Editor = () =>  <div style={{padding:'10px',width:'850px', backgroundColor:'white', border:'1px solid gray'}}>
-      <RESTEditorComponent {...RESTApiResource} block={block} />
+      <RESTEditorComponent {...RESTApiResource} block={block} onDataChanged={(metadata,spec) => {
+        console.log('Data changed', metadata, spec);
+      }} />
     </div>;
 
-export const MethodView = () => <RestMethodView compact={false} method={convertToEditMethod('test', method)} />;
+export const MethodView = () => <RestMethodView compact={false} method={convertToEditMethod('test', getTaskMethod)} />;
 
-export const MethodViewCompact = () => <RestMethodView compact={true} method={convertToEditMethod('test', method)} />;
+export const MethodViewCompact = () => <RestMethodView compact={true} method={convertToEditMethod('test', getTaskMethod)} />;
 
 export const APIToClientMapperView = () => <div style={{padding:'25px',width:'450px'}}>
   <APIToClientMapper name={'My Connection'}

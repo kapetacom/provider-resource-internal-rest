@@ -3,91 +3,14 @@ import React, {Component} from "react";
 import {action, makeObservable, observable, toJS} from "mobx";
 import _ from "lodash";
 
-import {
-    EntityPicker,
-    FormContainer,
-    FormButtons,
-    SingleLineInput,
-    DropdownInput,
-    MultiLineInput,
-    Button,
-    ButtonType,
-    ButtonStyle,
-    SidePanel,
-    PanelSize
-} from "@blockware/ui-web-components";
-import {
-    typeValue,
-    HTTPMethod,
-    HTTPTransport,
-    ResourceConfigProps
-} from "@blockware/ui-web-types";
+import {DSLEntityType, DSLMethod, MethodEditor, SingleLineInput} from "@blockware/ui-web-components";
+import {HTTPMethod, HTTPTransport, ResourceConfigProps, SchemaEntryType} from "@blockware/ui-web-types";
 
-
-import {
-    convertToEditMethod, convertToRestMethod,
-    RESTMethodArgumentEdit,
-    RESTMethodEdit,
-    RESTResourceMetadata,
-    RESTResourceSpec
-} from "./types";
-
-import RestMethodView from "./RestMethodView";
+import {RESTMethod, RESTResourceMetadata, RESTResourceSpec} from "./types";
 
 import './RESTEditorComponent.less';
 
-const AddIcon = () =>
-    <svg className="svg-icon" width="15" height="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-        <path
-            d="M140.6 21.2C154.1 7.7 172.4 .1 191.5 .1h129c19.1 0 37.4 7.6 50.9 21.1L490.8 140.6c13.5 13.5 21.1 31.8 21.1 50.9v129c0 19.1-7.6 37.4-21.1 50.9L371.4 490.8c-13.5 13.5-31.8 21.1-50.9 21.1h-129c-19.1 0-37.4-7.6-50.9-21.1L21.2 371.4C7.7 357.9 .1 339.6 .1 320.5v-129c0-19.1 7.6-37.4 21.1-50.9L140.6 21.2zM232 344c0 13.3 10.7 24 24 24s24-10.7 24-24V280h64c13.3 0 24-10.7 24-24s-10.7-24-24-24H280V168c0-13.3-10.7-24-24-24s-24 10.7-24 24v64H168c-13.3 0-24 10.7-24 24s10.7 24 24 24h64v64z"/>
-    </svg>;
-
-const SaveIcon = () =>
-    <svg className="svg-icon" width="15" height="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-        <path
-            d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V173.3c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32H64zm0 96c0-17.7 14.3-32 32-32H288c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V128zM224 416c-35.3 0-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64s-28.7 64-64 64z"/>
-    </svg>;
-
-const EditIcon = () =>
-    <svg className="svg-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
-        <path fillRule="evenodd" clipRule="evenodd"
-              d="M2 0C0.89543 0 0 0.895431 0 2V13C0 14.1046 0.895431 15 2 15H13C14.1046 15 15 14.1046 15 13V2C15 0.89543 14.1046 0 13 0H2Z"
-              fill="#009AA9"/>
-        <path
-            d="M9.77012 2.76391C10.1373 2.31805 10.7964 2.25425 11.2422 2.62142C11.6881 2.9886 11.7519 3.64769 11.3847 4.09355L6.09357 10.5187L4.47896 9.18905L9.77012 2.76391Z"
-            fill="white"/>
-        <path d="M3.93768 9.84631L5.55229 11.176L3.21064 12.3743L3.93768 9.84631Z" fill="white"/>
-    </svg>;
-
-const DeleteIcon = () =>
-    <svg className="svg-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
-        <path fillRule="evenodd" clipRule="evenodd"
-              d="M2 0C0.89543 0 0 0.895431 0 2V13C0 14.1046 0.895431 15 2 15H13C14.1046 15 15 14.1046 15 13V2C15 0.89543 14.1046 0 13 0H2Z"
-              fill="#FA7B6E"/>
-        <path fillRule="evenodd" clipRule="evenodd"
-              d="M10.7488 4.79167H4.24883V11.2917C4.24883 11.8897 4.73416 12.375 5.3327 12.375H9.66549C10.2646 12.375 10.7488 11.8897 10.7488 11.2917V4.79167ZM8.85385 2.62445H6.14552L5.60439 3.16666H4.24968C3.95122 3.16666 3.70856 3.40933 3.70856 3.70778V4.24999H11.2919V3.70778C11.2919 3.40933 11.0492 3.16666 10.7497 3.16666H9.39606L8.85385 2.62445Z"
-              fill="white"/>
-    </svg>;
-
-const showArgumentsCheckbox = (isChecked: boolean) =>
-    <div>
-        {isChecked ?
-            <svg className="arguments-checkbox" width="17" height="17" viewBox="0 0 13 13" fill="none">
-                <path
-                    d="M0 1.95C0 0.873044 0.873045 0 1.95 0H11.05C12.127 0 13 0.873045 13 1.95V11.05C13 12.127 12.127 13 11.05 13H1.95C0.873044 13 0 12.127 0 11.05V1.95Z"
-                    fill="#009AA9"/>
-                <path fillRule="evenodd" clipRule="evenodd"
-                      d="M5.20044 9.75L1.95044 6.625L2.86044 5.75L5.20044 8L10.1404 3.25L11.0504 4.125L5.20044 9.75Z"
-                      fill="#F5F1EE"/>
-            </svg> :
-            <svg className="arguments-checkbox" width="17" height="17" viewBox="0 0 13 13" fill="none">
-                <path fillRule="evenodd" clipRule="evenodd"
-                      d="M11.05 1.3H1.95C1.59101 1.3 1.3 1.59101 1.3 1.95V11.05C1.3 11.409 1.59101 11.7 1.95 11.7H11.05C11.409 11.7 11.7 11.409 11.7 11.05V1.95C11.7 1.59101 11.409 1.3 11.05 1.3ZM1.95 0C0.873045 0 0 0.873044 0 1.95V11.05C0 12.127 0.873044 13 1.95 13H11.05C12.127 13 13 12.127 13 11.05V1.95C13 0.873045 12.127 0 11.05 0H1.95Z"
-                      fill="#908988"/>
-            </svg>
-        }
-        <span>Arguments</span>
-    </div>;
+type SchemaMethods = { [p: string]: RESTMethod };
 
 function validateApiName(fieldName: string, name: string) {
     if (!name) {
@@ -99,52 +22,93 @@ function validateApiName(fieldName: string, name: string) {
     }
 }
 
-function validateArgumentName(fieldName: string, name: string) {
-    if (!name) {
-        return;
+function fromSchemaType(type:any):string {
+    if (!type) {
+        return 'void'
     }
-    if (!/^[a-z]([a-z0-9_-]*[a-z0-9_])?$/i.test(name)) {
-        throw new Error('Invalid argument name');
-    }
+    return type && type.$ref ? type.$ref : type;
 }
 
-function validateMethodName(fieldName: string, name: string) {
-    if (!name) {
-        return;
+function toSchemaType(type:string):SchemaEntryType {
+    if (!type) {
+        return ''
     }
-    if (!/^[a-z]([a-z0-9_-]*[a-z0-9_])?$/i.test(name)) {
-        throw new Error('Invalid method name');
+
+    if (type[0].toUpperCase() === type[0]) {
+        return {$ref: type};
     }
+
+    return type;
 }
 
-function validatePath(fieldName: string, name: string) {
-    if (!name) {
-        return;
+function fromSchemaTransport(transport:string) {
+    switch (transport.toLowerCase()) {
+        case 'path':
+            return '@Path';
+        case 'header':
+            return '@Header';
+        case 'query':
+            return '@Query';
+        case 'body':
+            return '@Body';
     }
-    if (!/^(\/[a-z{]([}a-z0-9_-]*))+\/?$/i.test(name)) {
-        throw new Error('Invalid path');
-    }
+
+    return ''
 }
 
-function createEmptyMethod(): RESTMethodEdit {
-    return {
-        id: '',
-        description: '',
-        method: HTTPMethod.GET,
-        path: '',
-        arguments: [],
-        responseType: ''
-    }
+function fromSchema(methods: SchemaMethods):DSLMethod[] {
+    return Object.entries(methods).map(([name, method]) => {
+
+        return {
+            name,
+            returnType: fromSchemaType(method.responseType),
+            type: DSLEntityType.METHOD,
+            description: method.description,
+            parameters: method.arguments ? Object.entries(method.arguments).map(([name, arg]) => {
+                return {
+                    name,
+                    type: fromSchemaType(arg.type),
+                    annotations: arg.transport ? [
+                        {
+                            type: fromSchemaTransport(arg.transport)
+                        }
+                    ] : []
+                }
+            }) : [],
+            annotations: [
+                {
+                    type: `@${method.method}`,
+                    arguments: [ method.path ]
+                }
+            ]
+        }
+    });
 }
 
-function createEmptyArgument(): RESTMethodArgumentEdit {
-    return {
-        id: '',
-        type: 'string',
-        transport: HTTPTransport.QUERY
-    }
-}
+function toSchema(methods:DSLMethod[]):SchemaMethods {
+    const out:SchemaMethods = {}
 
+    methods.forEach(method => {
+
+        const args = {};
+        method.parameters.forEach((arg) => {
+            args[arg.name] = {
+                type: toSchemaType(arg.type),
+                transport: arg.annotations && arg.annotations.length > 0 ? arg.annotations[0].type : HTTPTransport.QUERY
+            };
+        })
+
+        out[method.name] = {
+            responseType: toSchemaType(method.returnType),
+            method: (method.annotations ? method?.annotations[0].type?.substring(1).toUpperCase() : 'GET') as HTTPMethod,
+            path: (method.annotations && method.annotations[0].arguments ? method?.annotations[0].arguments[0] : '/'),
+            description: method.description || '',
+            arguments: args
+        }
+    });
+
+    return out;
+}
 
 @observer
 export default class RESTEditorComponent extends Component<ResourceConfigProps<RESTResourceMetadata, RESTResourceSpec>, any> {
@@ -154,27 +118,6 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
 
     @observable
     private readonly spec: RESTResourceSpec;
-
-    @observable
-    private newMethod: RESTMethodEdit = createEmptyMethod();
-
-    @observable
-    private newArgument: RESTMethodArgumentEdit = createEmptyArgument();
-
-    @observable
-    private currentMethod?: RESTMethodEdit;
-
-    @observable
-    private currentMethodOriginal?: RESTMethodEdit;
-
-    @observable
-    private methods: RESTMethodEdit[] = [];
-
-    @observable
-    private showCreateForm = false;
-
-    @observable
-    private showArguments: boolean = false;
 
     constructor(props: ResourceConfigProps<RESTResourceMetadata, RESTResourceSpec>) {
         super(props);
@@ -188,68 +131,17 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
             methods: {},
         };
 
-        this.readFromSpec();
-
-        if (this.methods.length < 1) {
-            this.showCreateForm = true;
-        }
     }
 
-    @action
-    private toggleArguments() {
-        this.showArguments = !this.showArguments;
-    }
-
-    private readFromSpec() {
-        _.forEach(toJS(this.spec.methods), (method, methodId) => {
-            this.methods.push(convertToEditMethod(methodId, method));
-        });
-    }
-
-    private resetNewMethod() {
-        this.newMethod = createEmptyMethod();
-    }
-
-    private resetNewArgument() {
-        this.newArgument = createEmptyArgument();
-    }
 
     private triggerChange() {
 
         const spec = toJS(this.spec);
         const metadata = toJS(this.metadata);
 
-        spec.methods = {};
-        this.methods.forEach((method) => {
-            spec.methods[method.id] = convertToRestMethod(method);
-        });
-
         this.props.onDataChanged(metadata, spec);
     }
 
-    @action
-    private addMethod() {
-        this.methods.push(this.newMethod);
-
-        this.resetNewMethod();
-        this.resetNewArgument();
-        this.showCreateForm = false;
-        this.triggerChange();
-    }
-
-    @action
-    private addArgument(method: RESTMethodEdit) {
-
-        if (method === this.currentMethod) {
-            this.currentMethod.arguments.push(this.newArgument);
-        }
-
-        if (method === this.newMethod) {
-            this.newMethod.arguments.push(this.newArgument);
-        }
-
-        this.resetNewArgument();
-    }
 
     @action
     private handleMetaDataChanged(name: string, input: string) {
@@ -258,297 +150,6 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
         this.triggerChange();
     }
 
-    @action
-    private editMethod(method: RESTMethodEdit) {
-        this.currentMethodOriginal = method;
-        this.currentMethod = _.cloneDeep(method);
-        this.showCreateForm = false;
-    }
-
-    @action
-    private stopEditingMethod() {
-        this.currentMethod = undefined;
-        this.currentMethodOriginal = undefined;
-        this.resetNewArgument();
-    }
-
-    @action
-    private cancelEditingMethod() {
-        this.stopEditingMethod();
-    }
-
-    @action
-    saveMethod() {
-        if (!this.currentMethod ||
-            !this.currentMethodOriginal) {
-            return;
-        }
-
-        const simpleMethod = toJS(this.currentMethod);
-        _.forEach(simpleMethod, (value, field) => {
-            // @ts-ignore
-            this.currentMethodOriginal[field] = value;
-        });
-
-        this.stopEditingMethod();
-        this.triggerChange();
-    }
-
-    @action
-    deleteMethod(method: RESTMethodEdit) {
-        const ix = this.methods.indexOf(method);
-        if (ix < 0) {
-            return;
-        }
-        this.methods.splice(ix, 1);
-        this.triggerChange();
-    }
-
-    @action
-    setMethodField(method: RESTMethodEdit, field: string, value: any) {
-        if (method === this.currentMethod) {
-            this.currentMethod[field] = value;
-        }
-
-        if (method === this.newMethod) {
-            this.newMethod[field] = value;
-        }
-    }
-
-    @action
-    setArgumentField(method: RESTMethodEdit, arg: RESTMethodArgumentEdit, field: string, value: any) {
-        if (arg === this.newArgument) {
-            this.newArgument[field] = value;
-            return;
-        }
-
-        if (method === this.currentMethod) {
-            let ix = this.currentMethod.arguments.indexOf(arg);
-            this.currentMethod.arguments[ix][field] = value;
-        }
-
-        if (method === this.newMethod) {
-            let ix = this.newMethod.arguments.indexOf(arg);
-            this.newMethod.arguments[ix][field] = value;
-        }
-    }
-
-    @action
-    deleteArgument(method: RESTMethodEdit, arg: RESTMethodArgumentEdit) {
-
-        if (arg === this.newArgument) {
-            return;
-        }
-
-        if (method === this.currentMethod) {
-            let ix = this.currentMethod.arguments.indexOf(arg);
-            this.currentMethod.arguments.splice(ix, 1);
-        }
-
-        if (method === this.newMethod) {
-            let ix = this.newMethod.arguments.indexOf(arg);
-            this.newMethod.arguments.splice(ix, 1);
-        }
-    }
-
-    @action
-    toggleCreateForm() {
-        this.showCreateForm = !this.showCreateForm;
-    }
-
-    @action
-    setCreateForm(show: boolean) {
-        this.showCreateForm = show;
-    }
-
-    isEditingMethod(method: RESTMethodEdit) {
-        return this.currentMethodOriginal === method;
-    }
-
-    isEditingMode() {
-        return !!this.currentMethodOriginal;
-    }
-
-    renderArgumentForm(method: RESTMethodEdit, argument: RESTMethodArgumentEdit, key: string, ix: number) {
-        return (
-            <>
-                <div className={"form-horizontal-rows"}>
-                    <SingleLineInput
-                        name={key + '_method.argument.' + ix + '.id'}
-                        value={argument.id}
-                        label={'Name'}
-                        validation={['required', validateArgumentName]}
-                        help={''}
-                        onChange={(name: string, input: string) => this.setArgumentField(method, argument, 'id', input.trim())}
-                    />
-
-                    <EntityPicker name={key + '_method.argument.' + ix + '.type'}
-                                  value={typeValue(argument.type)}
-                                  entities={this.props.block.getEntityNames()}
-                                  onEntityCreated={(newEntity) => this.props.block.addEntity(newEntity)}
-                                  onChange={(value: any) => {
-                                      this.setArgumentField(method, argument, 'type', value);
-
-                                  }}/>
-
-                    <div className={'transport'}>
-                        <DropdownInput
-                            name={key + '_method.argument.' + ix + '.transport'}
-                            value={argument.transport ? argument.transport.toUpperCase() : HTTPTransport.QUERY}
-                            label={'Transport'}
-                            validation={['required']}
-                            help={"How this argument should be transported."}
-                            onChange={(name: string, input: string) => this.setArgumentField(method, argument, 'transport', HTTPTransport[input.trim()])}
-                            options={Object.keys(HTTPTransport).map((methodName) => methodName)}
-                        />
-                    </div>
-                </div>
-            </>
-        )
-    }
-
-    renderMethodForm(method: RESTMethodEdit, key: string) {
-
-
-        return (
-            <>
-                <div className="form-horizontal-rows">
-                    <SingleLineInput
-                        name={key + '_method.id'}
-                        value={method.id}
-                        label={'Method name'}
-                        validation={['required', validateMethodName]}
-                        help={'This will be used when generating code. E.g. getSomething'}
-                        onChange={(name: string, input: string) => this.setMethodField(method, 'id', input.trim())}
-                    />
-                </div>
-
-                <div className="form-horizontal-rows">
-                    <MultiLineInput
-                        name={key + '_method.description'}
-                        value={method.description}
-                        label={'Description'}
-                        validation={[]}
-                        help={'Describe your method so others understand what it does'}
-                        onChange={(name: string, input: string) => this.setMethodField(method, 'method', HTTPMethod[input.trim()])}
-                    />
-                </div>
-
-                <div className={'rest-method-path form-horizontal-rows'}>
-
-                    <div className={"rest-http-method"}>
-                        <DropdownInput
-                            name={key + '_method.method'}
-                            value={method.method}
-                            label={'HTTP Method'}
-                            validation={['required']}
-                            help={'Choose your HTTP method'}
-                            onChange={(name: string, input: string) => this.setMethodField(method, 'method', HTTPMethod[input.trim()])}
-                            options={Object.keys(HTTPMethod).map((methodName) => methodName)}
-                        />
-                    </div>
-
-                    <div className={"rest-http-path"}>
-                        <SingleLineInput
-                            name={key + '_method.path'}
-                            value={method.path}
-                            label={'Path'}
-                            validation={['required', validatePath]}
-                            help={'Path variables are denoted with { and } - e.g. /my/{id}'}
-                            onChange={(name: string, input: string) => this.setMethodField(method, 'path', input.trim())}
-                        />
-                    </div>
-                </div>
-
-                <EntityPicker name={key + '_method.responseType'}
-                              value={typeValue(method.responseType)}
-                              entities={this.props.block.getEntityNames()}
-                              onEntityCreated={(newEntity) => this.props.block.addEntity(newEntity)}
-                              allowVoid={true}
-                              onChange={(value: any) => this.setMethodField(method, 'responseType', value)}
-                              label={"Response type"}
-                              help={"Choose your response type - this is the methods return type."}
-                />
-
-                <div className={'form-section arguments'}>
-                    <h4>Arguments</h4>
-
-                    <ul className={"method-arguments"}>
-                        {
-                            method.arguments.map((argument, ix) => {
-                                return (
-                                    <li key={ix} className={"method-argument"}
-                                        style={{position: 'relative', zIndex: 10 + method.arguments.length - ix}}>
-
-                                        <div className={"actions"}>
-                                            <div className={"delete-icon"}
-                                                 onClick={() => this.deleteArgument(method, argument)}>
-                                                <DeleteIcon/>
-                                            </div>
-                                        </div>
-
-                                        {this.renderArgumentForm(method, argument, key, ix)}
-
-                                    </li>
-                                )
-                            })
-                        }
-
-                        <li className={"method-argument new"}
-                            style={{position: 'relative'}}>
-                            <div className={"actions"}>
-                                <div className={"add-icon"}
-                                     onClick={() => this.addArgument(method)}>
-                                    <AddIcon/>
-                                </div>
-                            </div>
-
-                            {this.renderArgumentForm(method, this.newArgument, key, -1)}
-
-                        </li>
-
-                    </ul>
-                </div>
-            </>
-        )
-    }
-
-    renderMethodView(method: RESTMethodEdit, key: string, editing: boolean) {
-        return <>
-            <div className={'rest-method viewing'}>
-                <div className={"actions"}>
-                    <div className={"edit-icon"} onClick={() => this.editMethod(method)}>
-                        <EditIcon/>
-                    </div>
-                    <div className={"delete-icon"} onClick={() => this.deleteMethod(method)}>
-                        <DeleteIcon/>
-                    </div>
-                </div>
-                <RestMethodView method={method}/>
-                {editing && this.currentMethod &&
-                    <SidePanel size={PanelSize.large} open={true}
-                               title={'Edit method'}
-                               onClose={() => this.cancelEditingMethod()}
-                               className={'rest-resource-method-editor'}>
-
-                        <FormContainer onSubmit={() => this.saveMethod()}>
-
-                            {this.renderMethodForm(this.currentMethod, key)}
-
-                            <FormButtons>
-                                <Button type={ButtonType.BUTTON}
-                                        width={80}
-                                        onClick={() => this.cancelEditingMethod()}
-                                        style={ButtonStyle.DANGER} text={'Cancel'}/>
-                                <Button width={80}
-                                        type={ButtonType.SUBMIT} style={ButtonStyle.PRIMARY} text={'Save'}/>
-                            </FormButtons>
-                        </FormContainer>
-                    </SidePanel>
-                }
-            </div>
-        </>
-    }
 
     render() {
 
@@ -565,49 +166,26 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
                         onChange={(name: string, input: string) => this.handleMetaDataChanged(name, input)}
                     />
 
-                    <div className={"methods-container"}>
-                        <ul className={"methods"}>
-                            {
-                                this.methods.map((method, ix) => {
-                                    return (
-                                        <li key={ix}>
-                                            {this.renderMethodView(method, 'method_' + ix, this.isEditingMethod(method))}
-                                        </li>
-                                    )
-                                })
-                            }
-                            <FormButtons>
-                                <Button type={ButtonType.BUTTON} width={150} onClick={() => this.toggleCreateForm()}
-                                        text="Create method"/>
-                            </FormButtons>
-                        </ul>
-
-                        {!this.isEditingMode() && this.showCreateForm &&
-                            <SidePanel size={PanelSize.large} open={true}
-                                       title={'Create new method'}
-                                       onClose={() => this.setCreateForm(false)}
-                                       className={'rest-resource-method-editor'}>
-                                <FormContainer onSubmit={() => this.addMethod()}>
-                                    {this.renderMethodForm(this.newMethod, 'new_method')}
-
-                                    <FormButtons>
-                                        {this.methods.length > 0 &&
-                                            <Button width={80}
-                                                    type={ButtonType.BUTTON}
-                                                    style={ButtonStyle.DANGER}
-                                                    text={'Cancel'}
-                                                    onClick={() => this.toggleCreateForm()}/>
-                                        }
-                                        <Button width={80} type={ButtonType.SUBMIT} style={ButtonStyle.PRIMARY}
-                                                text={'Save'}/>
-                                    </FormButtons>
-
-                                </FormContainer>
-                            </SidePanel>
-                        }
+                    <div className={'editor'}>
+                        <MethodEditor restMethods={true}
+                                      validTypes={this.props.block.getEntityNames()}
+                                      value={{code: '', entities: fromSchema(this.spec.methods)}}
+                                      onChange={(result) => {
+                                          this.setResult(result.entities as DSLMethod[]);
+                                      }}/>
                     </div>
+
                 </div>
             </>
         )
+    }
+
+    @action
+    private setResult(methods: DSLMethod[]) {
+        const newMethods = toSchema(methods);
+        if (!_.isEqual(newMethods, this.spec.methods)) {
+            this.spec.methods = newMethods;
+            this.triggerChange();
+        }
     }
 }

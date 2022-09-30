@@ -20,7 +20,7 @@
         "watch": "webpack --watch"
     },
     "devDependencies": {
-        "@blockware/ui-web-components": "^0.0.44",
+        "@blockware/ui-web-components": "^0.0.52",
         "@blockware/ui-web-context": "^0.0.24",
         "@blockware/ui-web-types": "^0.0.26",
         "@blockware/ui-web-utils": "^0.0.17",
