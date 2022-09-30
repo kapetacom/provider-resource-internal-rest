@@ -1,6 +1,6 @@
 {
     "name": "@blockware/provider-resource-internal-rest",
-    "version": "0.0.14",
+    "version": "0.0.15",
     "description": "Provides REST API and Client resource type to Blockware",
     "keywords": [
         "blockware",
