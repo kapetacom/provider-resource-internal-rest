@@ -4,12 +4,12 @@ import {
   ConnectionMethodMappingType,
   ConnectionMethodsMapping,
   HTTPMethod,
-  ResourceKind,
+  ResourceKind, RESTMethod,
   Traffic
 } from '@blockware/ui-web-types';
 
 import RESTEditorComponent from "../src/web/RESTEditorComponent";
-import {convertToEditMethod, RESTMethod, RESTResourceMetadata, RESTResourceSpec} from "../src/web/types";
+import {convertToEditMethod, RESTResourceMetadata, RESTResourceSpec} from "../src/web/types";
 import RestMethodView from "../src/web/RestMethodView";
 import APIToClientMapper from "../src/web/mapping/APIToClientMapper";
 import InspectConnectionContent from "../src/web/inspectors/InspectConnectionContent";
@@ -74,6 +74,7 @@ const RESTClientResource:ResourceKind<RESTResourceSpec, RESTResourceMetadata> = 
 };
 
 const block:BlockWrapper<any> = {
+  id: 'some-block',
   addEntity: entity => {
 
   },

@@ -4,7 +4,9 @@ import {
     isCompatibleTypes,
     SchemaEntity,
     SchemaEntryType,
-    HTTPMethod
+    HTTPMethod,
+    TypedValue,
+    RESTMethod
 } from "@blockware/ui-web-types";
 
 
@@ -12,27 +14,12 @@ export interface RESTResourceMetadata {
     name: string
 }
 
-export interface RESTMethodArgument {
-    type: SchemaEntryType,
-    transport?: string
-}
-
-export interface RESTMethod {
-    description: string
-    method: HTTPMethod
-    path: string
-    arguments?: {
-        [key: string]: RESTMethodArgument
-    }
-    responseType?: SchemaEntryType
-}
-
 export interface RESTResourceSpec {
+    source?: TypedValue
     methods: {
         [key: string]: RESTMethod
     }
 }
-
 
 export interface RESTMethodArgumentEdit {
     id: string
