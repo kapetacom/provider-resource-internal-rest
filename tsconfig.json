@@ -39,6 +39,7 @@
   },
   "include": [
     "definitions",
+    "stories",
     "src",
     "src/**/*"
   ],
