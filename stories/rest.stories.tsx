@@ -181,7 +181,7 @@ export default {
   title: 'REST'
 };
 
-export const Editor = () =>  <div style={{padding:'10px',width:'850px', backgroundColor:'white', border:'1px solid gray'}}>
+export const Editor = () =>  <div style={{padding:'10px',width:'850px', height:'100%', backgroundColor:'white', border:'1px solid gray'}}>
       <RESTEditorComponent {...RESTApiResource} block={block} onDataChanged={(metadata,spec) => {
         console.log('Data changed', metadata, spec);
       }} />
@@ -191,7 +191,7 @@ export const MethodView = () => <RestMethodView compact={false} method={convertT
 
 export const MethodViewCompact = () => <RestMethodView compact={true} method={convertToEditMethod('test', getTaskMethod)} />;
 
-export const APIToClientMapperView = () => <div style={{padding:'25px',width:'450px'}}>
+export const APIToClientMapperView = () => <div style={{padding:'25px',width:'450px', height:'100%',}}>
   <APIToClientMapper name={'My Connection'}
                      source={RESTApiResource}
                      target={RESTClientResource}

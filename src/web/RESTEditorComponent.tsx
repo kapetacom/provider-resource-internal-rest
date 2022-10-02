@@ -63,29 +63,30 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
     render() {
 
         return (
-            <>
-                <div className={"rest-resource-editor"}>
+            <div className={"rest-resource-editor"}>
 
-                    <SingleLineInput
-                        name={"name"}
-                        value={this.metadata.name}
-                        label={"Name"}
-                        validation={['required', validateApiName]}
-                        help={"Name your REST API. E.g. MyApi"}
-                        onChange={(name: string, input: string) => this.handleMetaDataChanged(name, input)}
-                    />
+                <SingleLineInput
+                    name={"name"}
+                    value={this.metadata.name}
+                    label={"Name"}
+                    validation={['required', validateApiName]}
+                    help={"Name your REST API. E.g. MyApi"}
+                    onChange={(name: string, input: string) => this.handleMetaDataChanged(name, input)}
+                />
 
-                    <div className={'editor'}>
-                        <MethodEditor restMethods={true}
-                                      validTypes={this.props.block.getEntityNames()}
-                                      value={{code: this.spec.source?.value || '', entities: DSLConverters.fromSchemaMethods(this.spec.methods)}}
-                                      onChange={(result) => {
-                                          this.setResult(result.code, result.entities as DSLMethod[]);
-                                      }}/>
-                    </div>
-
+                <div className={'editor'}>
+                    <MethodEditor restMethods={true}
+                                  validTypes={this.props.block.getEntityNames()}
+                                  value={{
+                                      code: this.spec.source?.value || '',
+                                      entities: DSLConverters.fromSchemaMethods(this.spec.methods)
+                                  }}
+                                  onChange={(result) => {
+                                      this.setResult(result.code, result.entities as DSLMethod[]);
+                                  }}/>
                 </div>
-            </>
+
+            </div>
         )
     }
 

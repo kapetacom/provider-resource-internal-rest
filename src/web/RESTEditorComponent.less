@@ -2,13 +2,20 @@
 @import "~@blockware/ui-web-components/styles/functions.less";
 
 .rest-resource-editor {
-    padding-top: 10px;
     background-color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 
-    .editor {
-        min-height: 500px;
-        height: 500px;
-        margin-right: 10px;
+    > * {
+        flex: 0;
+    }
+
+    > .editor {
+        flex: 1;
+        .dsl-editor {
+            box-sizing: border-box;
+        }
     }
 
 }
