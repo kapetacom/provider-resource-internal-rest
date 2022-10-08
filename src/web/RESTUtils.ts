@@ -5,7 +5,7 @@ import {
     SchemaEntity,
     SchemaEntryType,
     typeName,
-    ResourceKind
+    ResourceKind, isList
 } from "@blockware/ui-web-types";
 
 import {RESTResourceMetadata, RESTResourceSpec} from "./types";
@@ -15,7 +15,7 @@ export const getCounterValue = (data: ResourceKind<RESTResourceSpec, RESTResourc
 };
 
 export const hasMethod = (data: ResourceKind<RESTResourceSpec, RESTResourceMetadata>, methodId: string):boolean => {
-    return !!data.spec.methods[methodId];
+    return methodId in data.spec.methods;
 };
 
 export const validate = (resource: ResourceKind<RESTResourceSpec, RESTResourceMetadata>, entities:SchemaEntity[]):string[] => {
@@ -23,7 +23,7 @@ export const validate = (resource: ResourceKind<RESTResourceSpec, RESTResourceMe
     let entityNames = resolveEntities(resource);
 
     const missingEntities = entityNames.filter((entityName) => {
-        return !entities.find((entity) => entity.name === entityName);
+        return !entities.some((entity) => entity.name === entityName);
     });
 
     if (missingEntities.length > 0) {
@@ -43,16 +43,16 @@ export const validate = (resource: ResourceKind<RESTResourceSpec, RESTResourceMe
             return;
         }
 
-        const invalidArguments = Object.values(method.arguments).filter((argument) => {
+        const invalidArguments = Object.entries(method.arguments).filter(([methodId, argument]) => {
             if (!argument.type) {
                 return true;
             }
 
             return !argument.transport;
-        });
+        }).map(([methodId, argument]) => methodId);
 
         if (invalidArguments.length > 0) {
-            errors.push(`${methodId} has invalid arguments`);
+            errors.push(`${methodId} has invalid arguments: ${invalidArguments.join(', ')}`);
         }
 
     });
@@ -104,6 +104,10 @@ export function renameEntityReferences(resource: ResourceKind<RESTResourceSpec, 
 
         if (typeName(type) !== from) {
             return type;
+        }
+
+        if (isList(type)) {
+            return {$ref:to + '[]'};
         }
 
         return {$ref:to};

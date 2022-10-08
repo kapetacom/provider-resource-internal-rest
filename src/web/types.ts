@@ -6,7 +6,7 @@ import {
     SchemaEntryType,
     HTTPMethod,
     TypedValue,
-    RESTMethod
+    RESTMethod, SchemaDTO
 } from "@blockware/ui-web-types";
 
 
@@ -37,7 +37,13 @@ export interface RESTMethodEdit {
 }
 
 export function convertToEditMethod(id:string, method:RESTMethod): RESTMethodEdit {
-    const tmp:RESTMethodEdit = {...method, arguments:[], id};
+    const tmp:RESTMethodEdit = {id,
+        description: method.description || '',
+        method: method.method,
+        arguments: [],
+        path: method.path,
+        responseType: method.responseType
+    };
 
     _.forEach(method.arguments,((arg, id) => {
         tmp.arguments.push({...arg, id});
@@ -55,6 +61,7 @@ export function convertToRestMethod(method: RESTMethodEdit):RESTMethod {
 
     method.arguments.forEach((argument) => {
         args[argument.id] = _.cloneDeep(argument);
+        delete args[argument.id].id
     });
 
     tmp.arguments = args;
@@ -62,7 +69,7 @@ export function convertToRestMethod(method: RESTMethodEdit):RESTMethod {
     return tmp;
 }
 
-export function isCompatibleRESTMethods(a:RESTMethodEdit, b:RESTMethodEdit, aEntities:SchemaEntity[], bEntities:SchemaEntity[]): boolean {
+export function isCompatibleRESTMethods(a:RESTMethodEdit, b:RESTMethodEdit, aEntities:SchemaDTO[], bEntities:SchemaDTO[]): boolean {
     if (!isCompatibleTypes(a.responseType, b.responseType, aEntities, bEntities)) {
         return false;
     }
