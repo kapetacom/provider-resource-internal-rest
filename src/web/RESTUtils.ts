@@ -5,10 +5,19 @@ import {
     SchemaEntity,
     SchemaEntryType,
     typeName,
-    ResourceKind, isList
+    ResourceKind, isList, isDTO, TypedValue
 } from "@blockware/ui-web-types";
 
-import {RESTResourceMetadata, RESTResourceSpec} from "./types";
+import {
+    convertToRestMethod,
+    RESTKindContext,
+    RESTMethodContext, RESTMethodEdit,
+    RESTMethodEditContext,
+    RESTResourceMetadata,
+    RESTResourceSpec
+} from "./types";
+
+import {DSL_LANGUAGE_ID, DSLConverters, DSLWriter} from "@blockware/ui-web-components";
 
 export const getCounterValue = (data: ResourceKind<RESTResourceSpec, RESTResourceMetadata>):number => {
     return _.size(data.spec.methods);
@@ -18,19 +27,19 @@ export const hasMethod = (data: ResourceKind<RESTResourceSpec, RESTResourceMetad
     return methodId in data.spec.methods;
 };
 
-export const validate = (resource: ResourceKind<RESTResourceSpec, RESTResourceMetadata>, entities:SchemaEntity[]):string[] => {
+export const validate = (context:RESTKindContext):string[] => {
     const errors:string[] = [];
-    let entityNames = resolveEntities(resource);
+    let entityNames = resolveEntities(context);
 
     const missingEntities = entityNames.filter((entityName) => {
-        return !entities.some((entity) => entity.name === entityName);
+        return !context.entities.some((entity) => entity.name === entityName);
     });
 
     if (missingEntities.length > 0) {
         errors.push('One or more entities are missing: ' + missingEntities.join(', '));
     }
 
-    _.forEach(resource.spec.methods, (method, methodId) => {
+    _.forEach(context.resource.spec.methods, (method, methodId) => {
         if (!method.path) {
             errors.push(`${methodId} is missing path`);
         }
@@ -60,8 +69,47 @@ export const validate = (resource: ResourceKind<RESTResourceSpec, RESTResourceMe
     return errors;
 };
 
-export function resolveEntities(resource: ResourceKind<RESTResourceSpec, RESTResourceMetadata>):string[] {
+export function resolveEntitiesFromEntity(entity: SchemaEntity, entities:SchemaEntity[]):SchemaEntity[] {
+    if (!isDTO(entity)) {
+        return [];
+    }
 
+    const out:string[] = [];
+
+    Object.values(entity.properties).forEach(property => {
+        if (typeof property.type === 'string') {
+            return;
+        }
+
+        const name = typeName(property.type);
+        if (entity.name === name) {
+            return;
+        }
+
+        if (out.indexOf(name) > -1) {
+            return;
+        }
+
+        out.push(name);
+
+        const subEntity = entities.find(e => e.name === name);
+
+        if (subEntity) {
+            const subEntityEntities = resolveEntitiesFromEntity(subEntity, entities);
+            subEntityEntities.forEach(e => {
+                if (out.indexOf(e.name) === -1) {
+                    out.push(e.name);
+                }
+            })
+        }
+    })
+
+    return out.map(name =>
+        entities.find(e => e.name === name)
+    ).filter(e => !!e) as SchemaEntity[];
+}
+
+export function resolveEntitiesFromMethod(context: RESTMethodContext|RESTMethodEditContext):string[] {
     const out:string[] = [];
 
     function maybeAddEntity(type?:SchemaEntryType) {
@@ -74,22 +122,64 @@ export function resolveEntities(resource: ResourceKind<RESTResourceSpec, RESTRes
         if (out.indexOf(entityName) === -1) {
             out.push(entityName);
         }
+
+        const entity = context.entities.find(e => e.name === entityName);
+        if (entity) {
+            const subEntities = resolveEntitiesFromEntity(entity, context.entities);
+            subEntities.forEach(subEntity => {
+                if (out.indexOf(subEntity.name) === -1) {
+                    out.push(subEntity.name);
+                }
+            })
+        }
     }
 
-    if (!resource.spec.methods) {
+    maybeAddEntity(context.method.responseType);
+
+    if (context.method.arguments) {
+        Object.values(context.method.arguments).forEach((arg) => {
+            maybeAddEntity(arg.type);
+        });
+    }
+
+    return out;
+}
+
+export function setRESTMethod(spec: RESTResourceSpec, id:string, method: RESTMethodEdit) {
+    spec.methods[id] = convertToRestMethod(method);
+    spec.source = convertRESTToDSLSource(spec);
+}
+
+export function deleteRESTMethod(spec: RESTResourceSpec, id:string) {
+    delete spec.methods[id];
+    spec.source = convertRESTToDSLSource(spec);
+}
+
+export function convertRESTToDSLSource(spec: RESTResourceSpec): TypedValue {
+    let dslMethods = DSLConverters.fromSchemaMethods(spec.methods);
+    return {
+        type: DSL_LANGUAGE_ID,
+        value: DSLWriter.write(dslMethods)
+    }
+}
+
+
+export function resolveEntities(context:RESTKindContext):string[] {
+
+    const out:string[] = [];
+
+    if (!context.resource.spec.methods) {
         return out;
     }
 
-    Object.values(resource.spec.methods).forEach((method) => {
-        maybeAddEntity(method.responseType);
+    Object.values(context.resource.spec.methods).forEach((method) => {
+        const usedEntities = resolveEntitiesFromMethod({method, entities: context.entities});
 
-        if (!method.arguments) {
-            return;
-        }
-
-        Object.values(method.arguments).forEach((arg) => {
-            maybeAddEntity(arg.type);
-        });
+        usedEntities.forEach(entity => {
+            if (out.indexOf(entity) === -1) {
+                out.push(entity);
+            }
+        })
     });
 
     return out;

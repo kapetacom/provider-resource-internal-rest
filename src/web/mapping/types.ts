@@ -1,5 +1,5 @@
 import {RESTMethodEdit} from "../types";
-import { ConnectionMethodMappingType } from "@blockware/ui-web-types";
+import {ConnectionMethodMappingType, RESTMethod, SchemaEntity} from "@blockware/ui-web-types";
 
 export enum ItemTypes {
     API_METHOD = 'API_METHOD',
@@ -33,6 +33,15 @@ export interface MappedMethod {
 
 export interface RESTMethodMappingEdit extends RESTMethodEdit {
     copyOf?: RESTMethodEdit
+}
+
+export interface MappingHandlerContext {
+    clientWasEmpty: boolean
+    serverWasEmpty: boolean
+    issues: string[]
+    warnings: string[]
+    targetName: string
+    sourceName: string
 }
 
 

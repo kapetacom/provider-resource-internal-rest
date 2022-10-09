@@ -1,15 +1,15 @@
+/**
+ * @jest-environment jsdom
+ */
+//This is all needed due to monaco editor getting pulled in
+document.queryCommandSupported = function() { return false };
+
 import {describe, expect, test} from "@jest/globals";
 import {getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate} from "../src/web/RESTUtils";
-import {KIND_REST_API} from "../src/web/types";
 import {
-    HTTPMethod,
-    isStringableType,
-    RESTMethod,
-    SchemaEntity,
-    SchemaEntityType,
-    SchemaEntryType, toStringName, typeName
+    toStringName
 } from "@blockware/ui-web-types";
-import {ENTITIES, makeAPI, makeMethod} from "./helpers";
+import {ENTITIES, makeAPI, makeAPIContext, makeMethod} from "./helpers";
 
 
 describe('RESTUtils', () => {
@@ -44,13 +44,13 @@ describe('RESTUtils', () => {
 
     test('can resolve all entities from methods', () => {
 
-        expect(resolveEntities(makeAPI({
+        expect(resolveEntities(makeAPIContext({
             test1: makeMethod(),
             test2: makeMethod(),
             test3: makeMethod()
         }))).toEqual([]);
 
-        expect(resolveEntities(makeAPI({
+        expect(resolveEntities(makeAPIContext({
             test1: makeMethod([{$ref:'User'},'string']),
             test2: makeMethod([],{$ref:'Person'}),
             test3: makeMethod(['string', {$ref:'Staff'}])
@@ -76,9 +76,9 @@ describe('RESTUtils', () => {
     describe('validation', () => {
         test('fails validation if entity is not found', () => {
 
-            expect(validate(makeAPI({
+            expect(validate(makeAPIContext({
                 test: makeMethod([{$ref:'Company'}], {$ref:'Department'})
-            }), ENTITIES)).toEqual([
+            }, ENTITIES))).toEqual([
                 'One or more entities are missing: Department, Company'
             ]);
         })
@@ -88,9 +88,9 @@ describe('RESTUtils', () => {
             const method = makeMethod();
             method.path = '';
 
-            expect(validate(makeAPI({
+            expect(validate(makeAPIContext({
                 test: method
-            }), ENTITIES)).toEqual([
+            }, ENTITIES))).toEqual([
                 'test is missing path'
             ]);
         })
@@ -100,9 +100,9 @@ describe('RESTUtils', () => {
             const method:any = makeMethod();
             method.method = null;
 
-            expect(validate(makeAPI({
+            expect(validate(makeAPIContext({
                 test: method
-            }), ENTITIES)).toEqual([
+            }, ENTITIES))).toEqual([
                 'test is missing HTTP method'
             ]);
         })
@@ -111,9 +111,9 @@ describe('RESTUtils', () => {
 
             const method:any = makeMethod(['string','float']);
             delete method.arguments.arg_0.type
-            expect(validate(makeAPI({
+            expect(validate(makeAPIContext({
                 test: method
-            }), ENTITIES)).toEqual([
+            }, ENTITIES))).toEqual([
                 'test has invalid arguments: arg_0'
             ]);
         })
@@ -122,9 +122,9 @@ describe('RESTUtils', () => {
 
             const method:any = makeMethod(['string','float']);
             delete method.arguments.arg_0.transport
-            expect(validate(makeAPI({
+            expect(validate(makeAPIContext({
                 test: method
-            }), ENTITIES)).toEqual([
+            }, ENTITIES))).toEqual([
                 'test has invalid arguments: arg_0'
             ]);
         })
@@ -133,9 +133,9 @@ describe('RESTUtils', () => {
 
             const method:any = makeMethod(['string','float'], 'void');
 
-            expect(validate(makeAPI({
+            expect(validate(makeAPIContext({
                 test: method
-            }), ENTITIES)).toEqual([]);
+            }, ENTITIES))).toEqual([]);
         })
 
         test('passes if method has no arguments', () => {
@@ -143,9 +143,9 @@ describe('RESTUtils', () => {
             const method:any = makeMethod([], 'void');
             delete method.arguments;
 
-            expect(validate(makeAPI({
+            expect(validate(makeAPIContext({
                 test: method
-            }), ENTITIES)).toEqual([]);
+            }, ENTITIES))).toEqual([]);
         })
     });
 

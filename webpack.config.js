@@ -2,7 +2,7 @@ const Path = require('path');
 
 module.exports = {
     mode: 'production',
-    devtool: 'source-map',
+    devtool: 'inline-source-map',
     entry: {
         'rest.blockware.com/v1/API': Path.resolve(__dirname, "./src/web/RESTAPIConfig.ts"),
         'rest.blockware.com/v1/Client': Path.resolve(__dirname, "./src/web/RESTClientConfig.ts")

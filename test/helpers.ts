@@ -1,15 +1,29 @@
 import {
     HTTPMethod,
-    isStringableType,
+    isStringableType, ResourceKind,
     RESTMethod, SchemaDTO,
     SchemaEntity,
     SchemaEntityType,
     SchemaEntryType
 } from "@blockware/ui-web-types";
-import {convertToEditMethod, KIND_REST_API, RESTMethodEdit} from "../src/web/types";
+import {
+    convertToEditMethod,
+    KIND_REST_API, RESTKindContext,
+    RESTMethodContext,
+    RESTMethodEdit,
+    RESTMethodEditContext, RESTResourceMetadata, RESTResourceSpec
+} from "../src/web/types";
 
-export function makeAPI(methods:{[key: string]: RESTMethod}) {
+export function makeAPIContext(methods:{[key: string]: RESTMethod}, entities?:SchemaEntity[]):RESTKindContext {
     return {
+        resource: makeAPI(methods),
+        entities:  entities ? entities : []
+    }
+}
+
+
+export function makeAPI(methods:{[key: string]: RESTMethod}, entities?:SchemaEntity[]):ResourceKind<RESTResourceSpec, RESTResourceMetadata> {
+    return  {
         kind: KIND_REST_API,
         metadata: {
             name: 'SomeAPI'
@@ -34,6 +48,13 @@ export function makeMethod(args:SchemaEntryType[] = [], responseType?:SchemaEntr
         arguments: argMap,
         path: '/',
         responseType
+    }
+}
+
+export function makeEditContext(id:string, args:SchemaEntryType[] = [], responseType?:SchemaEntryType, entities?:SchemaEntity[]):RESTMethodEditContext {
+    return {
+        method: makeEditMethod(id, args, responseType),
+        entities: entities ? entities : []
     }
 }
 

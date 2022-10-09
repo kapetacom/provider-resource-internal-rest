@@ -13,6 +13,8 @@
         flex:1;
         border: 1px solid #efefef;
         background-color: white;
+        height: 32px;
+        box-sizing: border-box;
 
         .rest-method-erasure {
             flex: 1;
@@ -122,5 +124,49 @@
 
     .rest-method-erasure {
         font-size: 12px;
+    }
+
+    .button {
+        &.friendly {
+            color: @green-dark;
+
+            &:hover {
+                color: lighten(@green-dark, 20%)
+            }
+        }
+
+        &.danger {
+            color: @red;
+            &:hover {
+                color: lighten(@red, 20%)
+            }
+        }
+    }
+
+    .issues {
+        .border-radius(3px);
+        font-size: 12px;
+        background-color: @yellow-alert;
+        color: @btn-text-w;
+        padding: 10px;
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 5px;
+
+        > svg {
+            margin:10px
+        }
+        .content {
+            padding-left: 20px;
+        }
+    }
+
+    .warnings {
+        .border-radius(3px);
+        font-size: 12px;
+        border: 2px dashed @yellow-alert;
+        color: @gray-xxdark;
+        padding: 10px;
+        margin-bottom: 5px;
     }
 }
