@@ -72,7 +72,7 @@ const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> =
                     const toMethod = convertToEditMethod(mapping.targetId, to.spec.methods[mapping.targetId]);
 
                     if (mapping.type === ConnectionMethodMappingType.EXACT &&
-                        !isCompatibleRESTMethods(fromMethod, toMethod, fromEntities, toEntities)) {
+                        !isCompatibleRESTMethods({method: fromMethod, entities: fromEntities}, {method:toMethod, entities: toEntities})) {
                         errors.push('Methods are not compatible');
                     }
                 });
@@ -110,9 +110,13 @@ const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> =
         }
     ],
     getCounterValue,
-    resolveEntities,
     hasMethod,
-    validate
+    resolveEntities: (resource) => {
+        return resolveEntities({resource, entities: []})
+    },
+    validate: (resource, entities) => {
+        return validate({resource, entities})
+    }
 };
 
 export default RestClientConfig;

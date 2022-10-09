@@ -200,7 +200,7 @@ export class MappingHandlerBuilder {
 
                     if (!isCompatible) {
                         //Something changed and methods are no longer compatible
-                        this.context.warnings.push(`Mapping for ${sourceMethodId} and ${mapping.targetId} was invalid and was removed.`);
+                        this.context.warnings.push(`Mapping for ${this.context.sourceName}.${sourceMethodId} and ${this.context.targetName}.${mapping.targetId} was invalid and was removed.`);
 
                         this.mappedMethods.push(
                             createSourceOnlyMapping(sourceMethod),

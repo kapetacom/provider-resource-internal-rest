@@ -28,7 +28,7 @@ export function determineEntityIssues(source: RESTKindContext, target: RESTKindC
         const targetEntity = target.entities.find(e => e.name === sourceEntityName);
         handled.push(sourceEntityName);
         if (!sourceEntity) {
-            entityIssues.push(`Missing source entity: ${sourceEntity}`);
+            entityIssues.push(`Missing source entity: ${sourceEntityName}`);
             return;
         }
         if (!targetEntity) {

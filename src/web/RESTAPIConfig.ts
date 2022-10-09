@@ -11,10 +11,14 @@ export const RESTAPIConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpe
     componentType: RESTEditorComponent,
     consumableKind: KIND_REST_CLIENT,
     getCounterValue,
-    resolveEntities,
-    renameEntityReferences,
     hasMethod,
-    validate
+    resolveEntities: (resource) => {
+        return resolveEntities({resource, entities: []})
+    },
+    renameEntityReferences,
+    validate: (resource, entities) => {
+        return validate({resource, entities})
+    }
 };
 
 export default RESTAPIConfig;
