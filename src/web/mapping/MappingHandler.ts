@@ -23,9 +23,9 @@ export class MappingHandler extends EventEmitter {
     constructor(methods: MappedMethod[], source: RESTKindContext, target: RESTKindContext) {
         super();
         makeObservable(this);
-        this.source = source;
-        this.target = target;
-        this.methods = methods;
+        this.source = toJS(source);
+        this.target = toJS(target);
+        this.methods = toJS(methods);
     }
 
     public isValid(): boolean {
@@ -40,7 +40,17 @@ export class MappingHandler extends EventEmitter {
         return this.methods.length > 0;
     }
 
-    public toData(): ConnectionMethodsMapping {
+    public toData() {
+        return {
+            source: toJS(this.source.resource),
+            sourceEntities: toJS(this.source.entities),
+            target: toJS(this.target.resource),
+            targetEntities: toJS(this.target.entities),
+            data: this.toMappingData()
+        }
+    }
+
+    public toMappingData(): ConnectionMethodsMapping {
         const methods: ConnectionMethodsMapping = {};
         this.methods.forEach((method) => {
             if (!method.source ||

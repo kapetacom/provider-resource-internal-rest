@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import _ from 'lodash';
 import {observer} from "mobx-react";
-import {action, makeObservable, observable} from "mobx";
+import {action, makeObservable, observable, toJS} from "mobx";
 
 import type {RESTMethodEdit, RESTResourceSpec} from "../types";
 
@@ -100,13 +100,7 @@ export default class APIToClientMapper extends Component<RestResourceToClientMap
             return;
         }
 
-        this.props.onDataChanged({
-            source: this.props.source,
-            sourceEntities: this.props.sourceEntities,
-            target: this.props.target,
-            targetEntities: this.props.targetEntities,
-            data: this.mappingHandler.toData()
-        });
+        this.props.onDataChanged(toJS(this.mappingHandler.toData()));
     }
 
     private renderInnerSourceColumn(ix: number, mappedMethod: MappedMethod, draggable: boolean, droppable: boolean) {
