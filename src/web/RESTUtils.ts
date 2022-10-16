@@ -36,16 +36,21 @@ export const validate = (context:RESTKindContext):string[] => {
     });
 
     if (missingEntities.length > 0) {
-        errors.push('One or more entities are missing: ' + missingEntities.join(', '));
+        if (missingEntities.length === 1) {
+            errors.push(`${missingEntities[0]} is not defined in this block. Create entity to solve this issue`);
+        } else {
+            errors.push(`Multiple entities are not defined in this block: ${missingEntities.join(', ')}. Create these entities to solve this issue`);
+        }
+
     }
 
     _.forEach(context.resource.spec.methods, (method, methodId) => {
         if (!method.path) {
-            errors.push(`${methodId} is missing path`);
+            errors.push(`${methodId} is missing path. Add path to solve this issue`);
         }
 
         if (!method.method) {
-            errors.push(`${methodId} is missing HTTP method`);
+            errors.push(`${methodId} is missing HTTP method. Define an HTTP method to solve this issue`);
         }
 
         if (!method.arguments) {
@@ -61,7 +66,7 @@ export const validate = (context:RESTKindContext):string[] => {
         }).map(([methodId, argument]) => methodId);
 
         if (invalidArguments.length > 0) {
-            errors.push(`${methodId} has invalid arguments: ${invalidArguments.join(', ')}`);
+            errors.push(`${methodId} is missing a type and/or a transport for the following arguments: ${invalidArguments.join(', ')}. Add type and transport to all arguments to solve this issue.`);
         }
 
     });
