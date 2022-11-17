@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { observer } from "mobx-react";
 
-import { ResourceRole } from "@blockware/ui-web-types";
-import { Traffic } from "@blockware/ui-web-context";
+import {ResourceRole, Traffic} from "@blockware/ui-web-types";
+
 import { countdown } from "@blockware/ui-web-utils";
 import {toClass, httpStatusPhrase} from "@blockware/ui-web-utils";
 

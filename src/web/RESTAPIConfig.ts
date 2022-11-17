@@ -5,7 +5,7 @@ import {ResourceConfig, ResourceRole, ResourceType} from "@blockware/ui-web-type
 
 export const RESTAPIConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> = {
     kind: KIND_REST_API,
-    name: 'REST API',
+    title: 'REST API',
     role: ResourceRole.PROVIDES,
     type: ResourceType.SERVICE,
     componentType: RESTEditorComponent,

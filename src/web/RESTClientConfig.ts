@@ -26,7 +26,7 @@ import InspectConnectionContent from "./inspectors/InspectConnectionContent";
 
 const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> = {
     kind: KIND_REST_CLIENT,
-    name: 'REST Client',
+    title: 'REST Client',
     role: ResourceRole.CONSUMES,
     type: ResourceType.SERVICE,
     componentType: RestAPIEditorComponent,

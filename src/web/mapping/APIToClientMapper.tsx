@@ -196,7 +196,7 @@ export default class APIToClientMapper extends Component<RestResourceToClientMap
         return (
 
             <div className={"rest-resource-to-client-mapper"}>
-                <FormReadyHandler name={this.props.name}
+                <FormReadyHandler name={this.props.title}
                                   ready={this.isValid()}>
 
                     {this.handlerContext.issues.length > 0 && (

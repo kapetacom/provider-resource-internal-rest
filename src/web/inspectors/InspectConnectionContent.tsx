@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 
 import { observer } from "mobx-react";
-import { Traffic } from "@blockware/ui-web-context";
+
 import {StackContainer, StackPage} from "@blockware/ui-web-components";
 
 import InspectConnectionMethods from "./InspectConnectionMethods";
 import InspectConnectionTraffic from "./InspectConnectionTraffic";
 import InspectConnectionPayload from "./InspectConnectionPayload";
-import {ResourceInspectProps} from "@blockware/ui-web-types";
+import type {ResourceInspectProps, Traffic} from "@blockware/ui-web-types";
 
 interface InspectConnectionContentState {
     currentPageId: string

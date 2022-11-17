@@ -3,7 +3,7 @@ import React, {Component} from "react";
 import {action, makeObservable, observable, toJS} from "mobx";
 import _ from "lodash";
 
-import {DSL_LANGUAGE_ID, DSLConverters, DSLMethod, MethodEditor, SingleLineInput} from "@blockware/ui-web-components";
+import {DSL_LANGUAGE_ID, DSLConverters, DSLMethod, FormInput, MethodEditor} from "@blockware/ui-web-components";
 import type {ResourceConfigProps} from "@blockware/ui-web-types";
 
 import type {RESTResourceMetadata, RESTResourceSpec} from "./types";
@@ -65,7 +65,7 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
         return (
             <div className={"rest-resource-editor"}>
 
-                <SingleLineInput
+                <FormInput
                     name={"name"}
                     value={this.metadata.name}
                     label={"Name"}
