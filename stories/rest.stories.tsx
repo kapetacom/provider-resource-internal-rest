@@ -20,8 +20,8 @@ import InspectConnectionContent from "../src/web/inspectors/InspectConnectionCon
 import '@blockware/ui-web-components/styles/index.less';
 import {ToastContainer} from "@blockware/ui-web-components";
 
-const API_KIND = 'rest.blockware.com/v1/API';
-const CLIENT_KIND = 'rest.blockware.com/v1/Client';
+const API_KIND = 'blockware/resource-type-rest-api';
+const CLIENT_KIND = 'blockware/resource-type-rest-client';
 
 const API_ENTITIES: SchemaEntity[] = [
     {

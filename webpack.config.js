@@ -4,8 +4,8 @@ module.exports = {
     mode: 'production',
     devtool: 'inline-source-map',
     entry: {
-        'rest.blockware.com/v1/API': Path.resolve(__dirname, "./src/web/RESTAPIConfig.ts"),
-        'rest.blockware.com/v1/Client': Path.resolve(__dirname, "./src/web/RESTClientConfig.ts")
+        'blockware/resource-type-rest-api': Path.resolve(__dirname, "./src/web/RESTAPIConfig.ts"),
+        'blockware/resource-type-rest-client': Path.resolve(__dirname, "./src/web/RESTClientConfig.ts")
     },
     output: {
         path: Path.join(process.cwd(), 'web'),

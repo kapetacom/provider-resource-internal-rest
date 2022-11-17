@@ -131,6 +131,6 @@ export function isCompatibleRESTMethods(a:RESTMethodEditContext, b:RESTMethodEdi
     return getCompatibleRESTMethodsIssues(a, b).length === 0;
 }
 
-export let KIND_REST_API = 'rest.blockware.com/v1/API';
+export let KIND_REST_API = 'blockware/resource-type-rest-api';
 
-export let KIND_REST_CLIENT = 'rest.blockware.com/v1/Client';
+export let KIND_REST_CLIENT = 'blockware/resource-type-rest-client';
