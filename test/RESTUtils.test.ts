@@ -3,6 +3,9 @@
  */
 //This is all needed due to monaco editor getting pulled in
 document.queryCommandSupported = function() { return false };
+import { TextEncoder, TextDecoder } from 'util';
+global.TextEncoder = TextEncoder as any;
+global.TextDecoder = TextDecoder as any;
 
 import {describe, expect, test} from "@jest/globals";
 import {getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate} from "../src/web/RESTUtils";
@@ -79,7 +82,7 @@ describe('RESTUtils', () => {
             expect(validate(makeAPIContext({
                 test: makeMethod([{$ref:'Company'}], {$ref:'Department'})
             }, ENTITIES))).toEqual([
-                'One or more entities are missing: Department, Company'
+                'Multiple entities are not defined in this block: Department, Company. Create these entities to solve this issue'
             ]);
         })
 
@@ -91,7 +94,7 @@ describe('RESTUtils', () => {
             expect(validate(makeAPIContext({
                 test: method
             }, ENTITIES))).toEqual([
-                'test is missing path'
+                'test is missing path. Add path to solve this issue'
             ]);
         })
 
@@ -103,7 +106,7 @@ describe('RESTUtils', () => {
             expect(validate(makeAPIContext({
                 test: method
             }, ENTITIES))).toEqual([
-                'test is missing HTTP method'
+                'test is missing HTTP method. Define an HTTP method to solve this issue'
             ]);
         })
 
@@ -114,7 +117,7 @@ describe('RESTUtils', () => {
             expect(validate(makeAPIContext({
                 test: method
             }, ENTITIES))).toEqual([
-                'test has invalid arguments: arg_0'
+                'test is missing a type and/or a transport for the following arguments: arg_0. Add type and transport to all arguments to solve this issue.'
             ]);
         })
 
@@ -125,7 +128,7 @@ describe('RESTUtils', () => {
             expect(validate(makeAPIContext({
                 test: method
             }, ENTITIES))).toEqual([
-                'test has invalid arguments: arg_0'
+                'test is missing a type and/or a transport for the following arguments: arg_0. Add type and transport to all arguments to solve this issue.'
             ]);
         })
 
