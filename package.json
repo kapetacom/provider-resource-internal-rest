@@ -1,6 +1,6 @@
 {
-  "name": "@blockware/provider-resource-internal-rest",
-  "version": "0.0.27",
+  "name": "@blockware/resource-type-rest",
+  "version": "local",
   "description": "Provides REST API and Client resource type to Blockware",
   "keywords": [
     "blockware",
@@ -12,12 +12,11 @@
     "access": "public"
   },
   "scripts": {
-    "build": "webpack",
-    "storybook": "start-storybook",
-    "build-storybook": "build-storybook",
+    "prepublishOnly": "npm run build",
+    "build": "webpack --mode production",
     "start": "npm run watch",
-    "watch": "webpack --watch",
-    "prepublishOnly": "npm run test && npm run build",
+    "watch": "webpack --mode development --watch",
+    "storybook": "start-storybook",
     "test": "jest"
   },
   "peerDependencies": {

@@ -1,17 +1,25 @@
 const Path = require('path');
+const packageJson = require('./package.json');
 
 module.exports = {
-    mode: 'production',
-    devtool: 'inline-source-map',
     entry: {
-        'blockware/resource-type-rest-api': Path.resolve(__dirname, "./src/web/RESTAPIConfig.ts"),
-        'blockware/resource-type-rest-client': Path.resolve(__dirname, "./src/web/RESTClientConfig.ts")
+        [`blockware/resource-type-rest-api:${packageJson.version}`]: {
+            import: Path.resolve(__dirname, "./src/web/RESTAPIConfig.ts"),
+            filename: `blockware/resource-type-rest-api.js`
+        },
+        [`blockware/resource-type-rest-client:${packageJson.version}`]: {
+            import: Path.resolve(__dirname, "./src/web/RESTClientConfig.ts"),
+            filename: `blockware/resource-type-rest-client.js`
+        }
     },
     output: {
         path: Path.join(process.cwd(), 'web'),
         filename: '[name].js',
-        library: `Blockware.resourceTypes["[name]"]`,
-        libraryTarget: 'assign'
+        library: {
+            name: `Blockware.resourceTypes["[name]"]`,
+            type: 'assign',
+            export: 'default'
+        }
     },
     module: {
         rules: [
