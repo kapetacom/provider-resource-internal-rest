@@ -24,8 +24,11 @@ import RestAPIEditorComponent from "./RESTEditorComponent";
 import APIToClientMapper from "./mapping/APIToClientMapper";
 import InspectConnectionContent from "./inspectors/InspectConnectionContent";
 
+const packageJson = require('../../package.json');
+
 const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> = {
     kind: KIND_REST_CLIENT,
+    version: packageJson.version,
     title: 'REST Client',
     role: ResourceRole.CONSUMES,
     type: ResourceType.SERVICE,
