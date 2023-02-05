@@ -39,10 +39,13 @@ const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> =
             mappingComponentType: APIToClientMapper,
             inspectComponentType: InspectConnectionContent,
             createFrom: (data: ResourceKind) => {
-                return {...data, kind: KIND_REST_CLIENT}
+                if (!data.kind?.startsWith(KIND_REST_CLIENT)) {
+                    throw new Error(`Invalid resource kind: ${data.kind}. Expected ${KIND_REST_CLIENT}`)
+                }
+                return {...data}
             },
             validateMapping: (
-                connection: BlockConnectionSpec<ConnectionMethodsMapping>,
+                connection: BlockConnectionSpec,
                 from: ResourceKind<RESTResourceSpec>,
                 to: ResourceKind<RESTResourceSpec>,
                 fromEntities: SchemaEntity[],
@@ -109,7 +112,6 @@ const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> =
 
                 return newMapping;
             }
-
         }
     ],
     getCounterValue,
