@@ -78,7 +78,10 @@ const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> =
                     const toMethod = convertToEditMethod(mapping.targetId, to.spec.methods[mapping.targetId]);
 
                     if (mapping.type === ConnectionMethodMappingType.EXACT &&
-                        !isCompatibleRESTMethods({method: fromMethod, entities: fromEntities}, {method:toMethod, entities: toEntities})) {
+                        !isCompatibleRESTMethods({method: fromMethod, entities: fromEntities}, {
+                            method: toMethod,
+                            entities: toEntities
+                        })) {
                         errors.push('Methods are not compatible');
                     }
                 });
@@ -88,6 +91,42 @@ const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> =
                 }
 
                 return errors;
+            },
+            createMapping: (from: ResourceKind<RESTResourceSpec>,
+                            to: ResourceKind<RESTResourceSpec>,
+                            fromEntities: SchemaEntity[],
+                            toEntities: SchemaEntity[]): ConnectionMethodsMapping => {
+                const newMapping = {};
+                Object.keys(from.spec.methods).forEach(sourceMethodId => {
+                    if (!to.spec.methods[sourceMethodId]) {
+                        return;
+                    }
+
+                    const fromMethod = convertToEditMethod(sourceMethodId, from.spec.methods[sourceMethodId]);
+                    const toMethod = convertToEditMethod(sourceMethodId, to.spec.methods[sourceMethodId]);
+
+                    const wasCompatible = isCompatibleRESTMethods(
+                        {
+                            method: fromMethod,
+                            entities: fromEntities
+                        },
+                        {
+                            method: toMethod,
+                            entities: toEntities
+                        }
+                    );
+
+                    if (!wasCompatible) {
+                        return;
+                    }
+
+                    newMapping[sourceMethodId] = {
+                        targetId: sourceMethodId,
+                        type: ConnectionMethodMappingType.EXACT
+                    };
+                });
+
+                return newMapping;
             },
             updateMapping: (
                 connection: BlockConnectionSpec<ConnectionMethodsMapping>,
