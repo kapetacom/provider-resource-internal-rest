@@ -20,7 +20,7 @@ import {
 } from "@blockware/ui-web-types";
 
 import {getCounterValue, hasMethod, resolveEntities, validate} from "./RESTUtils";
-import RestAPIEditorComponent from "./RESTEditorComponent";
+import {RESTEditorComponent} from "./RESTEditorComponent";
 import APIToClientMapper from "./mapping/APIToClientMapper";
 import InspectConnectionContent from "./inspectors/InspectConnectionContent";
 
@@ -32,7 +32,7 @@ const RestClientConfig: ResourceConfig<RESTResourceMetadata, RESTResourceSpec> =
     title: 'REST Client',
     role: ResourceRole.CONSUMES,
     type: ResourceType.SERVICE,
-    componentType: RestAPIEditorComponent,
+    componentType: RESTEditorComponent,
     converters: [
         {
             fromKind: KIND_REST_API,

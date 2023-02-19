@@ -10,7 +10,7 @@ import {ItemTypes} from "./types";
 
 import {ConnectionMethodsMapping, ResourceMapperProps} from "@blockware/ui-web-types";
 
-import {DnDContainer, DnDDrag, DnDDrop, FormReadyHandler, showToasty, ToastType} from "@blockware/ui-web-components";
+import {DnDContainer, DnDDrag, DnDDrop, FormReadyHandler} from "@blockware/ui-web-components";
 
 import RestMethodView from "../RestMethodView";
 

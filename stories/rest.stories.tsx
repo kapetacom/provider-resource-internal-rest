@@ -11,14 +11,14 @@ import {
     Traffic
 } from '@blockware/ui-web-types';
 
-import RESTEditorComponent from "../src/web/RESTEditorComponent";
+import {RESTEditorComponent} from "../src/web/RESTEditorComponent";
 import {convertToEditMethod, RESTResourceMetadata, RESTResourceSpec} from "../src/web/types";
 import RestMethodView from "../src/web/RestMethodView";
 import APIToClientMapper from "../src/web/mapping/APIToClientMapper";
 import InspectConnectionContent from "../src/web/inspectors/InspectConnectionContent";
 
 import '@blockware/ui-web-components/styles/index.less';
-import {ToastContainer} from "@blockware/ui-web-components";
+import {FormContainer, ToastContainer} from "@blockware/ui-web-components";
 
 const API_KIND = 'blockware/resource-type-rest-api';
 const CLIENT_KIND = 'blockware/resource-type-rest-client';
@@ -197,7 +197,7 @@ const block: BlockWrapper<any> = {
     setData: () => {
 
     },
-    getEntityNames: () => ['Task', 'TestType']
+    getEntityNames: () => ['Task', 'TestType','SimpleTask']
 };
 
 const mapping: ConnectionMethodsMapping = {
@@ -290,15 +290,18 @@ const trafficLines: Traffic[] = [
     }
 ];
 
+import './stories.less';
+
 export default {
     title: 'REST'
 };
 
 export const Editor = () => <div
     style={{padding: '10px', width: '850px', height: '100%', backgroundColor: 'white', border: '1px solid gray'}}>
-    <RESTEditorComponent {...RESTApiResource} block={block} onDataChanged={(metadata, spec) => {
-        console.log('Data changed', metadata, spec);
-    }}/>
+    <FormContainer initialValue={RESTApiResource}
+                   onChange={data => console.log('Data changed', data)} >
+        <RESTEditorComponent block={block} />
+    </FormContainer>
 </div>;
 
 export const MethodView = () => <RestMethodView compact={false} method={convertToEditMethod('test', getTaskMethod)}/>;
@@ -309,7 +312,7 @@ export const MethodViewCompact = () => <RestMethodView compact={true}
 export const APIToClientMapperViewProblem = () =>
     <div style={{padding: '25px', width: '750px', height: '100%',}}>
         <ToastContainer/>
-        <APIToClientMapper name={'My Connection'}
+        <APIToClientMapper title={'My Connection'}
                            source={RESTApiResource}
                            target={RESTClientResource}
                            onDataChanged={(change) => console.log('Data changed', change)}
@@ -320,7 +323,7 @@ export const APIToClientMapperViewProblem = () =>
 export const APIToClientMapperViewValueProblem = () =>
     <div style={{padding: '25px', width: '750px', height: '100%',}}>
         <ToastContainer/>
-        <APIToClientMapper name={'My Connection'}
+        <APIToClientMapper title={'My Connection'}
                            source={RESTApiResource}
                            target={RESTClientResource}
                            value={{
@@ -345,7 +348,7 @@ export const APIToClientMapperViewValueProblem = () =>
 export const APIToClientMapperViewOK = () =>
     <div style={{padding: '25px', width: '750px', height: '100%',}}>
         <ToastContainer/>
-        <APIToClientMapper name={'My Connection'}
+        <APIToClientMapper title={'My Connection'}
                            source={RESTApiResource}
                            target={RESTClientResource}
                            onDataChanged={(change) => console.log('Data changed', change)}
@@ -356,7 +359,7 @@ export const APIToClientMapperViewOK = () =>
 export const APIToClientMapperViewEmptyServerProblem = () =>
     <div style={{padding: '25px', width: '750px', height: '100%',}}>
         <ToastContainer/>
-        <APIToClientMapper name={'My Connection'}
+        <APIToClientMapper title={'My Connection'}
                            source={RESTApiResourceEmpty}
                            target={RESTClientResource}
                            onDataChanged={(change) => console.log('Data changed', change)}
@@ -367,7 +370,7 @@ export const APIToClientMapperViewEmptyServerProblem = () =>
 export const APIToClientMapperViewEmptyServerOK = () =>
     <div style={{padding: '25px', width: '750px', height: '100%',}}>
         <ToastContainer/>
-        <APIToClientMapper name={'My Connection'}
+        <APIToClientMapper title={'My Connection'}
                            source={RESTApiResourceEmpty}
                            target={RESTClientResource}
                            onDataChanged={(change) => console.log('Data changed', change)}
@@ -378,7 +381,7 @@ export const APIToClientMapperViewEmptyServerOK = () =>
 export const APIToClientMapperViewEmptyClientProblem = () =>
     <div style={{padding: '25px', width: '750px', height: '100%',}}>
         <ToastContainer/>
-        <APIToClientMapper name={'My Connection'}
+        <APIToClientMapper title={'My Connection'}
                            source={RESTApiResource}
                            target={RESTClientResourceEmpty}
                            onDataChanged={(change) => console.log('Data changed', change)}
@@ -389,7 +392,7 @@ export const APIToClientMapperViewEmptyClientProblem = () =>
 export const APIToClientMapperViewEmptyClientOK = () =>
     <div style={{padding: '25px', width: '750px', height: '100%',}}>
         <ToastContainer/>
-        <APIToClientMapper name={'My Connection'}
+        <APIToClientMapper title={'My Connection'}
                            source={RESTApiResource}
                            target={RESTClientResourceEmpty}
                            onDataChanged={(change) => console.log('Data changed', change)}

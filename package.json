@@ -17,6 +17,7 @@
     "start": "npm run watch",
     "watch": "webpack --mode development --watch",
     "storybook": "start-storybook",
+    "build-storybook": "build-storybook",
     "test": "jest"
   },
   "peerDependencies": {
@@ -41,8 +42,8 @@
     "@storybook/builder-webpack5": "^6.5.12",
     "@storybook/manager-webpack5": "^6.5.12",
     "@storybook/react": "^6.5.12",
-    "@types/lodash": "^4.14.149",
-    "@types/react": "^16.9.17",
+    "@types/lodash": "^4.14.191",
+    "@types/react": "^18.0.28",
     "babel-loader": "^8.0.6",
     "byte-size": "6.2.0",
     "css-loader": "^3.4.2",
