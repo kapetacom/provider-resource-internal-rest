@@ -31,7 +31,6 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
 
     constructor(props: ResourceConfigProps<RESTResourceMetadata, RESTResourceSpec>) {
         super(props);
-        makeObservable(this);
 
         this.metadata = !_.isEmpty(this.props.metadata) ? _.cloneDeep(this.props.metadata) : {
             name: 'New'
@@ -41,6 +40,7 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
             methods: {}
         };
 
+        makeObservable(this);
     }
 
 
@@ -48,7 +48,6 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
 
         const spec = toJS(this.spec);
         const metadata = toJS(this.metadata);
-
         this.props.onDataChanged(metadata, spec);
     }
 
@@ -92,8 +91,12 @@ export default class RESTEditorComponent extends Component<ResourceConfigProps<R
 
     @action
     private setResult(code: string, methods: DSLMethod[]) {
-        this.spec.methods = DSLConverters.toSchemaMethods(methods);
-        this.spec.source = {type: DSL_LANGUAGE_ID, value: code};
-        this.triggerChange();
+        try {
+            this.spec.methods = DSLConverters.toSchemaMethods(methods);
+            this.spec.source = {type: DSL_LANGUAGE_ID, value: code};
+            this.triggerChange();
+        } catch (e) {
+            console.error('Failed to trigger change', e);
+        }
     }
 }
