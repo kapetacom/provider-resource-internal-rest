@@ -27,7 +27,7 @@ jobs:
           repository: blockwarecom/core-registry-action
           path: ./github-action/core-registry-action
           token: ${{ secrets.GHA_TOKEN }}
-
+      - run: echo '@blockware:registry=${{ secrets.GCP_ARTIFACT_NPM_URL }}' > .npmrc
       - name: push to blockware cloud
         id: blockware-registry-push
         uses: ./github-action/core-registry-action
