@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 import { observer } from "mobx-react";
-import type {Traffic, ConnectionMethodsMapping, HTTPResponse} from "@blockware/ui-web-types";
+import type {Traffic, ConnectionMethodsMapping, HTTPResponse} from "@kapeta/ui-web-types";
 
 import "./InspectConnectionMethods.less";
 

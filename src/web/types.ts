@@ -7,7 +7,7 @@ import {
     HTTPMethod,
     TypedValue,
     RESTMethod, getCompatibilityIssuesForTypes, ResourceKind
-} from "@blockware/ui-web-types";
+} from "@kapeta/ui-web-types";
 
 
 export interface RESTResourceMetadata {
@@ -131,6 +131,6 @@ export function isCompatibleRESTMethods(a:RESTMethodEditContext, b:RESTMethodEdi
     return getCompatibleRESTMethodsIssues(a, b).length === 0;
 }
 
-export let KIND_REST_API = 'blockware/resource-type-rest-api';
+export let KIND_REST_API = 'kapeta/resource-type-rest-api';
 
-export let KIND_REST_CLIENT = 'blockware/resource-type-rest-client';
+export let KIND_REST_CLIENT = 'kapeta/resource-type-rest-client';

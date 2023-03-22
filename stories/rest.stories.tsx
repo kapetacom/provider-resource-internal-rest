@@ -9,7 +9,7 @@ import {
     SchemaEntity,
     SchemaEntityType,
     Traffic
-} from '@blockware/ui-web-types';
+} from '@kapeta/ui-web-types';
 
 import {RESTEditorComponent} from "../src/web/RESTEditorComponent";
 import {convertToEditMethod, RESTResourceMetadata, RESTResourceSpec} from "../src/web/types";
@@ -18,10 +18,10 @@ import APIToClientMapper from "../src/web/mapping/APIToClientMapper";
 import InspectConnectionContent from "../src/web/inspectors/InspectConnectionContent";
 
 import '@blockware/ui-web-components/styles/index.less';
-import {FormContainer, ToastContainer} from "@blockware/ui-web-components";
+import {FormContainer, ToastContainer} from "@kapeta/ui-web-components";
 
-const API_KIND = 'blockware/resource-type-rest-api';
-const CLIENT_KIND = 'blockware/resource-type-rest-client';
+const API_KIND = 'kapeta/resource-type-rest-api';
+const CLIENT_KIND = 'kapeta/resource-type-rest-client';
 
 const API_ENTITIES: SchemaEntity[] = [
     {

@@ -17,7 +17,7 @@ import {
     ResourceRole,
     ResourceType,
     SchemaEntity
-} from "@blockware/ui-web-types";
+} from "@kapeta/ui-web-types";
 
 import {getCounterValue, hasMethod, resolveEntities, validate} from "./RESTUtils";
 import {RESTEditorComponent} from "./RESTEditorComponent";

@@ -1,9 +1,9 @@
 {
-  "name": "@blockware/resource-type-rest",
+  "name": "@kapeta/resource-type-rest",
   "version": "local",
-  "description": "Provides REST API and Client resource type to Blockware",
+  "description": "Provides REST API and Client resource type to Kapeta",
   "keywords": [
-    "blockware",
+    "kapeta",
     "rest",
     "resource-type"
   ],
@@ -21,10 +21,10 @@
     "test": "jest"
   },
   "peerDependencies": {
-    "@blockware/ui-web-components": "<2",
-    "@blockware/ui-web-context": "<2",
-    "@blockware/ui-web-types": "<2",
-    "@blockware/ui-web-utils": "<2"
+    "@kapeta/ui-web-components": "<2",
+    "@kapeta/ui-web-context": "<2",
+    "@kapeta/ui-web-types": "<2",
+    "@kapeta/ui-web-utils": "<2"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.7",
@@ -34,10 +34,10 @@
     "@babel/preset-env": "^7.5.0",
     "@babel/preset-react": "^7.7.4",
     "@babel/preset-typescript": "^7.3.3",
-    "@blockware/ui-web-components": "<2",
-    "@blockware/ui-web-context": "<2",
-    "@blockware/ui-web-types": "<2",
-    "@blockware/ui-web-utils": "<2",
+    "@kapeta/ui-web-components": "<2",
+    "@kapeta/ui-web-context": "<2",
+    "@kapeta/ui-web-types": "<2",
+    "@kapeta/ui-web-utils": "<2",
     "@jest/globals": "^29.1.2",
     "@storybook/builder-webpack5": "^6.5.12",
     "@storybook/manager-webpack5": "^6.5.12",

@@ -1,7 +1,7 @@
 import React from "react";
 
-import {DSL_LANGUAGE_ID, DSLConverters, DSLMethod, MethodEditor, FormField, useFormContextField} from "@blockware/ui-web-components";
-import type {ResourceConfigProps} from "@blockware/ui-web-types";
+import {DSL_LANGUAGE_ID, DSLConverters, DSLMethod, MethodEditor, FormField, useFormContextField} from "@kapeta/ui-web-components";
+import type {ResourceConfigProps} from "@kapeta/ui-web-types";
 
 import './RESTEditorComponent.less';
 

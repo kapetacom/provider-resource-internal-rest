@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 
-import {typeName} from "@blockware/ui-web-types";
+import {typeName} from "@kapeta/ui-web-types";
 
 import {RESTMethodEdit} from "./types";
 

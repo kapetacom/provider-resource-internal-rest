@@ -1,11 +1,11 @@
 kind: core/resource-type-internal
 metadata:
-  name: blockware/resource-type-rest-api
+  name: kapeta/resource-type-rest-api
   title: REST API
   description: Provides REST API in your plans
 ---
 kind: core/resource-type-internal
 metadata:
-  name: blockware/resource-type-rest-client
+  name: kapeta/resource-type-rest-client
   title: REST Client
   description: Provides REST Clients in your plans

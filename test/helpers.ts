@@ -5,7 +5,7 @@ import {
     SchemaEntity,
     SchemaEntityType,
     SchemaEntryType
-} from "@blockware/ui-web-types";
+} from "@kapeta/ui-web-types";
 import {
     convertToEditMethod,
     KIND_REST_API, RESTKindContext,

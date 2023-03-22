@@ -11,7 +11,7 @@ import {describe, expect, test} from "@jest/globals";
 import {getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate} from "../src/web/RESTUtils";
 import {
     toStringName
-} from "@blockware/ui-web-types";
+} from "@kapeta/ui-web-types";
 import {ENTITIES, makeAPI, makeAPIContext, makeMethod} from "./helpers";
 
 

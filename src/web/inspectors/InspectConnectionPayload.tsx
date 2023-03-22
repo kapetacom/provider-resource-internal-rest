@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 
-import {TabContainer, TabPage} from "@blockware/ui-web-components";
-import {httpStatusPhrase} from "@blockware/ui-web-utils";
+import {TabContainer, TabPage} from "@kapeta/ui-web-components";
+import {httpStatusPhrase} from "@kapeta/ui-web-utils";
 
 import "./InspectConnectionPayload.less";
-import {Traffic} from "@blockware/ui-web-types";
+import {Traffic} from "@kapeta/ui-web-types";
 
 interface InspectTrafficPayloadProps {
     traffic:Traffic

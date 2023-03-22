@@ -9,7 +9,7 @@ import type {
 import {
     getSchemaEntityCompatibilityIssues, isSchemaEntityCompatible,
     SchemaEntity
-} from "@blockware/ui-web-types";
+} from "@kapeta/ui-web-types";
 import {resolveEntities, resolveEntitiesFromMethod} from "../RESTUtils";
 import {MappedMethod, RESTMethodMappingEdit} from "./types";
 

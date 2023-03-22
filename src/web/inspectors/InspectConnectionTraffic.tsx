@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { observer } from "mobx-react";
 
-import {ResourceRole, Traffic} from "@blockware/ui-web-types";
+import {ResourceRole, Traffic} from "@kapeta/ui-web-types";
 
-import { countdown } from "@blockware/ui-web-utils";
-import {toClass, httpStatusPhrase} from "@blockware/ui-web-utils";
+import { countdown } from "@kapeta/ui-web-utils";
+import {toClass, httpStatusPhrase} from "@kapeta/ui-web-utils";
 
 import byteSize from 'byte-size'
 

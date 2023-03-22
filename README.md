@@ -1,7 +1,7 @@
 # REST Resource Provider
-Provides REST client and API resources to the blockware eco-system.
+Provides REST client and API resources to the kapeta eco-system.
 
 ---
-For details about Blockware Providers see:
+For details about Kapeta Providers see:
 
 https://github.com/blockwarecom/provider-documentation

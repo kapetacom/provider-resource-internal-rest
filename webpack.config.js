@@ -3,20 +3,20 @@ const packageJson = require('./package.json');
 
 module.exports = {
     entry: {
-        [`blockware/resource-type-rest-api:${packageJson.version}`]: {
+        [`kapeta/resource-type-rest-api:${packageJson.version}`]: {
             import: Path.resolve(__dirname, "./src/web/RESTAPIConfig.ts"),
-            filename: `blockware/resource-type-rest-api.js`
+            filename: `kapeta/resource-type-rest-api.js`
         },
-        [`blockware/resource-type-rest-client:${packageJson.version}`]: {
+        [`kapeta/resource-type-rest-client:${packageJson.version}`]: {
             import: Path.resolve(__dirname, "./src/web/RESTClientConfig.ts"),
-            filename: `blockware/resource-type-rest-client.js`
+            filename: `kapeta/resource-type-rest-client.js`
         }
     },
     output: {
         path: Path.join(process.cwd(), 'web'),
         filename: '[name].js',
         library: {
-            name: `Blockware.resourceTypes["[name]"]`,
+            name: `Kapeta.resourceTypes["[name]"]`,
             type: 'assign',
             export: 'default'
         }
@@ -77,7 +77,7 @@ module.exports = {
         'mobx-react': 'MobXReact',
         'mobx': 'MobX',
         'lodash': '_',
-        '@blockware/ui-web-components': 'Blockware.Components',
-        '@blockware/ui-web-types': 'Blockware.Types'
+        '@kapeta/ui-web-components': 'Kapeta.Components',
+        '@kapeta/ui-web-types': 'Kapeta.Types'
     }
 };

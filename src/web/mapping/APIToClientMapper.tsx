@@ -8,9 +8,9 @@ import type {RESTMethodEdit, RESTResourceSpec} from "../types";
 import type {MappedMethod, MappingHandlerContext} from "./types";
 import {ItemTypes} from "./types";
 
-import {ConnectionMethodsMapping, ResourceMapperProps} from "@blockware/ui-web-types";
+import {ConnectionMethodsMapping, ResourceMapperProps} from "@kapeta/ui-web-types";
 
-import {DnDContainer, DnDDrag, DnDDrop, FormReadyHandler} from "@blockware/ui-web-components";
+import {DnDContainer, DnDDrag, DnDDrop, FormReadyHandler} from "@kapeta/ui-web-components";
 
 import RestMethodView from "../RestMethodView";
 

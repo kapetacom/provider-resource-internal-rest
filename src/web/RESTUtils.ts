@@ -6,7 +6,7 @@ import {
     SchemaEntryType,
     typeName,
     ResourceKind, isList, isDTO, TypedValue
-} from "@blockware/ui-web-types";
+} from "@kapeta/ui-web-types";
 
 import {
     convertToRestMethod,
@@ -17,7 +17,7 @@ import {
     RESTResourceSpec
 } from "./types";
 
-import {DSL_LANGUAGE_ID, DSLConverters, DSLWriter} from "@blockware/ui-web-components";
+import {DSL_LANGUAGE_ID, DSLConverters, DSLWriter} from "@kapeta/ui-web-components";
 
 export const getCounterValue = (data: ResourceKind<RESTResourceSpec, RESTResourceMetadata>):number => {
     return _.size(data.spec.methods);

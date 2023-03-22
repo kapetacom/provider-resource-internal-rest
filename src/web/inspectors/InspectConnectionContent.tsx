@@ -2,12 +2,12 @@ import React, { Component } from "react";
 
 import { observer } from "mobx-react";
 
-import {StackContainer, StackPage} from "@blockware/ui-web-components";
+import {StackContainer, StackPage} from "@kapeta/ui-web-components";
 
 import InspectConnectionMethods from "./InspectConnectionMethods";
 import InspectConnectionTraffic from "./InspectConnectionTraffic";
 import InspectConnectionPayload from "./InspectConnectionPayload";
-import type {ResourceInspectProps, Traffic} from "@blockware/ui-web-types";
+import type {ResourceInspectProps, Traffic} from "@kapeta/ui-web-types";
 
 interface InspectConnectionContentState {
     currentPageId: string

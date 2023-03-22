@@ -15,7 +15,7 @@ import {
     mappedMethodSorter
 } from "./MappingUtils";
 import _ from "lodash";
-import {ConnectionMethodMappingType, ConnectionMethodsMapping} from "@blockware/ui-web-types";
+import {ConnectionMethodMappingType, ConnectionMethodsMapping} from "@kapeta/ui-web-types";
 import {setRESTMethod} from "../RESTUtils";
 
 export interface BuildResultError {

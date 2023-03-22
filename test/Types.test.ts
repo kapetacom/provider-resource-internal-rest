@@ -6,7 +6,7 @@ import {
     isCompatibleRESTMethods,
     RESTMethodEdit
 } from "../src/web/types";
-import {HTTPMethod, isStringableType, RESTMethod, SchemaEntryType} from "@blockware/ui-web-types";
+import {HTTPMethod, isStringableType, RESTMethod, SchemaEntryType} from "@kapeta/ui-web-types";
 import {ENTITIES, ENTITIES_ALT, makeEditContext, makeEditMethod, makeMethod} from "./helpers";
 
 
