@@ -17,7 +17,7 @@ import RestMethodView from "../src/web/RestMethodView";
 import APIToClientMapper from "../src/web/mapping/APIToClientMapper";
 import InspectConnectionContent from "../src/web/inspectors/InspectConnectionContent";
 
-import '@blockware/ui-web-components/styles/index.less';
+import '@kapeta/ui-web-components/styles/index.less';
 import {FormContainer, ToastContainer} from "@kapeta/ui-web-components";
 
 const API_KIND = 'kapeta/resource-type-rest-api';
