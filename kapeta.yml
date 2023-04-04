@@ -3,9 +3,17 @@ metadata:
   name: kapeta/resource-type-rest-api
   title: REST API
   description: Provides REST API in your plans
+spec:
+  ports:
+    - name: rest
+      type: rest
 ---
 kind: core/resource-type-internal
 metadata:
   name: kapeta/resource-type-rest-client
   title: REST Client
   description: Provides REST Clients in your plans
+spec:
+  ports:
+    - name: rest
+      type: rest
