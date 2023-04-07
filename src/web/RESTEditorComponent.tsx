@@ -29,6 +29,8 @@ export const RESTEditorComponent = (props:ResourceConfigProps) => {
         }
     }
 
+    const validTypes = props.block.spec.entities?.types.map((t) => t.name) ?? [];
+
     return (
         <div className={"rest-resource-editor"}>
 
@@ -41,7 +43,7 @@ export const RESTEditorComponent = (props:ResourceConfigProps) => {
 
             <div className={'editor'}>
                 <MethodEditor restMethods={true}
-                              validTypes={props.block.getEntityNames()}
+                              validTypes={validTypes}
                               value={{
                                   code: methodSource.get({value:''}).value,
                                   entities: DSLConverters.fromSchemaMethods(methodField.get([]))
