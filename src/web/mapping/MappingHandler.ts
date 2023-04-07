@@ -1,12 +1,12 @@
 import {action, makeObservable, observable, toJS} from "mobx";
 import {showToasty, ToastType} from "@kapeta/ui-web-components";
-import {convertToRestMethod, getCompatibleRESTMethodsIssues, RESTResourceSpec} from "../types";
+import {getCompatibleRESTMethodsIssues} from "../types";
 import type {RESTMethodEdit, RESTKindContext} from "../types";
 import {createEqualMapping, createSourceOnlyMapping, MappedMethod} from "./types";
 import _ from "lodash";
 import {getEntitiesToBeAddedForCopy} from "./MappingUtils";
-import {convertRESTToDSLSource, deleteRESTMethod, setRESTMethod} from "../RESTUtils";
-import {ConnectionMethodMappingType, ConnectionMethodsMapping, ResourceKind, RESTMethod} from "@kapeta/ui-web-types";
+import {deleteRESTMethod, setRESTMethod} from "../RESTUtils";
+import {ConnectionMethodMappingType, ConnectionMethodsMapping} from "@kapeta/ui-web-types";
 import {EventEmitter} from 'events'
 
 export class MappingHandler extends EventEmitter {
