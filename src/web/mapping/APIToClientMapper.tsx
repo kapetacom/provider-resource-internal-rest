@@ -8,7 +8,7 @@ import type {RESTMethodEdit, RESTResourceSpec} from "../types";
 import type {MappedMethod, MappingHandlerContext} from "./types";
 import {ItemTypes} from "./types";
 
-import {ConnectionMethodsMapping, ResourceMapperProps} from "@kapeta/ui-web-types";
+import {ConnectionMethodsMapping, ResourceTypeProviderMappingProps} from "@kapeta/ui-web-types";
 
 import {DnDContainer, DnDDrag, DnDDrop, FormReadyHandler} from "@kapeta/ui-web-components";
 
@@ -26,7 +26,7 @@ const DangerIcon: React.FC = () => (
         <path d="M10 10L21.5148 21.5148" stroke="white" strokeWidth="2" strokeLinecap="round"/>
     </svg>);
 
-interface RestResourceToClientMapperProps extends ResourceMapperProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping> {
+interface RestResourceToClientMapperProps extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping> {
 
 }
 

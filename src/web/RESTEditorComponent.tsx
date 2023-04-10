@@ -1,7 +1,7 @@
 import React from "react";
 
 import {DSL_LANGUAGE_ID, DSLConverters, DSLMethod, MethodEditor, FormField, useFormContextField} from "@kapeta/ui-web-components";
-import type {ResourceConfigProps} from "@kapeta/ui-web-types";
+import type {ResourceTypeProviderEditorProps} from "@kapeta/ui-web-types";
 
 import './RESTEditorComponent.less';
 
@@ -15,7 +15,7 @@ function validateApiName(fieldName: string, name: string) {
     }
 }
 
-export const RESTEditorComponent = (props:ResourceConfigProps) => {
+export const RESTEditorComponent = (props:ResourceTypeProviderEditorProps) => {
 
     const methodField = useFormContextField('spec.methods');
     const methodSource = useFormContextField('spec.source');
@@ -29,7 +29,7 @@ export const RESTEditorComponent = (props:ResourceConfigProps) => {
         }
     }
 
-    const validTypes = props.block.spec.entities?.types.map((t) => t.name) ?? [];
+    const validTypes = props.block.spec.entities?.types?.map((t) => t.name) ?? [];
 
     return (
         <div className={"rest-resource-editor"}>
