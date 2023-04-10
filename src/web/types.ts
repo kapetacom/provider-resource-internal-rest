@@ -1,29 +1,35 @@
 import _ from "lodash";
 
 import {
-    isCompatibleTypes,
-    SchemaEntity,
-    SchemaEntryType,
     HTTPMethod,
     TypedValue,
-    RESTMethod, getCompatibilityIssuesForTypes, ResourceKind
+    RESTMethod
 } from "@kapeta/ui-web-types";
+import {
+    Entity,
+    EntityValueType,
+    getCompatibilityIssuesForTypes,
+    isCompatibleTypes,
+    Resource,
+    ResourceSpec
+} from "@kapeta/schemas";
 
 
-export interface RESTResourceMetadata {
-    name: string
-}
 
-export interface RESTResourceSpec {
+export interface RESTResourceSpec extends ResourceSpec {
     source?: TypedValue
     methods: {
         [key: string]: RESTMethod
     }
 }
 
+export interface RESTResource extends Resource {
+    spec: RESTResourceSpec
+}
+
 export interface RESTMethodArgumentEdit {
     id: string
-    type: SchemaEntryType,
+    type: EntityValueType,
     transport?: string
 }
 
@@ -33,33 +39,33 @@ export interface RESTMethodEdit {
     method: HTTPMethod
     path: string
     arguments: RESTMethodArgumentEdit[]
-    responseType?: SchemaEntryType
+    responseType?: EntityValueType
 }
 
 
 export interface RESTMethodEditContext {
     method: RESTMethodEdit
-    entities: SchemaEntity[]
+    entities: Entity[]
 }
 
 export interface RESTMethodContext {
     method: RESTMethod
-    entities: SchemaEntity[]
+    entities: Entity[]
 }
 
 export interface RESTKindContext {
-    resource: ResourceKind<RESTResourceSpec, RESTResourceMetadata>
-    entities:SchemaEntity[]
+    resource: Resource
+    entities:Entity[]
 }
 
-export function toRESTKindContext(resource: ResourceKind<RESTResourceSpec, RESTResourceMetadata>, entities:SchemaEntity[]):RESTKindContext {
+export function toRESTKindContext(resource: Resource, entities:Entity[]):RESTKindContext {
     return {
         resource,
         entities
     };
 }
 
-export function convertAllToEditMethods(resource: ResourceKind<RESTResourceSpec, RESTResourceMetadata>):RESTMethodEdit[] {
+export function convertAllToEditMethods(resource: Resource):RESTMethodEdit[] {
     const out:RESTMethodEdit[] = [];
     _.forEach(resource.spec.methods, (method, methodId) => {
         out.push(convertToEditMethod(methodId, method));

@@ -6,12 +6,9 @@ import type {
     RESTKindContext
 } from "../types";
 
-import {
-    getSchemaEntityCompatibilityIssues, isSchemaEntityCompatible,
-    SchemaEntity
-} from "@kapeta/ui-web-types";
 import {resolveEntities, resolveEntitiesFromMethod} from "../RESTUtils";
 import {MappedMethod, RESTMethodMappingEdit} from "./types";
+import {Entity, getSchemaEntityCompatibilityIssues, isSchemaEntityCompatible } from "@kapeta/schemas";
 
 /**
  * Determines conflicts between entities of source and target
@@ -110,7 +107,7 @@ export function getCompatibleMethodsAndEntities(methods:RESTMethodEdit[], aConte
     }
 }
 
-export function getCompatibleEntities(aContext:RESTKindContext, bContext:RESTKindContext):SchemaEntity[] {
+export function getCompatibleEntities(aContext:RESTKindContext, bContext:RESTKindContext):Entity[] {
     const entityList = resolveEntities(aContext);
     const {
         entitiesToBeAdded
@@ -128,9 +125,9 @@ export function copyMethods(methods: RESTMethodEdit[]):RESTMethodMappingEdit[] {
 /**
  * Gets all entities that can and should be added from one entity list (aEntities) to another (bEntities)
  */
-export function getCompatibleEntitiesForList(entityNames: string[], aEntities: SchemaEntity[], bEntities: SchemaEntity[]) {
+export function getCompatibleEntitiesForList(entityNames: string[], aEntities: Entity[], bEntities: Entity[]) {
     const issues: string[] = [];
-    let entitiesToBeAdded: SchemaEntity[] = [];
+    let entitiesToBeAdded: Entity[] = [];
     entityNames.forEach(entityNAme => {
         const bEntity = bEntities.find(e => e.name === entityNAme);
         const aEntity = aEntities.find(e => e.name === entityNAme);

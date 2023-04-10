@@ -1,11 +1,7 @@
 import _ from "lodash";
 
 import {
-    isBuiltInType,
-    SchemaEntity,
-    SchemaEntryType,
-    typeName,
-    ResourceKind, isList, isDTO, TypedValue
+    TypedValue
 } from "@kapeta/ui-web-types";
 
 import {
@@ -13,17 +9,26 @@ import {
     RESTKindContext,
     RESTMethodContext, RESTMethodEdit,
     RESTMethodEditContext,
-    RESTResourceMetadata,
     RESTResourceSpec
 } from "./types";
 
 import {DSL_LANGUAGE_ID, DSLConverters, DSLWriter} from "@kapeta/ui-web-components";
+import {
+    Entity,
+    EntityProperty,
+    EntityValueType,
+    isBuiltInType,
+    isDTO,
+    isList,
+    Resource,
+    typeName
+} from "@kapeta/schemas";
 
-export const getCounterValue = (data: ResourceKind<RESTResourceSpec, RESTResourceMetadata>):number => {
+export const getCounterValue = (data: Resource):number => {
     return _.size(data.spec.methods);
 };
 
-export const hasMethod = (data: ResourceKind<RESTResourceSpec, RESTResourceMetadata>, methodId: string):boolean => {
+export const hasMethod = (data: Resource, methodId: string):boolean => {
     return methodId in data.spec.methods;
 };
 
@@ -44,7 +49,9 @@ export const validate = (context:RESTKindContext):string[] => {
 
     }
 
-    _.forEach(context.resource.spec.methods, (method, methodId) => {
+    const restSpec = context.resource.spec as RESTResourceSpec;
+
+    _.forEach(restSpec.methods, (method, methodId) => {
         if (!method.path) {
             errors.push(`${methodId} is missing path. Add path to solve this issue`);
         }
@@ -74,7 +81,7 @@ export const validate = (context:RESTKindContext):string[] => {
     return errors;
 };
 
-export function resolveEntitiesFromEntity(entity: SchemaEntity, entities:SchemaEntity[]):SchemaEntity[] {
+export function resolveEntitiesFromEntity(entity: Entity, entities:Entity[]):Entity[] {
     if (!isDTO(entity)) {
         return [];
     }
@@ -111,13 +118,13 @@ export function resolveEntitiesFromEntity(entity: SchemaEntity, entities:SchemaE
 
     return out.map(name =>
         entities.find(e => e.name === name)
-    ).filter(e => !!e) as SchemaEntity[];
+    ).filter(e => !!e) as Entity[];
 }
 
 export function resolveEntitiesFromMethod(context: RESTMethodContext|RESTMethodEditContext):string[] {
     const out:string[] = [];
 
-    function maybeAddEntity(type?:SchemaEntryType) {
+    function maybeAddEntity(type?:EntityValueType) {
         if (!type ||
             isBuiltInType(type)) {
             return;
@@ -177,7 +184,9 @@ export function resolveEntities(context:RESTKindContext):string[] {
         return out;
     }
 
-    Object.values(context.resource.spec.methods).forEach((method) => {
+    const restSpec = context.resource.spec as RESTResourceSpec
+
+    Object.values(restSpec.methods).forEach((method) => {
         const usedEntities = resolveEntitiesFromMethod({method, entities: context.entities});
 
         usedEntities.forEach(entity => {
@@ -190,9 +199,9 @@ export function resolveEntities(context:RESTKindContext):string[] {
     return out;
 }
 
-export function renameEntityReferences(resource: ResourceKind<RESTResourceSpec, RESTResourceMetadata>, from:string, to:string):void {
+export function renameEntityReferences(resource: Resource, from:string, to:string):void {
 
-    function maybeRenameEntity(type:SchemaEntryType):SchemaEntryType {
+    function maybeRenameEntity(type:EntityValueType):EntityValueType {
         if (isBuiltInType(type)) {
             return type;
         }
@@ -202,13 +211,15 @@ export function renameEntityReferences(resource: ResourceKind<RESTResourceSpec, 
         }
 
         if (isList(type)) {
-            return {$ref:to + '[]'};
+            return {ref:to + '[]'};
         }
 
-        return {$ref:to};
+        return {ref:to};
     }
 
-    Object.values(resource.spec.methods).forEach((method) => {
+    const restSpec = resource.spec as RESTResourceSpec
+
+    Object.values(restSpec.methods).forEach((method) => {
         if (method.responseType) {
             method.responseType = maybeRenameEntity(method.responseType);
         }

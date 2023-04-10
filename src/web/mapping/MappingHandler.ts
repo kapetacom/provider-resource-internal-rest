@@ -1,6 +1,6 @@
 import {action, makeObservable, observable, toJS} from "mobx";
 import {showToasty, ToastType} from "@kapeta/ui-web-components";
-import {getCompatibleRESTMethodsIssues} from "../types";
+import {getCompatibleRESTMethodsIssues, RESTResourceSpec} from "../types";
 import type {RESTMethodEdit, RESTKindContext} from "../types";
 import {createEqualMapping, createSourceOnlyMapping, MappedMethod} from "./types";
 import _ from "lodash";
@@ -120,7 +120,7 @@ export class MappingHandler extends EventEmitter {
         this.target.entities.push(...entitiesToBeAdded);
 
         //First add the method to the target resource
-        setRESTMethod(this.target.resource.spec, source.id, newTarget);
+        setRESTMethod(this.target.resource.spec as RESTResourceSpec, source.id, newTarget);
         //Then add mapping for it
         this.methods.splice(ix, 1, createEqualMapping(source, newTarget));
 
@@ -156,7 +156,7 @@ export class MappingHandler extends EventEmitter {
         this.source.entities.push(...entitiesToBeAdded);
 
         //First add the method to the source resource
-        setRESTMethod(this.source.resource.spec, target.id, newSource);
+        setRESTMethod(this.source.resource.spec as RESTResourceSpec, target.id, newSource);
 
         //Then add mapping for it
         this.methods.splice(ix, 1, createEqualMapping(newSource, target));
@@ -172,7 +172,7 @@ export class MappingHandler extends EventEmitter {
         }
 
         //First remove the method from the target block
-        deleteRESTMethod(this.target.resource.spec, target.id);
+        deleteRESTMethod(this.target.resource.spec as RESTResourceSpec, target.id);
         //Then remove mapping for it
         const source = this.methods[ix].source;
         if (source) {
@@ -203,7 +203,7 @@ export class MappingHandler extends EventEmitter {
             method.target.copyOf) { //If the target is a copy
 
             //First remove the method from the source resource
-            deleteRESTMethod(this.source.resource.spec, source.id);
+            deleteRESTMethod(this.source.resource.spec as RESTResourceSpec, source.id);
             //And remove the entire line
             _.pull(this.methods, method);
         } else {

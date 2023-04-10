@@ -13,7 +13,7 @@ import "./InspectConnectionTraffic.less";
 countdown.setLabels(
     ' ms| s| min| h| day| week| mth| yr| decade| century| millennium',
     ' ms| s| min| hrs| days| weeks| mths| yrs| decades| centuries| millennia',
-    ', ');
+    ', ',' and ','','','');
 
 interface InspectMethodTrafficProps {
     trafficLines: Traffic[],
@@ -33,7 +33,7 @@ export default class InspectConnectionTraffic extends Component<InspectMethodTra
                 endTime = new Date().getTime();
             }
 
-            return '' + countdown(traffic.created, endTime);
+            return '' + countdown(traffic.created, endTime, countdown.MINUTES, null, null);
         }
 
         function asByte(traffic:Traffic) {

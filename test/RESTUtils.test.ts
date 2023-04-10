@@ -9,10 +9,8 @@ global.TextDecoder = TextDecoder as any;
 
 import {describe, expect, test} from "@jest/globals";
 import {getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate} from "../src/web/RESTUtils";
-import {
-    toStringName
-} from "@kapeta/ui-web-types";
 import {ENTITIES, makeAPI, makeAPIContext, makeMethod} from "./helpers";
+import { toStringName } from '@kapeta/schemas';
 
 
 describe('RESTUtils', () => {
@@ -54,17 +52,17 @@ describe('RESTUtils', () => {
         }))).toEqual([]);
 
         expect(resolveEntities(makeAPIContext({
-            test1: makeMethod([{$ref:'User'},'string']),
-            test2: makeMethod([],{$ref:'Person'}),
-            test3: makeMethod(['string', {$ref:'Staff'}])
+            test1: makeMethod([{ref:'User'},'string']),
+            test2: makeMethod([],{ref:'Person'}),
+            test3: makeMethod(['string', {ref:'Staff'}])
         }))).toEqual(['User','Person','Staff']);
     });
 
     test('can rename reference', () => {
         const api = makeAPI({
-            test1: makeMethod([{$ref:'User'},'string']),
-            test2: makeMethod([],{$ref:'Person[]'}),
-            test3: makeMethod(['string', {$ref:'Staff'}])
+            test1: makeMethod([{ref:'User'},'string']),
+            test2: makeMethod([],{ref:'Person[]'}),
+            test3: makeMethod(['string', {ref:'Staff'}])
         });
 
         expect(toStringName(api.spec.methods?.test1?.arguments?.arg_0?.type)).toBe('User');
@@ -80,7 +78,7 @@ describe('RESTUtils', () => {
         test('fails validation if entity is not found', () => {
 
             expect(validate(makeAPIContext({
-                test: makeMethod([{$ref:'Company'}], {$ref:'Department'})
+                test: makeMethod([{ref:'Company'}], {ref:'Department'})
             }, ENTITIES))).toEqual([
                 'Multiple entities are not defined in this block: Department, Company. Create these entities to solve this issue'
             ]);

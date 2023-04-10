@@ -7,7 +7,7 @@ import {StackContainer, StackPage} from "@kapeta/ui-web-components";
 import InspectConnectionMethods from "./InspectConnectionMethods";
 import InspectConnectionTraffic from "./InspectConnectionTraffic";
 import InspectConnectionPayload from "./InspectConnectionPayload";
-import type {ResourceInspectProps, Traffic} from "@kapeta/ui-web-types";
+import type {ResourceTypeProviderInspectorProps, Traffic} from "@kapeta/ui-web-types";
 
 interface InspectConnectionContentState {
     currentPageId: string
@@ -16,9 +16,9 @@ interface InspectConnectionContentState {
 }
 
 @observer
-export default class InspectConnectionContent extends Component<ResourceInspectProps, InspectConnectionContentState>{
+export default class InspectConnectionContent extends Component<ResourceTypeProviderInspectorProps, InspectConnectionContentState>{
 
-    constructor(props: ResourceInspectProps) {
+    constructor(props: ResourceTypeProviderInspectorProps) {
         super(props);
         this.state = {
             currentPageId:'methods'

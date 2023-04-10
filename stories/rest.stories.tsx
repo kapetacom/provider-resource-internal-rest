@@ -1,18 +1,16 @@
 import React from 'react';
 import {
-    BlockWrapper,
     ConnectionMethodMappingType,
     ConnectionMethodsMapping,
     HTTPMethod,
-    ResourceKind,
     RESTMethod,
-    SchemaEntity,
-    SchemaEntityType,
     Traffic
 } from '@kapeta/ui-web-types';
 
+import {Entity} from "@kapeta/schemas";
+
 import {RESTEditorComponent} from "../src/web/RESTEditorComponent";
-import {convertToEditMethod, RESTResourceMetadata, RESTResourceSpec} from "../src/web/types";
+import {convertToEditMethod, RESTResource} from "../src/web/types";
 import RestMethodView from "../src/web/RestMethodView";
 import APIToClientMapper from "../src/web/mapping/APIToClientMapper";
 import InspectConnectionContent from "../src/web/inspectors/InspectConnectionContent";
@@ -23,9 +21,21 @@ import {FormContainer, ToastContainer} from "@kapeta/ui-web-components";
 const API_KIND = 'kapeta/resource-type-rest-api';
 const CLIENT_KIND = 'kapeta/resource-type-rest-client';
 
-const API_ENTITIES: SchemaEntity[] = [
+const block: BlockDefinition = {
+    kind: 'kapeta/block-type-service',
+    metadata: {
+        name: 'kapeta/test',
+    },
+    spec: {
+        target : {
+            kind: '',
+        }
+    }
+}
+
+const API_ENTITIES: Entity[] = [
     {
-        type: SchemaEntityType.DTO,
+        type: EntityType.Dto,
         name: 'Task',
         properties: {
             id: {
@@ -35,45 +45,45 @@ const API_ENTITIES: SchemaEntity[] = [
                 type: 'string'
             },
             state: {
-                type: {$ref: 'TaskState'}
+                type: {ref: 'TaskState'}
             }
         }
     },
     {
-        type: SchemaEntityType.DTO,
+        type: EntityType.Dto,
         name: 'SimpleTask',
         properties: {
             id: {
                 type: 'string'
             },
             state: {
-                type: {$ref: 'TaskState'}
+                type: {ref: 'TaskState'}
             }
         }
     },
     {
-        type: SchemaEntityType.ENUM,
+        type: EntityType.Enum,
         name: 'TaskState',
         values: ['PENDING', 'DONE']
     }
 ];
 
 
-const CLIENT_ENTITIES: SchemaEntity[] = [
+const CLIENT_ENTITIES: Entity[] = [
     {
-        type: SchemaEntityType.DTO,
+        type: EntityType.Dto,
         name: 'Task',
         properties: {
             id: {
                 type: 'string'
             },
             state: {
-                type: {$ref: 'TaskState'}
+                type: {ref: 'TaskState'}
             }
         }
     },
     {
-        type: SchemaEntityType.ENUM,
+        type: EntityType.Enum,
         name: 'TaskState',
         values: ['PENDING', 'DONE']
     }
@@ -83,7 +93,7 @@ const getTaskMethod: RESTMethod = {
     path: '/tasks/{id}',
     method: HTTPMethod.GET,
     description: 'Get a task by id',
-    responseType: {$ref: 'Task'},
+    responseType: {ref: 'Task'},
     arguments: {
         id: {
             transport: 'PATH',
@@ -103,7 +113,7 @@ const addTaskMethod: RESTMethod = {
         },
         task: {
             transport: 'BODY',
-            type: {$ref: 'Task'}
+            type: {ref: 'Task'}
         }
     }
 };
@@ -119,7 +129,7 @@ const addSimpleTaskMethod: RESTMethod = {
         },
         task: {
             transport: 'BODY',
-            type: {$ref: 'SimpleTask'}
+            type: {ref: 'SimpleTask'}
         }
     }
 };
@@ -137,22 +147,28 @@ const deleteTaskMethod: RESTMethod = {
     }
 };
 
-const RESTApiResourceEmpty: ResourceKind<RESTResourceSpec, RESTResourceMetadata> = {
+const RESTApiResourceEmpty: RESTResource = {
     kind: API_KIND,
     metadata: {
         name: 'MyEmptyAPU'
     },
     spec: {
+        port: {
+            type: 'rest'
+        },
         methods: {}
     }
 };
 
-const RESTApiResource: ResourceKind<RESTResourceSpec, RESTResourceMetadata> = {
+const RESTApiResource: RESTResource = {
     kind: API_KIND,
     metadata: {
         name: 'MyRESTAPI'
     },
     spec: {
+        port: {
+            type: 'rest'
+        },
         methods: {
             test: getTaskMethod,
             addTask: addTaskMethod,
@@ -162,12 +178,15 @@ const RESTApiResource: ResourceKind<RESTResourceSpec, RESTResourceMetadata> = {
     }
 };
 
-const RESTClientResource: ResourceKind<RESTResourceSpec, RESTResourceMetadata> = {
+const RESTClientResource: RESTResource = {
     kind: CLIENT_KIND,
     metadata: {
         name: 'MyRESTClient'
     },
     spec: {
+        port: {
+            type: 'rest'
+        },
         methods: {
             doAddTask: addTaskMethod,
             doDeleteTask: deleteTaskMethod
@@ -175,30 +194,20 @@ const RESTClientResource: ResourceKind<RESTResourceSpec, RESTResourceMetadata> =
     }
 };
 
-const RESTClientResourceEmpty: ResourceKind<RESTResourceSpec, RESTResourceMetadata> = {
+const RESTClientResourceEmpty: RESTResource = {
     kind: CLIENT_KIND,
     metadata: {
         name: 'MyEmptyClient'
     },
     spec: {
+        port: {
+            type: 'rest'
+        },
         methods: {
         }
     }
 };
 
-const block: BlockWrapper<any> = {
-    id: 'some-block',
-    addEntity: entity => {
-
-    },
-    getData: () => {
-        return {};
-    },
-    setData: () => {
-
-    },
-    getEntityNames: () => ['Task', 'TestType','SimpleTask']
-};
 
 const mapping: ConnectionMethodsMapping = {
     test: {
@@ -291,6 +300,7 @@ const trafficLines: Traffic[] = [
 ];
 
 import './stories.less';
+import {BlockDefinition, EntityType} from "@kapeta/schemas/dist/cjs";
 
 export default {
     title: 'REST'

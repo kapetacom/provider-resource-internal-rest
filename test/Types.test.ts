@@ -3,18 +3,17 @@ import {
     convertToEditMethod,
     convertToRestMethod,
     getCompatibleRESTMethodsIssues,
-    isCompatibleRESTMethods,
-    RESTMethodEdit
+    isCompatibleRESTMethods
 } from "../src/web/types";
-import {HTTPMethod, isStringableType, RESTMethod, SchemaEntryType} from "@kapeta/ui-web-types";
-import {ENTITIES, ENTITIES_ALT, makeEditContext, makeEditMethod, makeMethod} from "./helpers";
+import {HTTPMethod} from "@kapeta/ui-web-types";
+import {ENTITIES, ENTITIES_ALT, makeEditContext, makeMethod} from "./helpers";
 
 
 describe('Types', () => {
 
     test('can convert to edit method', () => {
 
-        expect(convertToEditMethod('test1',makeMethod(['string',{$ref:'User'}], 'string'))).toEqual({
+        expect(convertToEditMethod('test1',makeMethod(['string',{ref:'User'}], 'string'))).toEqual({
             id: 'test1',
             description: '',
             method: HTTPMethod.POST,
@@ -26,7 +25,7 @@ describe('Types', () => {
                 },
                 {
                     id: 'arg_1',
-                    type: {$ref:'User'},
+                    type: {ref:'User'},
                     transport: 'BODY'
                 }
             ],
@@ -48,13 +47,13 @@ describe('Types', () => {
                 },
                 {
                     id: 'arg_1',
-                    type: {$ref:'User'},
+                    type: {ref:'User'},
                     transport: 'BODY'
                 }
             ],
             path: '/',
             responseType: 'string'
-        })).toEqual(makeMethod(['string',{$ref:'User'}], 'string'))
+        })).toEqual(makeMethod(['string',{ref:'User'}], 'string'))
     })
 
     describe('compatibility', () => {
@@ -127,55 +126,55 @@ describe('Types', () => {
         test('arguments with missing entities does not match', () => {
 
             expect(isCompatibleRESTMethods(
-                makeEditContext('test1',[{$ref: 'NotReal'}],'string'),
-                makeEditContext('test2', [{$ref: 'NotReal'}], 'string')
+                makeEditContext('test1',[{ref: 'NotReal'}],'string'),
+                makeEditContext('test2', [{ref: 'NotReal'}], 'string')
             )).toBe(false);
 
             expect(getCompatibleRESTMethodsIssues(
-                makeEditContext('test1',[{$ref: 'NotReal'}],'string'),
-                makeEditContext('test2', [{$ref: 'NotReal'}], 'string')
+                makeEditContext('test1',[{ref: 'NotReal'}],'string'),
+                makeEditContext('test2', [{ref: 'NotReal'}], 'string')
             )).toEqual(['Argument 1 type is not compatible: NotReal was not defined']);
         })
 
         test('arguments with same entity name but different structure does not match', () => {
 
             expect(isCompatibleRESTMethods(
-                makeEditContext('test1',[{$ref: 'User'}],'string', ENTITIES),
-                makeEditContext('test2', [{$ref: 'User'}], 'string', ENTITIES_ALT)
+                makeEditContext('test1',[{ref: 'User'}],'string', ENTITIES),
+                makeEditContext('test2', [{ref: 'User'}], 'string', ENTITIES_ALT)
             )).toBe(false);
 
             expect(getCompatibleRESTMethodsIssues(
-                makeEditContext('test1',[{$ref: 'User'}],'string', ENTITIES),
-                makeEditContext('test2', [{$ref: 'User'}], 'string', ENTITIES_ALT)
+                makeEditContext('test1',[{ref: 'User'}],'string', ENTITIES),
+                makeEditContext('test2', [{ref: 'User'}], 'string', ENTITIES_ALT)
             )).toEqual(['Argument 1 type is not compatible: Property not found: id']);
         })
 
         test('arguments with same entity name and structure does match', () => {
 
             expect(isCompatibleRESTMethods(
-                makeEditContext('test1',[{$ref: 'User'}],'string', ENTITIES),
-                makeEditContext('test2', [{$ref: 'User'}], 'string',ENTITIES)
+                makeEditContext('test1',[{ref: 'User'}],'string', ENTITIES),
+                makeEditContext('test2', [{ref: 'User'}], 'string',ENTITIES)
             )).toBe(true);
         })
 
         test('response type with same entity name but different structure does not match', () => {
 
             expect(isCompatibleRESTMethods(
-                makeEditContext('test1',[],{$ref: 'User'}, ENTITIES),
-                makeEditContext('test2', [], {$ref: 'User'}, ENTITIES_ALT)
+                makeEditContext('test1',[],{ref: 'User'}, ENTITIES),
+                makeEditContext('test2', [], {ref: 'User'}, ENTITIES_ALT)
             )).toBe(false);
 
             expect(getCompatibleRESTMethodsIssues(
-                makeEditContext('test1',[],{$ref: 'User'}, ENTITIES),
-                makeEditContext('test2', [], {$ref: 'User'}, ENTITIES_ALT)
+                makeEditContext('test1',[],{ref: 'User'}, ENTITIES),
+                makeEditContext('test2', [], {ref: 'User'}, ENTITIES_ALT)
             )).toEqual(['Response types are not compatible']);
         })
 
         test('response type with same entity name and structure does match', () => {
 
             expect(isCompatibleRESTMethods(
-                makeEditContext('test1',[],{$ref: 'User'}, ENTITIES),
-                makeEditContext('test2', [], {$ref: 'User'}, ENTITIES)
+                makeEditContext('test1',[],{ref: 'User'}, ENTITIES),
+                makeEditContext('test2', [], {ref: 'User'}, ENTITIES)
             )).toBe(true);
         })
 

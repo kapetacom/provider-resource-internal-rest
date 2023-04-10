@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 
-import {typeName} from "@kapeta/ui-web-types";
+import {typeName} from "@kapeta/schemas";
 
 import {RESTMethodEdit} from "./types";
 
@@ -19,6 +19,7 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
         if (!method.arguments) {
             method.arguments = [];
         }
+        console.log('method.responseType', method.responseType);
 
         return (
             <div className={"rest-method-erasure" + (compact ? ' compact' : '')}>

@@ -1,20 +1,16 @@
 import {
     HTTPMethod,
-    isStringableType, ResourceKind,
-    RESTMethod, SchemaDTO,
-    SchemaEntity,
-    SchemaEntityType,
-    SchemaEntryType
+    RESTMethod, 
 } from "@kapeta/ui-web-types";
 import {
     convertToEditMethod,
     KIND_REST_API, RESTKindContext,
-    RESTMethodContext,
     RESTMethodEdit,
-    RESTMethodEditContext, RESTResourceMetadata, RESTResourceSpec
+    RESTMethodEditContext, RESTResource
 } from "../src/web/types";
+import {Entity, EntityDTO, EntityType, EntityValueType, isStringableType} from "@kapeta/schemas";
 
-export function makeAPIContext(methods:{[key: string]: RESTMethod}, entities?:SchemaEntity[]):RESTKindContext {
+export function makeAPIContext(methods:{[key: string]: RESTMethod}, entities?:Entity[]):RESTKindContext {
     return {
         resource: makeAPI(methods),
         entities:  entities ? entities : []
@@ -22,19 +18,22 @@ export function makeAPIContext(methods:{[key: string]: RESTMethod}, entities?:Sc
 }
 
 
-export function makeAPI(methods:{[key: string]: RESTMethod}, entities?:SchemaEntity[]):ResourceKind<RESTResourceSpec, RESTResourceMetadata> {
+export function makeAPI(methods:{[key: string]: RESTMethod}, entities?:Entity[]):RESTResource {
     return  {
         kind: KIND_REST_API,
         metadata: {
             name: 'SomeAPI'
         },
         spec: {
+            port: {
+                type: 'rest'
+            },
             methods
         }
     }
 }
 
-export function makeMethod(args:SchemaEntryType[] = [], responseType?:SchemaEntryType):RESTMethod {
+export function makeMethod(args:EntityValueType[] = [], responseType?:EntityValueType):RESTMethod {
     const argMap = {};
     args.forEach((type, ix) => {
         argMap[`arg_${ix}`] = {
@@ -51,20 +50,20 @@ export function makeMethod(args:SchemaEntryType[] = [], responseType?:SchemaEntr
     }
 }
 
-export function makeEditContext(id:string, args:SchemaEntryType[] = [], responseType?:SchemaEntryType, entities?:SchemaEntity[]):RESTMethodEditContext {
+export function makeEditContext(id:string, args:EntityValueType[] = [], responseType?:EntityValueType, entities?:Entity[]):RESTMethodEditContext {
     return {
         method: makeEditMethod(id, args, responseType),
         entities: entities ? entities : []
     }
 }
 
-export function makeEditMethod(id:string, args:SchemaEntryType[] = [], responseType?:SchemaEntryType):RESTMethodEdit {
+export function makeEditMethod(id:string, args:EntityValueType[] = [], responseType?:EntityValueType):RESTMethodEdit {
     return convertToEditMethod(id, makeMethod(args, responseType));
 }
 
-export const ENTITIES:SchemaDTO[] = [
+export const ENTITIES:EntityDTO[] = [
     {
-        type: SchemaEntityType.DTO,
+        type: EntityType.Dto,
         name: 'User',
         properties: {
             id: {
@@ -73,7 +72,7 @@ export const ENTITIES:SchemaDTO[] = [
         }
     },
     {
-        type: SchemaEntityType.DTO,
+        type: EntityType.Dto,
         name: 'Person',
         properties: {
             id: {
@@ -85,7 +84,7 @@ export const ENTITIES:SchemaDTO[] = [
         }
     },
     {
-        type: SchemaEntityType.DTO,
+        type: EntityType.Dto,
         name: 'Staff',
         properties: {
             id: {
@@ -98,15 +97,15 @@ export const ENTITIES:SchemaDTO[] = [
                 type:'string'
             },
             boss: {
-                type: {$ref: 'Staff'}
+                type: {ref: 'Staff'}
             }
         }
     }
 ]
 
-export const ENTITIES_ALT:SchemaDTO[] = [
+export const ENTITIES_ALT:EntityDTO[] = [
     {
-        type: SchemaEntityType.DTO,
+        type: EntityType.Dto,
         name: 'User',
         properties: {
             username: {
@@ -115,7 +114,7 @@ export const ENTITIES_ALT:SchemaDTO[] = [
         }
     },
     {
-        type: SchemaEntityType.DTO,
+        type: EntityType.Dto,
         name: 'Person',
         properties: {
             username: {
@@ -127,7 +126,7 @@ export const ENTITIES_ALT:SchemaDTO[] = [
         }
     },
     {
-        type: SchemaEntityType.DTO,
+        type: EntityType.Dto,
         name: 'Staff',
         properties: {
             username: {
@@ -140,7 +139,7 @@ export const ENTITIES_ALT:SchemaDTO[] = [
                 type:'string'
             },
             manager: {
-                type: {$ref: 'Staff'}
+                type: {ref: 'Staff'}
             }
         }
     }
