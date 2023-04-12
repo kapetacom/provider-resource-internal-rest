@@ -1,5 +1,5 @@
 import {RESTMethodEdit} from "../types";
-import {ConnectionMethodMappingType, RESTMethod, Entity} from "@kapeta/ui-web-types";
+import {ConnectionMethodMappingType} from "@kapeta/ui-web-types";
 
 export enum ItemTypes {
     API_METHOD = 'API_METHOD',

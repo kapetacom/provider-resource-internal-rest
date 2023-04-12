@@ -4,13 +4,13 @@
 //This is all needed due to monaco editor getting pulled in
 document.queryCommandSupported = function() { return false };
 import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder as any;
-global.TextDecoder = TextDecoder as any;
+global['TextEncoder'] = TextEncoder as any;
+global['TextDecoder'] = TextDecoder as any;
 
 import {describe, expect, test} from "@jest/globals";
 import {getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate} from "../src/web/RESTUtils";
 import {ENTITIES, makeAPI, makeAPIContext, makeMethod} from "./helpers";
-import { toStringName } from '@kapeta/schemas';
+
 
 
 describe('RESTUtils', () => {
@@ -65,13 +65,13 @@ describe('RESTUtils', () => {
             test3: makeMethod(['string', {ref:'Staff'}])
         });
 
-        expect(toStringName(api.spec.methods?.test1?.arguments?.arg_0?.type)).toBe('User');
+        expect(api.spec.methods?.test1?.arguments?.arg_0?.ref).toBe('User');
         renameEntityReferences(api, 'User', 'UserInformation');
-        expect(toStringName(api.spec.methods?.test1?.arguments?.arg_0?.type)).toBe('UserInformation');
+        expect(api.spec.methods?.test1?.arguments?.arg_0?.ref).toBe('UserInformation');
 
-        expect(toStringName(api.spec.methods?.test2?.responseType)).toBe('Person[]');
+        expect(api.spec.methods?.test2?.responseType?.ref).toBe('Person[]');
         renameEntityReferences(api, 'Person', 'PersonInfo');
-        expect(toStringName(api.spec.methods?.test2?.responseType)).toBe('PersonInfo[]');
+        expect(api.spec.methods?.test2?.responseType?.ref).toBe('PersonInfo[]');
     })
 
     describe('validation', () => {

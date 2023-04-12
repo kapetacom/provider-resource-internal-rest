@@ -3,11 +3,10 @@ import _ from "lodash";
 import {
     HTTPMethod,
     TypedValue,
-    RESTMethod
+    RESTMethod, TypeLike
 } from "@kapeta/ui-web-types";
 import {
     Entity,
-    EntityValueType,
     getCompatibilityIssuesForTypes,
     isCompatibleTypes,
     Resource,
@@ -27,9 +26,8 @@ export interface RESTResource extends Resource {
     spec: RESTResourceSpec
 }
 
-export interface RESTMethodArgumentEdit {
+export interface RESTMethodArgumentEdit extends TypeLike {
     id: string
-    type: EntityValueType,
     transport?: string
 }
 
@@ -39,7 +37,7 @@ export interface RESTMethodEdit {
     method: HTTPMethod
     path: string
     arguments: RESTMethodArgumentEdit[]
-    responseType?: EntityValueType
+    responseType?: TypeLike
 }
 
 
@@ -65,7 +63,7 @@ export function toRESTKindContext(resource: Resource, entities:Entity[]):RESTKin
     };
 }
 
-export function convertAllToEditMethods(resource: Resource):RESTMethodEdit[] {
+export function convertAllToEditMethods(resource: RESTResource):RESTMethodEdit[] {
     const out:RESTMethodEdit[] = [];
     _.forEach(resource.spec.methods, (method, methodId) => {
         out.push(convertToEditMethod(methodId, method));
@@ -115,8 +113,8 @@ export function getCompatibleRESTMethodsIssues(aContext:RESTMethodEditContext, b
         errors.push('Response types are not compatible');
     }
 
-    const aArgs = a.arguments.map((argument) => argument.type);
-    const bArgs = b.arguments.map((argument) => argument.type);
+    const aArgs = a.arguments;
+    const bArgs = b.arguments;
 
     if (aArgs.length !== bArgs.length) {
         errors.push('Argument counts is not compatible');

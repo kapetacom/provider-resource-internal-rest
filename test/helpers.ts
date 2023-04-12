@@ -1,6 +1,6 @@
 import {
     HTTPMethod,
-    RESTMethod, 
+    RESTMethod, RESTMethodArgument, TypeLike,
 } from "@kapeta/ui-web-types";
 import {
     convertToEditMethod,
@@ -8,7 +8,7 @@ import {
     RESTMethodEdit,
     RESTMethodEditContext, RESTResource
 } from "../src/web/types";
-import {Entity, EntityDTO, EntityType, EntityValueType, isStringableType} from "@kapeta/schemas";
+import {Entity, EntityDTO, EntityType, isStringableType, typeName, TypeOrString} from "@kapeta/schemas";
 
 export function makeAPIContext(methods:{[key: string]: RESTMethod}, entities?:Entity[]):RESTKindContext {
     return {
@@ -33,31 +33,37 @@ export function makeAPI(methods:{[key: string]: RESTMethod}, entities?:Entity[])
     }
 }
 
-export function makeMethod(args:EntityValueType[] = [], responseType?:EntityValueType):RESTMethod {
+function toTypeLike(type:TypeOrString):TypeLike {
+    return typeof type === 'string' ? {type} : type;
+}
+
+export function makeMethod(args:TypeOrString[] = [], responseType?:TypeOrString):RESTMethod {
     const argMap = {};
     args.forEach((type, ix) => {
-        argMap[`arg_${ix}`] = {
-            type,
-            transport: isStringableType(type) ? 'QUERY' : 'BODY'
+        const typeLike = toTypeLike(type)
+        const arg:RESTMethodArgument = {
+            ...typeLike,
+            transport: isStringableType(typeName(typeLike)) ? 'QUERY' : 'BODY'
         };
+        argMap[`arg_${ix}`] = arg;
     })
     return {
         method: HTTPMethod.POST,
         description: '',
         arguments: argMap,
         path: '/',
-        responseType
+        responseType: responseType ? toTypeLike(toTypeLike(responseType)) : {type: 'void'}
     }
 }
 
-export function makeEditContext(id:string, args:EntityValueType[] = [], responseType?:EntityValueType, entities?:Entity[]):RESTMethodEditContext {
+export function makeEditContext(id:string, args:TypeOrString[] = [], responseType?:TypeOrString, entities?:Entity[]):RESTMethodEditContext {
     return {
         method: makeEditMethod(id, args, responseType),
         entities: entities ? entities : []
     }
 }
 
-export function makeEditMethod(id:string, args:EntityValueType[] = [], responseType?:EntityValueType):RESTMethodEdit {
+export function makeEditMethod(id:string, args:TypeOrString[] = [], responseType?:TypeOrString):RESTMethodEdit {
     return convertToEditMethod(id, makeMethod(args, responseType));
 }
 
@@ -97,7 +103,7 @@ export const ENTITIES:EntityDTO[] = [
                 type:'string'
             },
             boss: {
-                type: {ref: 'Staff'}
+                ref: 'Staff'
             }
         }
     }
@@ -139,7 +145,7 @@ export const ENTITIES_ALT:EntityDTO[] = [
                 type:'string'
             },
             manager: {
-                type: {ref: 'Staff'}
+                ref: 'Staff'
             }
         }
     }

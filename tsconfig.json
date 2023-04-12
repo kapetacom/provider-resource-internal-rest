@@ -42,12 +42,12 @@
     "definitions",
     "stories",
     "src",
-    "src/**/*"
+    "src/**/*",
+    "test"
   ],
   "exclude": [
     "node_modules",
     "build",
-    "scripts",
-    "test"
+    "scripts"
   ]
 }

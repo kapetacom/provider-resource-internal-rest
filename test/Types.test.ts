@@ -25,12 +25,12 @@ describe('Types', () => {
                 },
                 {
                     id: 'arg_1',
-                    type: {ref:'User'},
+                    ref:'User',
                     transport: 'BODY'
                 }
             ],
             path: '/',
-            responseType: 'string'
+            responseType: {type: 'string'}
         })
     })
 
@@ -47,12 +47,12 @@ describe('Types', () => {
                 },
                 {
                     id: 'arg_1',
-                    type: {ref:'User'},
-                    transport: 'BODY'
+                    ref:'User',
+                    transport: 'BODY',
                 }
             ],
             path: '/',
-            responseType: 'string'
+            responseType: {type: 'string'}
         })).toEqual(makeMethod(['string',{ref:'User'}], 'string'))
     })
 

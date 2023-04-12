@@ -1,6 +1,7 @@
 import _ from "lodash";
 
 import {
+    RESTMethodArgument,
     TypedValue
 } from "@kapeta/ui-web-types";
 
@@ -15,12 +16,11 @@ import {
 import {DSL_LANGUAGE_ID, DSLConverters, DSLWriter} from "@kapeta/ui-web-components";
 import {
     Entity,
-    EntityProperty,
-    EntityValueType,
     isBuiltInType,
     isDTO,
     isList,
     Resource,
+    TypeLike,
     typeName
 } from "@kapeta/schemas";
 
@@ -64,8 +64,8 @@ export const validate = (context:RESTKindContext):string[] => {
             return;
         }
 
-        const invalidArguments = Object.entries(method.arguments).filter(([methodId, argument]) => {
-            if (!argument.type) {
+        const invalidArguments = Object.entries(method.arguments).filter(([, argument]:[string,RESTMethodArgument]) => {
+            if (!argument.type && !argument.ref) {
                 return true;
             }
 
@@ -124,8 +124,9 @@ export function resolveEntitiesFromEntity(entity: Entity, entities:Entity[]):Ent
 export function resolveEntitiesFromMethod(context: RESTMethodContext|RESTMethodEditContext):string[] {
     const out:string[] = [];
 
-    function maybeAddEntity(type?:EntityValueType) {
+    function maybeAddEntity(type?:TypeLike) {
         if (!type ||
+            (!type.ref && !type.type) ||
             isBuiltInType(type)) {
             return;
         }
@@ -150,7 +151,7 @@ export function resolveEntitiesFromMethod(context: RESTMethodContext|RESTMethodE
 
     if (context.method.arguments) {
         Object.values(context.method.arguments).forEach((arg) => {
-            maybeAddEntity(arg.type);
+            maybeAddEntity(arg);
         });
     }
 
@@ -201,7 +202,7 @@ export function resolveEntities(context:RESTKindContext):string[] {
 
 export function renameEntityReferences(resource: Resource, from:string, to:string):void {
 
-    function maybeRenameEntity(type:EntityValueType):EntityValueType {
+    function maybeRenameEntity(type:TypeLike):TypeLike {
         if (isBuiltInType(type)) {
             return type;
         }
@@ -228,8 +229,10 @@ export function renameEntityReferences(resource: Resource, from:string, to:strin
             return;
         }
 
-        Object.values(method.arguments).forEach((arg) => {
-            arg.type = maybeRenameEntity(arg.type);
+        const methodIds = Object.keys(method.arguments);
+
+        methodIds.forEach((methodId) => {
+            method.arguments![methodId] = maybeRenameEntity(method.arguments![methodId]);
         });
     });
 
