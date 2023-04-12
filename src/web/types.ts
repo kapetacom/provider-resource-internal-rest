@@ -52,11 +52,11 @@ export interface RESTMethodContext {
 }
 
 export interface RESTKindContext {
-    resource: Resource
+    resource: RESTResource
     entities:Entity[]
 }
 
-export function toRESTKindContext(resource: Resource, entities:Entity[]):RESTKindContext {
+export function toRESTKindContext(resource: RESTResource, entities:Entity[]):RESTKindContext {
     return {
         resource,
         entities

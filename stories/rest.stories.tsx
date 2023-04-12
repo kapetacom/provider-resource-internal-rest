@@ -29,6 +29,25 @@ const block: BlockDefinition = {
     spec: {
         target : {
             kind: '',
+        },
+        entities: {
+            types: [
+                {
+                    type: EntityType.Dto,
+                    name: 'Task',
+                    properties: {
+                        id: {
+                            type: 'string'
+                        },
+                        description: {
+                            type: 'string'
+                        },
+                        state: {
+                            ref: 'TaskState'
+                        }
+                    }
+                }
+            ]
         }
     }
 }
@@ -45,7 +64,7 @@ const API_ENTITIES: Entity[] = [
                 type: 'string'
             },
             state: {
-                type: {ref: 'TaskState'}
+                ref: 'TaskState'
             }
         }
     },
@@ -57,7 +76,7 @@ const API_ENTITIES: Entity[] = [
                 type: 'string'
             },
             state: {
-                type: {ref: 'TaskState'}
+                ref: 'TaskState'
             }
         }
     },
@@ -78,7 +97,7 @@ const CLIENT_ENTITIES: Entity[] = [
                 type: 'string'
             },
             state: {
-                type: {ref: 'TaskState'}
+                ref: 'TaskState'
             }
         }
     },
@@ -113,7 +132,7 @@ const addTaskMethod: RESTMethod = {
         },
         task: {
             transport: 'BODY',
-            type: {ref: 'Task'}
+            ref: 'Task'
         }
     }
 };
@@ -129,7 +148,7 @@ const addSimpleTaskMethod: RESTMethod = {
         },
         task: {
             transport: 'BODY',
-            type: {ref: 'SimpleTask'}
+            ref: 'SimpleTask'
         }
     }
 };
@@ -137,7 +156,7 @@ const addSimpleTaskMethod: RESTMethod = {
 const deleteTaskMethod: RESTMethod = {
     path: '/tasks/{id}',
     method: HTTPMethod.DELETE,
-    responseType: 'void',
+    responseType: {type:'void'},
     description: 'Deletes a task from the system',
     arguments: {
         id: {

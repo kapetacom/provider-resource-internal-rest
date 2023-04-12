@@ -2,21 +2,17 @@ import React, {Component} from "react";
 import _ from 'lodash';
 import {observer} from "mobx-react";
 import {action, makeObservable, observable, toJS} from "mobx";
-
-import type {RESTMethodEdit, RESTResourceSpec} from "../types";
-
+import type {RESTMethodEdit, RESTResource, RESTResourceSpec} from "../types";
 import type {MappedMethod, MappingHandlerContext} from "./types";
 import {ItemTypes} from "./types";
-
 import {ConnectionMethodsMapping, ResourceTypeProviderMappingProps} from "@kapeta/ui-web-types";
-
 import {DnDContainer, DnDDrag, DnDDrop, FormReadyHandler} from "@kapeta/ui-web-components";
-
 import RestMethodView from "../RestMethodView";
-
-import './APIToClientMapper.less';
 import {MappingHandler} from "./MappingHandler";
 import {MappingHandlerBuilder} from "./MappingHandlerBuilder";
+import {toRESTKindContext} from "../types";
+
+import './APIToClientMapper.less';
 
 
 const DangerIcon: React.FC = () => (
@@ -27,12 +23,13 @@ const DangerIcon: React.FC = () => (
     </svg>);
 
 interface RestResourceToClientMapperProps extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping> {
-
+    source: RESTResource;
+    target: RESTResource;
 }
 
 
 @observer
-export default class APIToClientMapper extends Component<RestResourceToClientMapperProps> {
+export default class APIToClientMapper extends Component<RestResourceToClientMapperProps,any> {
 
     @observable
     private mappingHandler: MappingHandler;
@@ -51,18 +48,18 @@ export default class APIToClientMapper extends Component<RestResourceToClientMap
         super(props);
         makeObservable(this);
 
-        //We just init this to avoid having to null-check everywhere
-        this.mappingHandler = new MappingHandler([],
-            {
-                resource: this.props.source,
-                entities: this.props.sourceEntities
-            },
-
-            {
-                resource: this.props.target,
-                entities: this.props.targetEntities
-            }
+        const sourceContext = toRESTKindContext(
+            this.props.source,
+            this.props.sourceEntities
         );
+
+        const targetContext = toRESTKindContext(
+            this.props.target,
+            this.props.targetEntities
+        );
+
+        //We just init this to avoid having to null-check everywhere
+        this.mappingHandler = new MappingHandler([], sourceContext, targetContext);
     }
 
     private hasValidValue() {
@@ -70,14 +67,15 @@ export default class APIToClientMapper extends Component<RestResourceToClientMap
     }
 
     private createMappingHandler(): MappingHandler {
-        const sourceContext = {
-            resource: this.props.source,
-            entities: this.props.sourceEntities
-        }
-        const targetContext = {
-            resource: this.props.target,
-            entities: this.props.targetEntities
-        }
+        const sourceContext = toRESTKindContext(
+            this.props.source,
+            this.props.sourceEntities
+        );
+
+        const targetContext = toRESTKindContext(
+            this.props.target,
+            this.props.targetEntities
+        );
 
         const builder = new MappingHandlerBuilder(sourceContext, targetContext);
 

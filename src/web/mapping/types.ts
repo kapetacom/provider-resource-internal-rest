@@ -29,6 +29,7 @@ export interface MappedMethod {
     targetId?: string
     target?: RESTMethodMappingEdit,
     mapped: boolean
+    mapping?: Mapping[]
 }
 
 export interface RESTMethodMappingEdit extends RESTMethodEdit {
@@ -55,7 +56,7 @@ export function createEqualMapping(sourceMethod: RESTMethodMappingEdit, targetMe
     };
 }
 
-export function createTargetOnlyMapping(method: RESTMethodEdit) {
+export function createTargetOnlyMapping(method: RESTMethodEdit):MappedMethod {
     return {
         targetId: method.id,
         target: method,

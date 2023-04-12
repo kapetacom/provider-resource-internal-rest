@@ -1,5 +1,11 @@
 import {MappingHandler} from "./MappingHandler";
-import {convertAllToEditMethods, isCompatibleRESTMethods, RESTKindContext, RESTMethodEdit} from "../types";
+import {
+    convertAllToEditMethods,
+    isCompatibleRESTMethods,
+    RESTKindContext,
+    RESTMethodEdit,
+    RESTResource
+} from "../types";
 import {
     createEqualMapping,
     createSourceOnlyMapping,
@@ -177,14 +183,14 @@ export class MappingHandlerBuilder {
         if (value && hasValue) {
             Object.entries(value)
                 .forEach(([sourceMethodId, mapping]) => {
-                    const sourceMethod = _.find(this.sourceMethods, {id: sourceMethodId});
+                    const sourceMethod = this.sourceMethods.find(m => m.id === sourceMethodId);
 
                     if (!sourceMethod) {
                         this.context.warnings.push(`Mapped method ${sourceMethodId} did not exist and was removed.`);
                         return;
                     }
 
-                    const targetMethod = _.find(this.targetMethods, {id: mapping.targetId});
+                    const targetMethod = this.targetMethods.find(m => m.id === mapping.targetId);
                     if (!targetMethod) {
                         this.context.warnings.push(`Mapped method ${mapping.targetId} did not exist and was removed.`);
                         return;

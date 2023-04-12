@@ -36,7 +36,7 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
                                             </span>
                                             <span className={'type-separator'}>:</span>
                                             <span className={"type"}>
-                                                {typeName(argument.type)}
+                                                {typeName(argument)}
                                             </span>
                                             <span className={"transport"}>
                                                 {`(${argument.transport})`}
