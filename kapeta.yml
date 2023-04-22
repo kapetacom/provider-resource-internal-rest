@@ -7,6 +7,41 @@ spec:
   ports:
     - name: rest
       type: rest
+  versioning:
+    - paths:
+        - spec.methods.*.responseType
+        - spec.methods.*.method
+        - spec.methods.*.path
+        - spec.methods.*.arguments
+      on:
+        - update
+      increment: major
+    - paths:
+        - spec.methods.*
+      on:
+        - delete
+      increment: major
+    - paths:
+        - spec.methods.*
+      on:
+        - create
+      increment: minor
+  schema:
+    type: object
+    required:
+      - port
+      - methods
+      - source
+    properties:
+      port:
+        $ref: /core/port
+      methods:
+        type: object
+        additionalProperties:
+          $ref: /core/rest-method
+      source:
+        $ref: /core/source-code
+
 ---
 kind: core/resource-type-internal
 metadata:
@@ -17,3 +52,37 @@ spec:
   ports:
     - name: rest
       type: rest
+  versioning:
+    - paths:
+        - spec.methods.*.responseType
+        - spec.methods.*.method
+        - spec.methods.*.path
+        - spec.methods.*.arguments
+      on:
+        - update
+      increment: major
+    - paths:
+        - spec.methods.*
+      on:
+        - delete
+      increment: major
+    - paths:
+        - spec.methods.*
+      on:
+        - create
+      increment: minor
+  schema:
+    type: object
+    required:
+      - port
+      - methods
+      - source
+    properties:
+      port:
+        $ref: /core/port
+      methods:
+        type: object
+        additionalProperties:
+          $ref: /core/rest-method
+      source:
+        $ref: /core/source-code
