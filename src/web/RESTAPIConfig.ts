@@ -13,7 +13,7 @@ export const RESTAPIConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = 
     title: 'REST API',
     role: ResourceRole.PROVIDES,
     type: ResourceProviderType.INTERNAL,
-    componentType: RESTEditorComponent,
+    editorComponent: RESTEditorComponent,
     consumableKind: KIND_REST_CLIENT,
     getCounterValue,
     hasMethod,

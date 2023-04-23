@@ -30,7 +30,7 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
     title: 'REST Client',
     role: ResourceRole.CONSUMES,
     type: ResourceProviderType.INTERNAL,
-    componentType: RESTEditorComponent,
+    editorComponent: RESTEditorComponent,
     converters: [
         {
             fromKind: KIND_REST_API,
