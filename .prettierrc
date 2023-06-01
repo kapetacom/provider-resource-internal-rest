@@ -1,11 +1,19 @@
 {
-  "printWidth": 120,
-  "proseWrap": "never",
-  "semi": true,
-  "singleQuote": true,
-  "bracketSpacing": false,
-  "trailingComma": "es5",
-  "arrowParens": "always",
-  "useTabs": false,
-  "tabWidth": 2
+    "printWidth": 120,
+    "proseWrap": "never",
+    "semi": true,
+    "singleQuote": true,
+    "bracketSpacing": false,
+    "trailingComma": "es5",
+    "arrowParens": "always",
+    "useTabs": false,
+    "tabWidth": 4,
+    "overrides": [
+        {
+            "files": "*.yml",
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
 }
