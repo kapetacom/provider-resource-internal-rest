@@ -18,7 +18,8 @@
     "watch": "NODE_ENV=development webpack --watch",
     "storybook": "start-storybook",
     "build-storybook": "build-storybook",
-    "test": "jest"
+    "test": "jest",
+    "format": "prettier --write ."
   },
   "peerDependencies": {
     "@kapeta/schemas": "<2",
@@ -58,6 +59,7 @@
     "lodash": "^4.17.15",
     "mobx": "^6.6.2",
     "mobx-react": "^7.5.3",
+    "prettier": "^2.8.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "socket.io-client": "^4.5.2",
