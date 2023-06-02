@@ -1,15 +1,16 @@
-@import "~@kapeta/ui-web-components/styles/values";
-@import "~@kapeta/ui-web-components/styles/functions.less";
+@import '~@kapeta/ui-web-components/styles/values';
+@import '~@kapeta/ui-web-components/styles/functions.less';
 
 .inspect-connection-methods {
     font-size: 12px;
     z-index: 10000;
     & > table {
         table-layout: fixed;
-        width:100%;
+        width: 100%;
 
-        td, th {
-            padding:5px;
+        td,
+        th {
+            padding: 5px;
             border-bottom: 1px solid @gray;
             text-align: left;
 
@@ -23,7 +24,6 @@
         }
 
         tbody {
-
             tr:nth-child(2n) {
                 background-color: @gray-light;
             }
@@ -41,7 +41,7 @@
         .hits,
         .status-code {
             text-align: center;
-            width: 60px
+            width: 60px;
         }
 
         .hits {
@@ -75,5 +75,4 @@
             }
         }
     }
-
 }

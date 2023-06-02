@@ -1,16 +1,15 @@
-import {action, makeObservable, observable, toJS} from "mobx";
-import {showToasty, ToastType} from "@kapeta/ui-web-components";
-import {getCompatibleRESTMethodsIssues, RESTResourceSpec} from "../types";
-import type {RESTMethodEdit, RESTKindContext} from "../types";
-import {createEqualMapping, createSourceOnlyMapping, MappedMethod} from "./types";
-import _ from "lodash";
-import {getEntitiesToBeAddedForCopy} from "./MappingUtils";
-import {deleteRESTMethod, setRESTMethod} from "../RESTUtils";
-import {ConnectionMethodMappingType, ConnectionMethodsMapping} from "@kapeta/ui-web-types";
-import {EventEmitter} from 'events'
+import {action, makeObservable, observable, toJS} from 'mobx';
+import {showToasty, ToastType} from '@kapeta/ui-web-components';
+import {getCompatibleRESTMethodsIssues, RESTResourceSpec} from '../types';
+import type {RESTMethodEdit, RESTKindContext} from '../types';
+import {createEqualMapping, createSourceOnlyMapping, MappedMethod} from './types';
+import _ from 'lodash';
+import {getEntitiesToBeAddedForCopy} from './MappingUtils';
+import {deleteRESTMethod, setRESTMethod} from '../RESTUtils';
+import {ConnectionMethodMappingType, ConnectionMethodsMapping} from '@kapeta/ui-web-types';
+import {EventEmitter} from 'events';
 
 export class MappingHandler extends EventEmitter {
-
     @observable
     public readonly methods: MappedMethod[];
 
@@ -46,22 +45,20 @@ export class MappingHandler extends EventEmitter {
             sourceEntities: toJS(this.source.entities),
             target: toJS(this.target.resource),
             targetEntities: toJS(this.target.entities),
-            data: this.toMappingData()
-        }
+            data: this.toMappingData(),
+        };
     }
 
     public toMappingData(): ConnectionMethodsMapping {
         const methods: ConnectionMethodsMapping = {};
         this.methods.forEach((method) => {
-            if (!method.source ||
-                !method.target ||
-                !method.mapped) {
+            if (!method.source || !method.target || !method.mapped) {
                 return;
             }
 
             methods[method.source.id] = {
                 targetId: method.target.id,
-                type: ConnectionMethodMappingType.EXACT //We only support exact at the moment
+                type: ConnectionMethodMappingType.EXACT, //We only support exact at the moment
             };
         });
 
@@ -79,13 +76,9 @@ export class MappingHandler extends EventEmitter {
                 return false;
             }
 
-            return method.target &&
-                method.target.id === source.id;
-
-
+            return method.target && method.target.id === source.id;
         });
     }
-
 
     public canDropOnTarget(ix: number, source: RESTMethodEdit): boolean {
         return !!this.methods[ix].target;
@@ -100,10 +93,7 @@ export class MappingHandler extends EventEmitter {
 
         const newTarget = {...toJS(source), copyOf: source};
 
-        const {
-            issues,
-            entitiesToBeAdded
-        } = getEntitiesToBeAddedForCopy(
+        const {issues, entitiesToBeAdded} = getEntitiesToBeAddedForCopy(
             {method: source, entities: this.source.entities},
             {method: newTarget, entities: this.target.entities}
         );
@@ -112,8 +102,8 @@ export class MappingHandler extends EventEmitter {
             showToasty({
                 title: 'Could not add method',
                 type: ToastType.ALERT,
-                message: issues[0]
-            })
+                message: issues[0],
+            });
             return;
         }
 
@@ -136,10 +126,7 @@ export class MappingHandler extends EventEmitter {
 
         const newSource = {...toJS(target), copyOf: target};
 
-        const {
-            issues,
-            entitiesToBeAdded
-        } = getEntitiesToBeAddedForCopy(
+        const {issues, entitiesToBeAdded} = getEntitiesToBeAddedForCopy(
             {method: target, entities: this.target.entities},
             {method: newSource, entities: this.source.entities}
         );
@@ -148,8 +135,8 @@ export class MappingHandler extends EventEmitter {
             showToasty({
                 title: 'Could not add method',
                 type: ToastType.ALERT,
-                message: issues[0]
-            })
+                message: issues[0],
+            });
             return;
         }
 
@@ -184,7 +171,6 @@ export class MappingHandler extends EventEmitter {
         this.triggerChange();
     }
 
-
     @action
     public removeSource(ix: number): void {
         const method = this.methods[ix];
@@ -193,14 +179,13 @@ export class MappingHandler extends EventEmitter {
             return;
         }
 
-
         if (!source.copyOf) {
             //If source is not a copy from target - readd it
             this.methods.push(createSourceOnlyMapping(source));
         }
 
-        if (method.target &&
-            method.target.copyOf) { //If the target is a copy
+        if (method.target && method.target.copyOf) {
+            //If the target is a copy
 
             //First remove the method from the source resource
             deleteRESTMethod(this.source.resource.spec as RESTResourceSpec, source.id);
@@ -213,7 +198,6 @@ export class MappingHandler extends EventEmitter {
         }
 
         this.triggerChange();
-
     }
 
     @action
@@ -232,8 +216,8 @@ export class MappingHandler extends EventEmitter {
             showToasty({
                 title: 'Methods did not match',
                 type: ToastType.ALERT,
-                message: errors[0]
-            })
+                message: errors[0],
+            });
             return;
         }
 
@@ -246,7 +230,6 @@ export class MappingHandler extends EventEmitter {
         _.pull(this.methods, existing);
 
         this.triggerChange();
-
     }
 
     private triggerChange() {
