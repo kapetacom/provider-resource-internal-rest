@@ -1,65 +1,63 @@
-import {MappingHandler} from "./MappingHandler";
+import {MappingHandler} from './MappingHandler';
 import {
     convertAllToEditMethods,
     isCompatibleRESTMethods,
     RESTKindContext,
     RESTMethodEdit,
-    RESTResource
-} from "../types";
+    RESTResource,
+} from '../types';
 import {
     createEqualMapping,
     createSourceOnlyMapping,
     createTargetOnlyMapping,
     MappedMethod,
     MappingHandlerContext,
-    RESTMethodMappingEdit
-} from "./types";
+    RESTMethodMappingEdit,
+} from './types';
 import {
     determineEntityIssues,
     getCompatibleMethodsAndEntities,
     getEntitiesToBeAddedForCopy,
-    mappedMethodSorter
-} from "./MappingUtils";
-import _ from "lodash";
-import {ConnectionMethodMappingType, ConnectionMethodsMapping} from "@kapeta/ui-web-types";
-import {setRESTMethod} from "../RESTUtils";
+    mappedMethodSorter,
+} from './MappingUtils';
+import _ from 'lodash';
+import {ConnectionMethodMappingType, ConnectionMethodsMapping} from '@kapeta/ui-web-types';
+import {setRESTMethod} from '../RESTUtils';
 
 export interface BuildResultError {
-    title:string
-    message:string
+    title: string;
+    message: string;
 }
 
 export interface BuildResult extends MappingHandlerContext {
-    handler: MappingHandler
+    handler: MappingHandler;
 }
 
-
 export class MappingHandlerBuilder {
-    private readonly sourceContext:RESTKindContext;
-    private readonly targetContext:RESTKindContext;
+    private readonly sourceContext: RESTKindContext;
+    private readonly targetContext: RESTKindContext;
     private readonly mappedMethods: MappedMethod[] = [];
     private readonly mappedTargets: RESTMethodEdit[] = [];
     private readonly mappedSources: RESTMethodEdit[] = [];
 
-    private sourceMethods:RESTMethodEdit[] = [];
-    private targetMethods:RESTMethodMappingEdit[] = [];
+    private sourceMethods: RESTMethodEdit[] = [];
+    private targetMethods: RESTMethodMappingEdit[] = [];
 
-    private context:MappingHandlerContext = {
+    private context: MappingHandlerContext = {
         clientWasEmpty: false,
         serverWasEmpty: false,
         sourceName: '',
         targetName: '',
         issues: [],
-        warnings: []
+        warnings: [],
     };
 
-
-    constructor(sourceContext:RESTKindContext, targetContext:RESTKindContext) {
+    constructor(sourceContext: RESTKindContext, targetContext: RESTKindContext) {
         this.sourceContext = sourceContext;
         this.targetContext = targetContext;
     }
 
-    private isValidValue(value?: ConnectionMethodsMapping):boolean {
+    private isValidValue(value?: ConnectionMethodsMapping): boolean {
         return !!(value && !_.isEmpty(value));
     }
 
@@ -86,8 +84,8 @@ export class MappingHandlerBuilder {
 
         return {
             ...this.context,
-            handler
-        }
+            handler,
+        };
     }
 
     private handleTargetMethods() {
@@ -100,7 +98,7 @@ export class MappingHandlerBuilder {
         });
     }
 
-    private handleSourceMethods(validValue:boolean) {
+    private handleSourceMethods(validValue: boolean) {
         this.sourceMethods.forEach((sourceMethod) => {
             if (this.mappedSources.indexOf(sourceMethod) > -1) {
                 return;
@@ -117,13 +115,10 @@ export class MappingHandlerBuilder {
                         continue;
                     }
 
-                    const {
-                        issues,
-                        entitiesToBeAdded
-                    } = getEntitiesToBeAddedForCopy(
+                    const {issues, entitiesToBeAdded} = getEntitiesToBeAddedForCopy(
                         {method: sourceMethod, entities: this.sourceContext.entities},
                         {method: targetMethod, entities: this.targetContext.entities}
-                    )
+                    );
 
                     if (issues.length === 0) {
                         this.mappedTargets.push(targetMethod);
@@ -136,22 +131,22 @@ export class MappingHandlerBuilder {
 
             //No matching target found
             this.mappedMethods.push(createSourceOnlyMapping(sourceMethod));
-
         });
     }
 
     private copyMethodsAndEntitiesToPeer() {
         //If target or source methods are empty we assume it is a new connection and mapping - and copy everything
         if (this.targetMethods.length === 0) {
-            let {
-                compatibleMethods,
-                compatibleEntities
-            } = getCompatibleMethodsAndEntities(this.sourceMethods, this.sourceContext, this.targetContext);
+            let {compatibleMethods, compatibleEntities} = getCompatibleMethodsAndEntities(
+                this.sourceMethods,
+                this.sourceContext,
+                this.targetContext
+            );
 
             if (compatibleMethods.length > 0) {
                 this.targetContext.entities.push(...compatibleEntities);
                 this.targetMethods.push(...compatibleMethods);
-                compatibleMethods.forEach(method => {
+                compatibleMethods.forEach((method) => {
                     setRESTMethod(this.targetContext.resource.spec, method.id, method);
                 });
             }
@@ -159,16 +154,17 @@ export class MappingHandlerBuilder {
             this.context.targetName = this.context.sourceName;
             this.context.clientWasEmpty = true;
         } else if (this.sourceMethods.length === 0) {
-            let {
-                compatibleMethods,
-                compatibleEntities
-            } = getCompatibleMethodsAndEntities(this.targetMethods, this.targetContext, this.sourceContext);
+            let {compatibleMethods, compatibleEntities} = getCompatibleMethodsAndEntities(
+                this.targetMethods,
+                this.targetContext,
+                this.sourceContext
+            );
 
             if (compatibleMethods.length > 0) {
                 this.sourceContext.entities.push(...compatibleEntities);
                 this.sourceMethods.push(...compatibleMethods);
                 //Also add to the spec
-                compatibleMethods.forEach(method => {
+                compatibleMethods.forEach((method) => {
                     setRESTMethod(this.sourceContext.resource.spec, method.id, method);
                 });
             }
@@ -181,46 +177,47 @@ export class MappingHandlerBuilder {
     private readFromValue(value?: ConnectionMethodsMapping) {
         const hasValue = this.isValidValue(value);
         if (value && hasValue) {
-            Object.entries(value)
-                .forEach(([sourceMethodId, mapping]) => {
-                    const sourceMethod = this.sourceMethods.find(m => m.id === sourceMethodId);
+            Object.entries(value).forEach(([sourceMethodId, mapping]) => {
+                const sourceMethod = this.sourceMethods.find((m) => m.id === sourceMethodId);
 
-                    if (!sourceMethod) {
-                        this.context.warnings.push(`Mapped method ${sourceMethodId} did not exist and was removed.`);
-                        return;
-                    }
+                if (!sourceMethod) {
+                    this.context.warnings.push(`Mapped method ${sourceMethodId} did not exist and was removed.`);
+                    return;
+                }
 
-                    const targetMethod = this.targetMethods.find(m => m.id === mapping.targetId);
-                    if (!targetMethod) {
-                        this.context.warnings.push(`Mapped method ${mapping.targetId} did not exist and was removed.`);
-                        return;
-                    }
+                const targetMethod = this.targetMethods.find((m) => m.id === mapping.targetId);
+                if (!targetMethod) {
+                    this.context.warnings.push(`Mapped method ${mapping.targetId} did not exist and was removed.`);
+                    return;
+                }
 
-                    this.mappedTargets.push(targetMethod);
-                    this.mappedSources.push(sourceMethod);
+                this.mappedTargets.push(targetMethod);
+                this.mappedSources.push(sourceMethod);
 
-                    const isCompatible = isCompatibleRESTMethods(
-                        {method:sourceMethod, entities: this.sourceContext.entities},
-                        {method:targetMethod, entities: this.targetContext.entities}
+                const isCompatible = isCompatibleRESTMethods(
+                    {method: sourceMethod, entities: this.sourceContext.entities},
+                    {method: targetMethod, entities: this.targetContext.entities}
+                );
+
+                if (!isCompatible) {
+                    //Something changed and methods are no longer compatible
+                    this.context.warnings.push(
+                        `Mapping for ${this.context.sourceName}.${sourceMethodId} and ${this.context.targetName}.${mapping.targetId} was invalid and was removed.`
                     );
 
-                    if (!isCompatible) {
-                        //Something changed and methods are no longer compatible
-                        this.context.warnings.push(`Mapping for ${this.context.sourceName}.${sourceMethodId} and ${this.context.targetName}.${mapping.targetId} was invalid and was removed.`);
+                    this.mappedMethods.push(
+                        createSourceOnlyMapping(sourceMethod),
+                        createTargetOnlyMapping(targetMethod)
+                    );
+                    return;
+                }
 
-                        this.mappedMethods.push(
-                            createSourceOnlyMapping(sourceMethod),
-                            createTargetOnlyMapping(targetMethod)
-                        );
-                        return;
-                    }
-
-                    switch (mapping.type) {
-                        case ConnectionMethodMappingType.EXACT: //Only exact mapping supported right now
-                            this.mappedMethods.push(createEqualMapping(sourceMethod, targetMethod));
-                            break;
-                    }
-                });
+                switch (mapping.type) {
+                    case ConnectionMethodMappingType.EXACT: //Only exact mapping supported right now
+                        this.mappedMethods.push(createEqualMapping(sourceMethod, targetMethod));
+                        break;
+                }
+            });
         }
     }
 }

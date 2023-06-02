@@ -1,32 +1,31 @@
-import React, { Component } from "react";
+import React, {Component} from 'react';
 
-import { observer } from "mobx-react";
-import type {Traffic, ConnectionMethodsMapping, HTTPResponse} from "@kapeta/ui-web-types";
+import {observer} from 'mobx-react';
+import type {Traffic, ConnectionMethodsMapping, HTTPResponse} from '@kapeta/ui-web-types';
 
-import "./InspectConnectionMethods.less";
+import './InspectConnectionMethods.less';
 
 interface InspectConnectionProps {
-    mapping: ConnectionMethodsMapping
-    trafficLines: Traffic[]
-    onMethodClick:(method:string) => void
+    mapping: ConnectionMethodsMapping;
+    trafficLines: Traffic[];
+    onMethodClick: (method: string) => void;
 }
 
 interface StatusCodes {
-    requests: number
-    sc2xx: number
-    sc3xx: number
-    sc4xx: number
-    sc5xx: number
+    requests: number;
+    sc2xx: number;
+    sc3xx: number;
+    sc4xx: number;
+    sc5xx: number;
 }
- interface ConnectionMethod {
-    providerName: string
-    consumerName: string
-    stats: StatusCodes
+interface ConnectionMethod {
+    providerName: string;
+    consumerName: string;
+    stats: StatusCodes;
 }
 
 @observer
-export default class InspectConnectionMethods extends Component<InspectConnectionProps>{
-
+export default class InspectConnectionMethods extends Component<InspectConnectionProps> {
     private methods: ConnectionMethod[];
 
     constructor(props: InspectConnectionProps) {
@@ -36,14 +35,13 @@ export default class InspectConnectionMethods extends Component<InspectConnectio
 
     private extractMethodsFromMapping(mapping: ConnectionMethodsMapping) {
         const methods: ConnectionMethod[] = [];
-        const methodStats: { [key: string]: ConnectionMethod } = {};
+        const methodStats: {[key: string]: ConnectionMethod} = {};
 
         if (!mapping) {
             return methods;
         }
 
         Object.entries(mapping).forEach(([providerMethodId, mappingInfo]: any) => {
-
             const method = {
                 providerName: providerMethodId,
                 consumerName: mappingInfo.targetId,
@@ -52,8 +50,8 @@ export default class InspectConnectionMethods extends Component<InspectConnectio
                     sc2xx: 0,
                     sc3xx: 0,
                     sc4xx: 0,
-                    sc5xx: 0
-                }
+                    sc5xx: 0,
+                },
             };
 
             methodStats[providerMethodId] = method;
@@ -62,7 +60,7 @@ export default class InspectConnectionMethods extends Component<InspectConnectio
 
         const isInRange = (response: HTTPResponse, lowerAndEqualEnd: number, highEnd: number) => {
             if (response) {
-                return response.code >= lowerAndEqualEnd && response.code < highEnd
+                return response.code >= lowerAndEqualEnd && response.code < highEnd;
             }
             return false;
         };
@@ -99,7 +97,6 @@ export default class InspectConnectionMethods extends Component<InspectConnectio
     }
 
     render() {
-
         this.methods = this.extractMethodsFromMapping(this.props.mapping);
 
         return (
@@ -107,9 +104,11 @@ export default class InspectConnectionMethods extends Component<InspectConnectio
                 <table cellSpacing={0}>
                     <thead>
                         <tr className={'sections'}>
-                            <th/>
-                            <th className={'hits'}/>
-                            <th colSpan={4} className={'status-codes'}>HTTP Status</th>
+                            <th />
+                            <th className={'hits'} />
+                            <th colSpan={4} className={'status-codes'}>
+                                HTTP Status
+                            </th>
                         </tr>
                         <tr>
                             <th className={'methods'}>Methods</th>
@@ -121,37 +120,25 @@ export default class InspectConnectionMethods extends Component<InspectConnectio
                         </tr>
                     </thead>
                     <tbody>
-
-                    {this.methods.map((methodLine: ConnectionMethod, index: number) => {
-                        return (
-                            <tr key={index} onClick={() => this.props.onMethodClick(methodLine.providerName)}>
-                                <td className={'methods'}>
-                                    <span className={'provider'}>{methodLine.providerName}</span>
-                                    <i className="fal fa-long-arrow-right" />
-                                    <span className={'consumer'}>{methodLine.consumerName}</span>
-                                </td>
-                                <td className={'hits'}>
-                                    {methodLine.stats.requests}
-                                </td>
-                                <td className={'status-code ok'}>
-                                    {methodLine.stats.sc2xx}
-                                </td>
-                                <td className={'status-code redirect'}>
-                                    {methodLine.stats.sc3xx}
-                                </td>
-                                <td className={'status-code client-error'}>
-                                    {methodLine.stats.sc4xx}
-                                </td>
-                                <td className={'status-code server-error'}>
-                                    {methodLine.stats.sc5xx}
-                                </td>
-                            </tr>
-                        )
-                    })}
+                        {this.methods.map((methodLine: ConnectionMethod, index: number) => {
+                            return (
+                                <tr key={index} onClick={() => this.props.onMethodClick(methodLine.providerName)}>
+                                    <td className={'methods'}>
+                                        <span className={'provider'}>{methodLine.providerName}</span>
+                                        <i className="fal fa-long-arrow-right" />
+                                        <span className={'consumer'}>{methodLine.consumerName}</span>
+                                    </td>
+                                    <td className={'hits'}>{methodLine.stats.requests}</td>
+                                    <td className={'status-code ok'}>{methodLine.stats.sc2xx}</td>
+                                    <td className={'status-code redirect'}>{methodLine.stats.sc3xx}</td>
+                                    <td className={'status-code client-error'}>{methodLine.stats.sc4xx}</td>
+                                    <td className={'status-code server-error'}>{methodLine.stats.sc5xx}</td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
-
             </div>
-        )
+        );
     }
 }

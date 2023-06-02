@@ -1,14 +1,10 @@
-import {
-    getCompatibleRESTMethodsIssues, isCompatibleRESTMethods, RESTMethodEdit, RESTMethodEditContext
-} from "../types";
+import {getCompatibleRESTMethodsIssues, isCompatibleRESTMethods, RESTMethodEdit, RESTMethodEditContext} from '../types';
 
-import type {
-    RESTKindContext
-} from "../types";
+import type {RESTKindContext} from '../types';
 
-import {resolveEntities, resolveEntitiesFromMethod} from "../RESTUtils";
-import {MappedMethod, RESTMethodMappingEdit} from "./types";
-import {Entity, getSchemaEntityCompatibilityIssues, isSchemaEntityCompatible } from "@kapeta/schemas";
+import {resolveEntities, resolveEntitiesFromMethod} from '../RESTUtils';
+import {MappedMethod, RESTMethodMappingEdit} from './types';
+import {Entity, getSchemaEntityCompatibilityIssues, isSchemaEntityCompatible} from '@kapeta/schemas';
 
 /**
  * Determines conflicts between entities of source and target
@@ -20,9 +16,9 @@ export function determineEntityIssues(source: RESTKindContext, target: RESTKindC
     const targetEntityNames = resolveEntities(target);
     const entityIssues: string[] = [];
     const handled: string[] = [];
-    sourceEntityNames.forEach(sourceEntityName => {
-        const sourceEntity = source.entities.find(e => e.name === sourceEntityName);
-        const targetEntity = target.entities.find(e => e.name === sourceEntityName);
+    sourceEntityNames.forEach((sourceEntityName) => {
+        const sourceEntity = source.entities.find((e) => e.name === sourceEntityName);
+        const targetEntity = target.entities.find((e) => e.name === sourceEntityName);
         handled.push(sourceEntityName);
         if (!sourceEntity) {
             entityIssues.push(`Missing source entity: ${sourceEntityName}`);
@@ -34,18 +30,20 @@ export function determineEntityIssues(source: RESTKindContext, target: RESTKindC
         }
 
         const issues = getSchemaEntityCompatibilityIssues(sourceEntity, targetEntity, source.entities, target.entities);
-        entityIssues.push(...issues.map(i => {
-            return `${i} for type: ${sourceEntityName}`
-        }));
+        entityIssues.push(
+            ...issues.map((i) => {
+                return `${i} for type: ${sourceEntityName}`;
+            })
+        );
     });
 
-    targetEntityNames.forEach(targetEntityName => {
+    targetEntityNames.forEach((targetEntityName) => {
         if (handled.indexOf(targetEntityName) > -1) {
             return;
         }
 
-        const sourceEntity = source.entities.find(e => e.name === targetEntityName);
-        const targetEntity = target.entities.find(e => e.name === targetEntityName);
+        const sourceEntity = source.entities.find((e) => e.name === targetEntityName);
+        const targetEntity = target.entities.find((e) => e.name === targetEntityName);
         if (!targetEntity) {
             entityIssues.push(`Missing target entity: ${targetEntityName}`);
             return;
@@ -57,15 +55,17 @@ export function determineEntityIssues(source: RESTKindContext, target: RESTKindC
         }
 
         const issues = getSchemaEntityCompatibilityIssues(sourceEntity, targetEntity, source.entities, target.entities);
-        entityIssues.push(...issues.map(i => {
-            return `${i} for type: ${targetEntityName}`
-        }));
+        entityIssues.push(
+            ...issues.map((i) => {
+                return `${i} for type: ${targetEntityName}`;
+            })
+        );
     });
 
     return entityIssues;
 }
 
-export const mappedMethodSorter = (a:MappedMethod, b:MappedMethod) => {
+export const mappedMethodSorter = (a: MappedMethod, b: MappedMethod) => {
     if (a.mapped !== b.mapped) {
         return a.mapped ? -1 : 1;
     }
@@ -83,40 +83,42 @@ export const mappedMethodSorter = (a:MappedMethod, b:MappedMethod) => {
     }
 
     return 0;
-}
+};
 
-export function getCompatibleMethodsAndEntities(methods:RESTMethodEdit[], aContext:RESTKindContext, bContext:RESTKindContext) {
+export function getCompatibleMethodsAndEntities(
+    methods: RESTMethodEdit[],
+    aContext: RESTKindContext,
+    bContext: RESTKindContext
+) {
     const compatibleEntities = getCompatibleEntities(aContext, bContext);
     const compatibleMethods: RESTMethodMappingEdit[] = [];
 
-    methods.forEach(sourceMethod => {
+    methods.forEach((sourceMethod) => {
         const sourceMethodContext = {method: sourceMethod, entities: aContext.entities};
         const targetMethodContext = {
             method: sourceMethod,
-            entities: [...bContext.entities, ...compatibleEntities]
+            entities: [...bContext.entities, ...compatibleEntities],
         };
         //Check if the methods are compatible
         if (isCompatibleRESTMethods(sourceMethodContext, targetMethodContext)) {
             compatibleMethods.push({...sourceMethod, copyOf: sourceMethod});
         }
-    })
+    });
 
     return {
         compatibleMethods,
-        compatibleEntities
-    }
+        compatibleEntities,
+    };
 }
 
-export function getCompatibleEntities(aContext:RESTKindContext, bContext:RESTKindContext):Entity[] {
+export function getCompatibleEntities(aContext: RESTKindContext, bContext: RESTKindContext): Entity[] {
     const entityList = resolveEntities(aContext);
-    const {
-        entitiesToBeAdded
-    } = getCompatibleEntitiesForList(entityList, aContext.entities, bContext.entities);
+    const {entitiesToBeAdded} = getCompatibleEntitiesForList(entityList, aContext.entities, bContext.entities);
 
     return entitiesToBeAdded;
 }
 
-export function copyMethods(methods: RESTMethodEdit[]):RESTMethodMappingEdit[] {
+export function copyMethods(methods: RESTMethodEdit[]): RESTMethodMappingEdit[] {
     return methods.map((sourceMethod) => {
         return {...sourceMethod, copyOf: sourceMethod};
     });
@@ -128,27 +130,29 @@ export function copyMethods(methods: RESTMethodEdit[]):RESTMethodMappingEdit[] {
 export function getCompatibleEntitiesForList(entityNames: string[], aEntities: Entity[], bEntities: Entity[]) {
     const issues: string[] = [];
     let entitiesToBeAdded: Entity[] = [];
-    entityNames.forEach(entityNAme => {
-        const bEntity = bEntities.find(e => e.name === entityNAme);
-        const aEntity = aEntities.find(e => e.name === entityNAme);
+    entityNames.forEach((entityNAme) => {
+        const bEntity = bEntities.find((e) => e.name === entityNAme);
+        const aEntity = aEntities.find((e) => e.name === entityNAme);
         if (!bEntity) {
             if (aEntity) {
                 entitiesToBeAdded.push(aEntity);
             }
         } else if (aEntity) {
             const entityIssues = getSchemaEntityCompatibilityIssues(aEntity, bEntity, aEntities, bEntities);
-            issues.push(...entityIssues.map(issue => {
-                return `${issue} for type: ${entityNAme}`
-            }));
+            issues.push(
+                ...entityIssues.map((issue) => {
+                    return `${issue} for type: ${entityNAme}`;
+                })
+            );
         }
     });
 
-    entitiesToBeAdded = entitiesToBeAdded.filter(newEntity => {
+    entitiesToBeAdded = entitiesToBeAdded.filter((newEntity) => {
         //We do this to make sure any sub types are available
-        return isSchemaEntityCompatible(newEntity,newEntity,aEntities, [...bEntities, ...entitiesToBeAdded] )
+        return isSchemaEntityCompatible(newEntity, newEntity, aEntities, [...bEntities, ...entitiesToBeAdded]);
     });
 
-    return {issues, entitiesToBeAdded };
+    return {issues, entitiesToBeAdded};
 }
 
 /**
@@ -158,16 +162,19 @@ export function getCompatibleEntitiesForList(entityNames: string[], aEntities: E
 export function getEntitiesToBeAddedForCopy(aContext: RESTMethodEditContext, bContext: RESTMethodEditContext) {
     const usedEntityNames = resolveEntitiesFromMethod(aContext);
 
-    const {
-        issues,
-        entitiesToBeAdded
-    } = getCompatibleEntitiesForList(usedEntityNames, aContext.entities, bContext.entities);
+    const {issues, entitiesToBeAdded} = getCompatibleEntitiesForList(
+        usedEntityNames,
+        aContext.entities,
+        bContext.entities
+    );
 
     if (issues.length === 0) {
-        issues.push(...getCompatibleRESTMethodsIssues(aContext, {
-            method: bContext.method,
-            entities: [...bContext.entities, ...entitiesToBeAdded]
-        }));
+        issues.push(
+            ...getCompatibleRESTMethodsIssues(aContext, {
+                method: bContext.method,
+                entities: [...bContext.entities, ...entitiesToBeAdded],
+            })
+        );
     }
 
     return {issues, entitiesToBeAdded: issues.length === 0 ? entitiesToBeAdded : []};

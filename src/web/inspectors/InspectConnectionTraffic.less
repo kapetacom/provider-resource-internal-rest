@@ -1,22 +1,21 @@
-@import "~@kapeta/ui-web-components/styles/values";
-@import "~@kapeta/ui-web-components/styles/functions.less";
-
+@import '~@kapeta/ui-web-components/styles/values';
+@import '~@kapeta/ui-web-components/styles/functions.less';
 
 .inspect-method-traffic {
-
     table {
         table-layout: fixed;
-        width:100%;
+        width: 100%;
 
-        td, th {
-            padding:5px;
+        td,
+        th {
+            padding: 5px;
             border-bottom: 1px solid @gray;
             text-align: left;
             font-size: 12px;
         }
 
         td {
-            height:45px;
+            height: 45px;
             vertical-align: middle;
             white-space: nowrap;
             overflow: hidden;
@@ -33,7 +32,6 @@
         }
 
         tbody {
-
             tr:nth-child(2n) {
                 background-color: @gray-light;
             }
@@ -51,12 +49,12 @@
         th.method,
         th.status,
         th.size {
-            width:80px;
+            width: 80px;
         }
 
-        th.time ,
+        th.time,
         th.type {
-            width:140px;
+            width: 140px;
         }
     }
 }

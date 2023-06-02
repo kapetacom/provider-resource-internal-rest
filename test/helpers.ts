@@ -1,152 +1,155 @@
-import {
-    HTTPMethod,
-    RESTMethod, RESTMethodArgument, TypeLike,
-} from "@kapeta/ui-web-types";
+import {HTTPMethod, RESTMethod, RESTMethodArgument, TypeLike} from '@kapeta/ui-web-types';
 import {
     convertToEditMethod,
-    KIND_REST_API, RESTKindContext,
+    KIND_REST_API,
+    RESTKindContext,
     RESTMethodEdit,
-    RESTMethodEditContext, RESTResource
-} from "../src/web/types";
-import {Entity, EntityDTO, EntityType, isStringableType, typeName, TypeOrString} from "@kapeta/schemas";
+    RESTMethodEditContext,
+    RESTResource,
+} from '../src/web/types';
+import {Entity, EntityDTO, EntityType, isStringableType, typeName, TypeOrString} from '@kapeta/schemas';
 
-export function makeAPIContext(methods:{[key: string]: RESTMethod}, entities?:Entity[]):RESTKindContext {
+export function makeAPIContext(methods: {[key: string]: RESTMethod}, entities?: Entity[]): RESTKindContext {
     return {
         resource: makeAPI(methods),
-        entities:  entities ? entities : []
-    }
+        entities: entities ? entities : [],
+    };
 }
 
-
-export function makeAPI(methods:{[key: string]: RESTMethod}, entities?:Entity[]):RESTResource {
-    return  {
+export function makeAPI(methods: {[key: string]: RESTMethod}, entities?: Entity[]): RESTResource {
+    return {
         kind: KIND_REST_API,
         metadata: {
-            name: 'SomeAPI'
+            name: 'SomeAPI',
         },
         spec: {
             port: {
-                type: 'rest'
+                type: 'rest',
             },
-            methods
-        }
-    }
+            methods,
+        },
+    };
 }
 
-function toTypeLike(type:TypeOrString):TypeLike {
+function toTypeLike(type: TypeOrString): TypeLike {
     return typeof type === 'string' ? {type} : type;
 }
 
-export function makeMethod(args:TypeOrString[] = [], responseType?:TypeOrString):RESTMethod {
+export function makeMethod(args: TypeOrString[] = [], responseType?: TypeOrString): RESTMethod {
     const argMap = {};
     args.forEach((type, ix) => {
-        const typeLike = toTypeLike(type)
-        const arg:RESTMethodArgument = {
+        const typeLike = toTypeLike(type);
+        const arg: RESTMethodArgument = {
             ...typeLike,
-            transport: isStringableType(typeName(typeLike)) ? 'QUERY' : 'BODY'
+            transport: isStringableType(typeName(typeLike)) ? 'QUERY' : 'BODY',
         };
         argMap[`arg_${ix}`] = arg;
-    })
+    });
     return {
         method: HTTPMethod.POST,
         description: '',
         arguments: argMap,
         path: '/',
-        responseType: responseType ? toTypeLike(toTypeLike(responseType)) : {type: 'void'}
-    }
+        responseType: responseType ? toTypeLike(toTypeLike(responseType)) : {type: 'void'},
+    };
 }
 
-export function makeEditContext(id:string, args:TypeOrString[] = [], responseType?:TypeOrString, entities?:Entity[]):RESTMethodEditContext {
+export function makeEditContext(
+    id: string,
+    args: TypeOrString[] = [],
+    responseType?: TypeOrString,
+    entities?: Entity[]
+): RESTMethodEditContext {
     return {
         method: makeEditMethod(id, args, responseType),
-        entities: entities ? entities : []
-    }
+        entities: entities ? entities : [],
+    };
 }
 
-export function makeEditMethod(id:string, args:TypeOrString[] = [], responseType?:TypeOrString):RESTMethodEdit {
+export function makeEditMethod(id: string, args: TypeOrString[] = [], responseType?: TypeOrString): RESTMethodEdit {
     return convertToEditMethod(id, makeMethod(args, responseType));
 }
 
-export const ENTITIES:EntityDTO[] = [
+export const ENTITIES: EntityDTO[] = [
     {
         type: EntityType.Dto,
         name: 'User',
         properties: {
             id: {
-                type:'string'
-            }
-        }
+                type: 'string',
+            },
+        },
     },
     {
         type: EntityType.Dto,
         name: 'Person',
         properties: {
             id: {
-                type:'string'
+                type: 'string',
             },
             name: {
-                type:'string'
-            }
-        }
+                type: 'string',
+            },
+        },
     },
     {
         type: EntityType.Dto,
         name: 'Staff',
         properties: {
             id: {
-                type:'string'
+                type: 'string',
             },
             name: {
-                type:'string'
+                type: 'string',
             },
             department: {
-                type:'string'
+                type: 'string',
             },
             boss: {
-                ref: 'Staff'
-            }
-        }
-    }
-]
+                ref: 'Staff',
+            },
+        },
+    },
+];
 
-export const ENTITIES_ALT:EntityDTO[] = [
+export const ENTITIES_ALT: EntityDTO[] = [
     {
         type: EntityType.Dto,
         name: 'User',
         properties: {
             username: {
-                type:'string'
-            }
-        }
+                type: 'string',
+            },
+        },
     },
     {
         type: EntityType.Dto,
         name: 'Person',
         properties: {
             username: {
-                type:'string'
+                type: 'string',
             },
             fullName: {
-                type:'string'
-            }
-        }
+                type: 'string',
+            },
+        },
     },
     {
         type: EntityType.Dto,
         name: 'Staff',
         properties: {
             username: {
-                type:'string'
+                type: 'string',
             },
             fullName: {
-                type:'string'
+                type: 'string',
             },
             section: {
-                type:'string'
+                type: 'string',
             },
             manager: {
-                ref: 'Staff'
-            }
-        }
-    }
-]
+                ref: 'Staff',
+            },
+        },
+    },
+];

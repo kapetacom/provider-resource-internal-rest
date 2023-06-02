@@ -1,11 +1,5 @@
-import _ from "lodash";
-import {
-    convertToEditMethod,
-    isCompatibleRESTMethods,
-    KIND_REST_API,
-    KIND_REST_CLIENT,
-    RESTResourceSpec
-} from "./types";
+import _ from 'lodash';
+import {convertToEditMethod, isCompatibleRESTMethods, KIND_REST_API, KIND_REST_CLIENT, RESTResourceSpec} from './types';
 
 import {
     ConnectionMethodMappingType,
@@ -13,14 +7,14 @@ import {
     IResourceTypeProvider,
     ResourceRole,
     ResourceProviderType,
-} from "@kapeta/ui-web-types";
+} from '@kapeta/ui-web-types';
 
-import {Connection, Entity, Metadata, Resource} from "@kapeta/schemas";
+import {Connection, Entity, Metadata, Resource} from '@kapeta/schemas';
 
-import {getCounterValue, hasMethod, resolveEntities, validate} from "./RESTUtils";
-import {RESTEditorComponent} from "./RESTEditorComponent";
-import APIToClientMapper from "./mapping/APIToClientMapper";
-import InspectConnectionContent from "./inspectors/InspectConnectionContent";
+import {getCounterValue, hasMethod, resolveEntities, validate} from './RESTUtils';
+import {RESTEditorComponent} from './RESTEditorComponent';
+import APIToClientMapper from './mapping/APIToClientMapper';
+import InspectConnectionContent from './inspectors/InspectConnectionContent';
 
 const packageJson = require('../../package.json');
 
@@ -38,16 +32,17 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
             inspectComponentType: InspectConnectionContent,
             createFrom: (data: Resource) => {
                 if (!data.kind?.startsWith(KIND_REST_CLIENT)) {
-                    throw new Error(`Invalid resource kind: ${data.kind}. Expected ${KIND_REST_CLIENT}`)
+                    throw new Error(`Invalid resource kind: ${data.kind}. Expected ${KIND_REST_CLIENT}`);
                 }
-                return {...data}
+                return {...data};
             },
             validateMapping: (
                 connection: Connection,
                 provider: Resource,
                 consumer: Resource,
                 fromEntities: Entity[],
-                toEntities: Entity[]): string[] => {
+                toEntities: Entity[]
+            ): string[] => {
                 const errors: string[] = [];
 
                 if (!_.isObject(connection.mapping)) {
@@ -62,7 +57,6 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
 
                 const oldMapping = connectionMapping;
                 _.forEach(oldMapping, (mapping, sourceMethodId) => {
-
                     if (!providerSpec.methods[sourceMethodId]) {
                         //Some methods are gone - ignore and remove
                         errors.push('Missing source method');
@@ -79,11 +73,16 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                     const fromMethod = convertToEditMethod(sourceMethodId, providerSpec.methods[sourceMethodId]);
                     const toMethod = convertToEditMethod(mapping.targetId, consumerSpec.methods[mapping.targetId]);
 
-                    if (mapping.type === ConnectionMethodMappingType.EXACT &&
-                        !isCompatibleRESTMethods({method: fromMethod, entities: fromEntities}, {
-                            method: toMethod,
-                            entities: toEntities
-                        })) {
+                    if (
+                        mapping.type === ConnectionMethodMappingType.EXACT &&
+                        !isCompatibleRESTMethods(
+                            {method: fromMethod, entities: fromEntities},
+                            {
+                                method: toMethod,
+                                entities: toEntities,
+                            }
+                        )
+                    ) {
                         errors.push('Methods are not compatible');
                     }
                 });
@@ -94,12 +93,14 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
 
                 return errors;
             },
-            createMapping: (from: Resource,
-                            to: Resource,
-                            fromEntities: Entity[],
-                            toEntities: Entity[]): ConnectionMethodsMapping => {
+            createMapping: (
+                from: Resource,
+                to: Resource,
+                fromEntities: Entity[],
+                toEntities: Entity[]
+            ): ConnectionMethodsMapping => {
                 const newMapping = {};
-                Object.keys(from.spec.methods).forEach(sourceMethodId => {
+                Object.keys(from.spec.methods).forEach((sourceMethodId) => {
                     if (!to.spec.methods[sourceMethodId]) {
                         return;
                     }
@@ -110,11 +111,11 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                     const wasCompatible = isCompatibleRESTMethods(
                         {
                             method: fromMethod,
-                            entities: fromEntities
+                            entities: fromEntities,
                         },
                         {
                             method: toMethod,
-                            entities: toEntities
+                            entities: toEntities,
                         }
                     );
 
@@ -124,13 +125,17 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
 
                     newMapping[sourceMethodId] = {
                         targetId: sourceMethodId,
-                        type: ConnectionMethodMappingType.EXACT
+                        type: ConnectionMethodMappingType.EXACT,
                     };
                 });
 
                 return newMapping;
             },
-            updateMapping: (connection: Connection, provider: Resource, consumer: Resource): ConnectionMethodsMapping => {
+            updateMapping: (
+                connection: Connection,
+                provider: Resource,
+                consumer: Resource
+            ): ConnectionMethodsMapping => {
                 const newMapping = {};
 
                 if (!_.isObject(connection.mapping)) {
@@ -143,8 +148,7 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
 
                 const oldMapping = connectionMapping;
                 _.forEach(oldMapping, (mapping, sourceMethodId) => {
-                    if (!providerSpec.methods[sourceMethodId] ||
-                        !consumerSpec.methods[mapping.targetId]) {
+                    if (!providerSpec.methods[sourceMethodId] || !consumerSpec.methods[mapping.targetId]) {
                         //Some methods are gone - ignore and remove
                         return;
                     }
@@ -153,33 +157,33 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 });
 
                 return newMapping;
-            }
-        }
+            },
+        },
     ],
     getCounterValue,
     hasMethod,
     resolveEntities: (resource) => {
-        return resolveEntities({resource, entities: []})
+        return resolveEntities({resource, entities: []});
     },
     validate: (resource, entities) => {
-        return validate({resource, entities})
+        return validate({resource, entities});
     },
     definition: {
         kind: 'core/resource-type-internal',
         metadata: {
             name: 'kapeta/resource-type-rest-client',
             title: 'REST Client',
-            description: 'Provides REST Clients in your plans'
+            description: 'Provides REST Clients in your plans',
         },
         spec: {
             ports: [
                 {
                     name: 'rest',
-                    type: 'rest'
-                }
-            ]
-        }
-    }
+                    type: 'rest',
+                },
+            ],
+        },
+    },
 };
 
 export default RestClientConfig;

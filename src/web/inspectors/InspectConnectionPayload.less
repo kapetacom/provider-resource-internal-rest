@@ -1,6 +1,5 @@
-@import "~@kapeta/ui-web-components/styles/values";
-@import "~@kapeta/ui-web-components/styles/functions.less";
-
+@import '~@kapeta/ui-web-components/styles/values';
+@import '~@kapeta/ui-web-components/styles/functions.less';
 
 .inspect-connection-payload {
     font-size: 12px;
@@ -8,21 +7,21 @@
     .overview {
         .container();
 
-        margin-bottom:15px;
+        margin-bottom: 15px;
         font-size: 16px;
-        border:1px solid @gray;
-        padding:10px;
+        border: 1px solid @gray;
+        padding: 10px;
         background-color: @gray-xlight;
 
         span {
             display: inline-block;
-            padding:5px;
+            padding: 5px;
         }
 
         .method {
             font-weight: 500;
             padding-right: 3px;
-            color:@blue-dark;
+            color: @blue-dark;
             line-height: 28px;
         }
 
@@ -32,7 +31,7 @@
         }
 
         .status {
-            border:1px solid @gray;
+            border: 1px solid @gray;
             float: right;
             background-color: white;
             font-size: 12px;
@@ -41,24 +40,25 @@
                 font-weight: bold;
             }
         }
-
     }
 
     table {
         table-layout: fixed;
-        width:100%;
+        width: 100%;
         border-right: 1px solid @gray;
         border-left: 1px solid @gray;
 
-        td, th {
-            padding:5px;
+        td,
+        th {
+            padding: 5px;
             border-bottom: 1px solid @gray;
             text-align: left;
             font-size: inherit;
         }
 
         tr:first-child {
-            th,td {
+            th,
+            td {
                 border-top: 1px solid @gray;
             }
         }
@@ -72,14 +72,13 @@
         }
 
         tbody {
-
             tr:nth-child(2n) {
                 background-color: @gray-light;
             }
         }
 
         th {
-            width:120px;
+            width: 120px;
             font-weight: 500;
         }
 
@@ -87,14 +86,14 @@
             th {
                 text-align: right;
                 &:after {
-                    content:':'
+                    content: ':';
                 }
             }
         }
     }
 
     pre.body {
-        padding:15px;
+        padding: 15px;
         background-color: @gray-light;
     }
 }

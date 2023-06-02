@@ -1,33 +1,37 @@
-import React, { Component } from "react";
-import { observer } from "mobx-react";
+import React, {Component} from 'react';
+import {observer} from 'mobx-react';
 
-import {ResourceRole, Traffic} from "@kapeta/ui-web-types";
+import {ResourceRole, Traffic} from '@kapeta/ui-web-types';
 
-import { countdown } from "@kapeta/ui-web-utils";
-import {toClass, httpStatusPhrase} from "@kapeta/ui-web-utils";
+import {countdown} from '@kapeta/ui-web-utils';
+import {toClass, httpStatusPhrase} from '@kapeta/ui-web-utils';
 
-import byteSize from 'byte-size'
+import byteSize from 'byte-size';
 
-import "./InspectConnectionTraffic.less";
+import './InspectConnectionTraffic.less';
 
 countdown.setLabels(
     ' ms| s| min| h| day| week| mth| yr| decade| century| millennium',
     ' ms| s| min| hrs| days| weeks| mths| yrs| decades| centuries| millennia',
-    ', ',' and ','','','');
+    ', ',
+    ' and ',
+    '',
+    '',
+    ''
+);
 
 interface InspectMethodTrafficProps {
-    trafficLines: Traffic[],
-    providerMethod:string
-    onTrafficClick:(traffic:Traffic)=>void
+    trafficLines: Traffic[];
+    providerMethod: string;
+    onTrafficClick: (traffic: Traffic) => void;
 }
 
 @observer
-export default class InspectConnectionTraffic extends Component<InspectMethodTrafficProps>{
+export default class InspectConnectionTraffic extends Component<InspectMethodTrafficProps> {
     sender: ResourceRole = ResourceRole.CONSUMES;
 
     render() {
-
-        function asTime(traffic:Traffic) {
+        function asTime(traffic: Traffic) {
             let endTime = traffic.ended;
             if (!endTime) {
                 endTime = new Date().getTime();
@@ -36,29 +40,21 @@ export default class InspectConnectionTraffic extends Component<InspectMethodTra
             return '' + countdown(traffic.created, endTime, countdown.MINUTES, null, null);
         }
 
-        function asByte(traffic:Traffic) {
-
-            if (traffic.response &&
-                traffic.response.headers &&
-                traffic.response.headers['content-length']) {
-                const {value,unit} = byteSize(traffic.response.headers['content-length']);
+        function asByte(traffic: Traffic) {
+            if (traffic.response && traffic.response.headers && traffic.response.headers['content-length']) {
+                const {value, unit} = byteSize(traffic.response.headers['content-length']);
                 return `${value} ${unit}`;
             }
 
             return '-';
-
         }
 
-        function asType(traffic:Traffic) {
-
-            if (traffic.response &&
-                traffic.response.headers &&
-                traffic.response.headers['content-type']) {
+        function asType(traffic: Traffic) {
+            if (traffic.response && traffic.response.headers && traffic.response.headers['content-type']) {
                 return traffic.response.headers['content-type'];
             }
 
             return 'Unknown';
-
         }
 
         return (
@@ -79,40 +75,38 @@ export default class InspectConnectionTraffic extends Component<InspectMethodTra
                             {this.props.trafficLines.map((traffic, index) => {
                                 return (
                                     <tr onClick={() => this.props.onTrafficClick(traffic)}>
-                                        <td className={'name'}>
-                                            {traffic.request.url}
+                                        <td className={'name'}>{traffic.request.url}</td>
+                                        <td className={'type'}>{asType(traffic)}</td>
+                                        <td className={'method'}>{traffic.request.method.toUpperCase()}</td>
+                                        <td
+                                            className={toClass({
+                                                status: true,
+                                                pending: !traffic.response,
+                                            })}
+                                        >
+                                            {traffic.response ? (
+                                                traffic.response.code
+                                            ) : (
+                                                <i className="fa fa-circle-notch fa-spin" />
+                                            )}
+                                            {traffic.response ? (
+                                                <>
+                                                    <br />
+                                                    {httpStatusPhrase(traffic.response.code)}
+                                                </>
+                                            ) : (
+                                                ''
+                                            )}
                                         </td>
-                                        <td className={'type'}>
-                                            {asType(traffic)}
-                                        </td>
-                                        <td className={'method'}>
-                                            {traffic.request.method.toUpperCase()}
-                                        </td>
-                                        <td className={toClass({
-                                            'status': true,
-                                            'pending': !traffic.response
-                                        })}>
-                                            {traffic.response ? traffic.response.code :
-                                                <i className="fa fa-circle-notch fa-spin"/> }
-                                            {traffic.response ?
-                                                <><br/>{httpStatusPhrase(traffic.response.code)}</>
-                                                : ''}
-                                        </td>
-                                        <td className={'size'}>
-                                            {asByte(traffic)}
-                                        </td>
-                                        <td className={'time'}>
-                                            {asTime(traffic)}
-                                        </td>
+                                        <td className={'size'}>{asByte(traffic)}</td>
+                                        <td className={'time'}>{asTime(traffic)}</td>
                                     </tr>
-                                )
+                                );
                             })}
-
                         </tbody>
                     </table>
-
                 </div>
             </>
-        )
+        );
     }
 }
