@@ -1,4 +1,3 @@
-import {action, makeObservable, observable, toJS} from 'mobx';
 import {showToasty, ToastType} from '@kapeta/ui-web-components';
 import {getCompatibleRESTMethodsIssues, RESTResourceSpec} from '../types';
 import type {RESTMethodEdit, RESTKindContext} from '../types';
@@ -10,21 +9,16 @@ import {ConnectionMethodMappingType, ConnectionMethodsMapping} from '@kapeta/ui-
 import {EventEmitter} from 'events';
 
 export class MappingHandler extends EventEmitter {
-    @observable
     public readonly methods: MappedMethod[];
-
-    @observable
     private readonly source: RESTKindContext;
-
-    @observable
     private readonly target: RESTKindContext;
 
     constructor(methods: MappedMethod[], source: RESTKindContext, target: RESTKindContext) {
         super();
-        makeObservable(this);
-        this.source = toJS(source);
-        this.target = toJS(target);
-        this.methods = toJS(methods);
+
+        this.source = source;
+        this.target = target;
+        this.methods = methods;
     }
 
     public isValid(): boolean {
@@ -41,10 +35,10 @@ export class MappingHandler extends EventEmitter {
 
     public toData() {
         return {
-            source: toJS(this.source.resource),
-            sourceEntities: toJS(this.source.entities),
-            target: toJS(this.target.resource),
-            targetEntities: toJS(this.target.entities),
+            source: this.source.resource,
+            sourceEntities: this.source.entities,
+            target: this.target.resource,
+            targetEntities: this.target.entities,
             data: this.toMappingData(),
         };
     }
@@ -84,14 +78,13 @@ export class MappingHandler extends EventEmitter {
         return !!this.methods[ix].target;
     }
 
-    @action
     public addToTarget(ix: number): void {
         const source = this.methods[ix].source;
         if (!source) {
             return;
         }
 
-        const newTarget = {...toJS(source), copyOf: source};
+        const newTarget = {...source, copyOf: source};
 
         const {issues, entitiesToBeAdded} = getEntitiesToBeAddedForCopy(
             {method: source, entities: this.source.entities},
@@ -117,14 +110,13 @@ export class MappingHandler extends EventEmitter {
         this.triggerChange();
     }
 
-    @action
     public addToSource(ix: number): void {
         const target = this.methods[ix].target;
         if (!target) {
             return;
         }
 
-        const newSource = {...toJS(target), copyOf: target};
+        const newSource = {...target, copyOf: target};
 
         const {issues, entitiesToBeAdded} = getEntitiesToBeAddedForCopy(
             {method: target, entities: this.target.entities},
@@ -151,7 +143,6 @@ export class MappingHandler extends EventEmitter {
         this.triggerChange();
     }
 
-    @action
     public removeTarget(ix: number): void {
         const target = this.methods[ix].target;
         if (!target) {
@@ -171,7 +162,6 @@ export class MappingHandler extends EventEmitter {
         this.triggerChange();
     }
 
-    @action
     public removeSource(ix: number): void {
         const method = this.methods[ix];
         const source = method.source;
@@ -200,7 +190,6 @@ export class MappingHandler extends EventEmitter {
         this.triggerChange();
     }
 
-    @action
     public addMappingForTarget(ix: number, source: RESTMethodEdit) {
         const target = this.methods[ix].target;
         if (!target) {

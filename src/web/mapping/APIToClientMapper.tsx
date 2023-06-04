@@ -1,7 +1,5 @@
-import React, {Component} from 'react';
-import _ from 'lodash';
-import {observer} from 'mobx-react';
-import {action, makeObservable, observable, toJS} from 'mobx';
+import React, {useState, useEffect, useCallback} from 'react';
+import {isEmpty} from 'lodash';
 import type {RESTMethodEdit, RESTResource, RESTResourceSpec} from '../types';
 import type {MappedMethod, MappingHandlerContext} from './types';
 import {ItemTypes} from './types';
@@ -28,67 +26,79 @@ interface RestResourceToClientMapperProps
     target: RESTResource;
 }
 
-@observer
-export default class APIToClientMapper extends Component<RestResourceToClientMapperProps, any> {
-    @observable
-    private mappingHandler: MappingHandler;
-
-    @observable
-    private handlerContext: MappingHandlerContext = {
+const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
+    title,
+    source,
+    sourceEntities,
+    target,
+    targetEntities,
+    value,
+    onDataChanged,
+}) => {
+    const [mappingHandler, setMappingHandler] = useState(
+        // We just init this to avoid having to null-check everywhere
+        new MappingHandler([], toRESTKindContext(source, sourceEntities), toRESTKindContext(target, targetEntities))
+    );
+    const [handlerContext, setHandlerContext] = useState<MappingHandlerContext>({
         clientWasEmpty: false,
         serverWasEmpty: false,
         sourceName: '',
         targetName: '',
         issues: [],
         warnings: [],
-    };
+    });
 
-    constructor(props: RestResourceToClientMapperProps) {
-        super(props);
-        makeObservable(this);
-
-        const sourceContext = toRESTKindContext(this.props.source, this.props.sourceEntities);
-
-        const targetContext = toRESTKindContext(this.props.target, this.props.targetEntities);
-
-        //We just init this to avoid having to null-check everywhere
-        this.mappingHandler = new MappingHandler([], sourceContext, targetContext);
-    }
-
-    private hasValidValue() {
-        return this.props.value && !_.isEmpty(this.props.value);
-    }
-
-    private createMappingHandler(): MappingHandler {
-        const sourceContext = toRESTKindContext(this.props.source, this.props.sourceEntities);
-
-        const targetContext = toRESTKindContext(this.props.target, this.props.targetEntities);
-
-        const builder = new MappingHandlerBuilder(sourceContext, targetContext);
-
-        const result = builder.build(this.props.value);
-
-        this.handlerContext = result;
-        return result.handler;
-    }
-
-    private isValid() {
-        if (this.handlerContext.issues.length > 0) {
+    const isValid = () => {
+        if (handlerContext.issues.length > 0) {
             return false;
         }
 
-        return this.mappingHandler.isValid();
-    }
+        return mappingHandler.isValid();
+    };
 
-    private triggerChange() {
-        if (!this.props.onDataChanged) {
-            return;
+    const createMappingHandler = (): MappingHandler => {
+        const sourceContext = toRESTKindContext(source, sourceEntities);
+        const targetContext = toRESTKindContext(target, targetEntities);
+        const builder = new MappingHandlerBuilder(sourceContext, targetContext);
+        const result = builder.build(value);
+
+        setHandlerContext(result);
+
+        return result.handler;
+    };
+
+    // forceUpdate is used to nudge React to re-render. This is needed when
+    // MappingHandlers internal state changes. MappingHandler is not a React
+    // component and doesn't have access to the React state.
+    const [, updateState] = useState({});
+    const forceUpdate = useCallback(() => updateState({}), []);
+
+    // On mount
+    useEffect(() => {
+        const onMappingChanged = () => {
+            if (onDataChanged) {
+                onDataChanged(mappingHandler.toData());
+            }
+            forceUpdate();
+        };
+
+        const newMappingHandler = createMappingHandler();
+        newMappingHandler.on('change', onMappingChanged);
+
+        const hasValidValue = value && !isEmpty(value);
+        if (!hasValidValue) {
+            onMappingChanged();
         }
 
-        this.props.onDataChanged(toJS(this.mappingHandler.toData()));
-    }
+        setMappingHandler(newMappingHandler);
+    }, []);
 
-    private renderInnerSourceColumn(ix: number, mappedMethod: MappedMethod, draggable: boolean, droppable: boolean) {
+    const renderInnerSourceColumn = (
+        ix: number,
+        mappedMethod: MappedMethod,
+        draggable: boolean,
+        droppable: boolean
+    ) => {
         const sourceClassNames = ['source'];
 
         if (draggable) {
@@ -111,20 +121,20 @@ export default class APIToClientMapper extends Component<RestResourceToClientMap
                             type={'button'}
                             className={'button icon danger'}
                             title={'Disconnect'}
-                            onClick={() => this.mappingHandler.removeSource(ix)}
+                            onClick={() => mappingHandler.removeSource(ix)}
                         >
                             <i className={'fas fa-times'} />
                         </button>
                     </div>
                 )}
 
-                {!mappedMethod.mapped && !droppable && this.mappingHandler.canAddToTarget(ix) && (
+                {!mappedMethod.mapped && !droppable && mappingHandler.canAddToTarget(ix) && (
                     <div className={'actions'}>
                         <button
                             type={'button'}
                             className={'button icon friendly'}
                             title={'Add'}
-                            onClick={() => this.mappingHandler.addToTarget(ix)}
+                            onClick={() => mappingHandler.addToTarget(ix)}
                         >
                             <i className={'fas fa-plus'} />
                         </button>
@@ -132,9 +142,9 @@ export default class APIToClientMapper extends Component<RestResourceToClientMap
                 )}
             </div>
         );
-    }
+    };
 
-    private renderSourceColumn(ix: number, mappedMethod: MappedMethod) {
+    const renderSourceColumn = (ix: number, mappedMethod: MappedMethod) => {
         const draggable: boolean = !!mappedMethod.source && !mappedMethod.mapped;
         const dropZone: boolean = !mappedMethod.source && !!mappedMethod.target;
 
@@ -142,10 +152,10 @@ export default class APIToClientMapper extends Component<RestResourceToClientMap
             return (
                 <DnDDrop
                     type={ItemTypes.API_METHOD}
-                    droppable={(source: RESTMethodEdit) => this.mappingHandler.canDropOnTarget(ix, source)}
-                    onDrop={(type, source: RESTMethodEdit) => this.mappingHandler.addMappingForTarget(ix, source)}
+                    droppable={(source: RESTMethodEdit) => mappingHandler.canDropOnTarget(ix, source)}
+                    onDrop={(type, source: RESTMethodEdit) => mappingHandler.addMappingForTarget(ix, source)}
                 >
-                    {this.renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}
+                    {renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}
                 </DnDDrop>
             );
         }
@@ -153,138 +163,119 @@ export default class APIToClientMapper extends Component<RestResourceToClientMap
         if (draggable) {
             return (
                 <DnDDrag type={ItemTypes.API_METHOD} value={mappedMethod.source} horizontal={false}>
-                    {this.renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}
+                    {renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}
                 </DnDDrag>
             );
         }
 
-        return <>{this.renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}</>;
-    }
+        return <>{renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}</>;
+    };
 
-    componentDidMount() {
-        this.refreshMethods();
-    }
-
-    @action
-    private refreshMethods() {
-        this.mappingHandler = this.createMappingHandler();
-        this.mappingHandler.on('change', () => this.triggerChange());
-
-        if (!this.hasValidValue()) {
-            this.triggerChange();
-        }
-    }
-
-    render() {
-        return (
-            <div className={'rest-resource-to-client-mapper'}>
-                <FormReadyHandler name={this.props.title} ready={this.isValid()}>
-                    {this.handlerContext.issues.length > 0 && (
-                        <div className={'issues'}>
-                            <DangerIcon />
-                            <div className={'content'}>
-                                <div>
-                                    Identified the following incompatibility issues with entities in this connection:
-                                </div>
-                                <ul>
-                                    {this.handlerContext.issues.map((error, ix) => {
-                                        return <li key={`error_${ix}`}>{error}</li>;
-                                    })}
-                                </ul>
-                                <div>You'll need to correct these issues before you can fully map this connection.</div>
-                            </div>
-                        </div>
-                    )}
-
-                    {this.handlerContext.warnings.length > 0 && (
-                        <div className={'warnings'}>
-                            <div>The following warnings were encountered when reading connection mapping:</div>
-                            <div className={'content'}>
-                                <ul>
-                                    {this.handlerContext.warnings.map((error, ix) => {
-                                        return <li key={`error_${ix}`}>{error}</li>;
-                                    })}
-                                </ul>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className={'header'}>
-                        <div className={'source'}>{this.handlerContext.sourceName}: REST API</div>
-                        <div className={'mapping-seperator'}></div>
-                        <div className={'target'}>{this.handlerContext.targetName}: REST Client</div>
-                    </div>
-                    <DnDContainer>
+    return (
+        <div className={'rest-resource-to-client-mapper'}>
+            <FormReadyHandler name={title} ready={isValid()}>
+                {handlerContext.issues.length > 0 && (
+                    <div className={'issues'}>
+                        <DangerIcon />
                         <div className={'content'}>
-                            {this.mappingHandler.methods.map((method, ix) => {
-                                const methodMappingClassName = ['method-mapping'];
+                            <div>Identified the following incompatibility issues with entities in this connection:</div>
+                            <ul>
+                                {handlerContext.issues.map((error, ix) => {
+                                    return <li key={`error_${ix}`}>{error}</li>;
+                                })}
+                            </ul>
+                            <div>You'll need to correct these issues before you can fully map this connection.</div>
+                        </div>
+                    </div>
+                )}
 
-                                methodMappingClassName.push(method.mapped ? 'mapped' : 'unmapped');
+                {handlerContext.warnings.length > 0 && (
+                    <div className={'warnings'}>
+                        <div>The following warnings were encountered when reading connection mapping:</div>
+                        <div className={'content'}>
+                            <ul>
+                                {handlerContext.warnings.map((error, ix) => {
+                                    return <li key={`error_${ix}`}>{error}</li>;
+                                })}
+                            </ul>
+                        </div>
+                    </div>
+                )}
 
-                                if (!method.source && method.target) {
-                                    methodMappingClassName.push('unmapped-source');
-                                }
+                <div className={'header'}>
+                    <div className={'source'}>{handlerContext.sourceName}: REST API</div>
+                    <div className={'mapping-seperator'}></div>
+                    <div className={'target'}>{handlerContext.targetName}: REST Client</div>
+                </div>
+                <DnDContainer>
+                    <div className={'content'}>
+                        {mappingHandler.methods.map((method, ix) => {
+                            const methodMappingClassName = ['method-mapping'];
 
-                                if (!method.target && method.source) {
-                                    methodMappingClassName.push('unmapped-target');
-                                }
+                            methodMappingClassName.push(method.mapped ? 'mapped' : 'unmapped');
 
-                                return (
-                                    <div key={ix} className={methodMappingClassName.join(' ')}>
-                                        {this.renderSourceColumn(ix, method)}
+                            if (!method.source && method.target) {
+                                methodMappingClassName.push('unmapped-source');
+                            }
 
-                                        <div className={'mapping-seperator'}>
-                                            {method.mapped && (
-                                                <i title={'Mapped succesfully'} className={'fas fa-chevron-right'} />
-                                            )}
+                            if (!method.target && method.source) {
+                                methodMappingClassName.push('unmapped-target');
+                            }
 
-                                            {!method.source && method.target && (
-                                                <i
-                                                    title={'Missing mapping'}
-                                                    className={'fas fa-exclamation-triangle'}
-                                                />
-                                            )}
-                                        </div>
-                                        <div className={'target'}>
-                                            {method.target && (
-                                                <>
-                                                    <RestMethodView compact={true} method={method.target} />
-                                                    {method.source && method.target.copyOf && (
+                            return (
+                                <div key={ix} className={methodMappingClassName.join(' ')}>
+                                    {renderSourceColumn(ix, method)}
+
+                                    <div className={'mapping-seperator'}>
+                                        {method.mapped && (
+                                            <i title={'Mapped succesfully'} className={'fas fa-chevron-right'} />
+                                        )}
+
+                                        {!method.source && method.target && (
+                                            <i title={'Missing mapping'} className={'fas fa-exclamation-triangle'} />
+                                        )}
+                                    </div>
+                                    <div className={'target'}>
+                                        {method.target && (
+                                            <>
+                                                <RestMethodView compact={true} method={method.target} />
+                                                {method.source && method.target.copyOf && (
+                                                    <div className={'actions'}>
+                                                        <button
+                                                            type={'button'}
+                                                            className={'button icon danger'}
+                                                            title={'Remove method'}
+                                                            onClick={() => mappingHandler.removeTarget(ix)}
+                                                        >
+                                                            <i className={'fas fa-times'} />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {!method.source &&
+                                                    !method.target.copyOf &&
+                                                    handlerContext.serverWasEmpty && (
                                                         <div className={'actions'}>
                                                             <button
                                                                 type={'button'}
-                                                                className={'button icon danger'}
-                                                                title={'Remove method'}
-                                                                onClick={() => this.mappingHandler.removeTarget(ix)}
+                                                                className={'button icon friendly'}
+                                                                title={'Add'}
+                                                                onClick={() => mappingHandler.addToSource(ix)}
                                                             >
-                                                                <i className={'fas fa-times'} />
+                                                                <i className={'fas fa-plus'} />
                                                             </button>
                                                         </div>
                                                     )}
-                                                    {!method.source &&
-                                                        !method.target.copyOf &&
-                                                        this.handlerContext.serverWasEmpty && (
-                                                            <div className={'actions'}>
-                                                                <button
-                                                                    type={'button'}
-                                                                    className={'button icon friendly'}
-                                                                    title={'Add'}
-                                                                    onClick={() => this.mappingHandler.addToSource(ix)}
-                                                                >
-                                                                    <i className={'fas fa-plus'} />
-                                                                </button>
-                                                            </div>
-                                                        )}
-                                                </>
-                                            )}
-                                        </div>
+                                            </>
+                                        )}
                                     </div>
-                                );
-                            })}
-                        </div>
-                    </DnDContainer>
-                </FormReadyHandler>
-            </div>
-        );
-    }
-}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </DnDContainer>
+            </FormReadyHandler>
+        </div>
+    );
+};
+
+export default APIToClientMapper;

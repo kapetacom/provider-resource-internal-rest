@@ -1,11 +1,5 @@
 import {MappingHandler} from './MappingHandler';
-import {
-    convertAllToEditMethods,
-    isCompatibleRESTMethods,
-    RESTKindContext,
-    RESTMethodEdit,
-    RESTResource,
-} from '../types';
+import {convertAllToEditMethods, isCompatibleRESTMethods, RESTKindContext, RESTMethodEdit} from '../types';
 import {
     createEqualMapping,
     createSourceOnlyMapping,
@@ -20,7 +14,7 @@ import {
     getEntitiesToBeAddedForCopy,
     mappedMethodSorter,
 } from './MappingUtils';
-import _ from 'lodash';
+import {isEmpty} from 'lodash';
 import {ConnectionMethodMappingType, ConnectionMethodsMapping} from '@kapeta/ui-web-types';
 import {setRESTMethod} from '../RESTUtils';
 
@@ -58,7 +52,7 @@ export class MappingHandlerBuilder {
     }
 
     private isValidValue(value?: ConnectionMethodsMapping): boolean {
-        return !!(value && !_.isEmpty(value));
+        return !!(value && !isEmpty(value));
     }
 
     public build(value?: ConnectionMethodsMapping): BuildResult {
