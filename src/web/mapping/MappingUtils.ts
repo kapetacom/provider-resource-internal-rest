@@ -25,7 +25,7 @@ export function determineEntityIssues(source: RESTKindContext, target: RESTKindC
             return;
         }
         if (!targetEntity) {
-            //Not a problem - we can add it
+            // Not a problem - we can add it
             return;
         }
 
@@ -50,7 +50,7 @@ export function determineEntityIssues(source: RESTKindContext, target: RESTKindC
         }
 
         if (!sourceEntity) {
-            //Not a problem - we can add it
+            // Not a problem - we can add it
             return;
         }
 
@@ -99,7 +99,7 @@ export function getCompatibleMethodsAndEntities(
             method: sourceMethod,
             entities: [...bContext.entities, ...compatibleEntities],
         };
-        //Check if the methods are compatible
+        // Check if the methods are compatible
         if (isCompatibleRESTMethods(sourceMethodContext, targetMethodContext)) {
             compatibleMethods.push({...sourceMethod, copyOf: sourceMethod});
         }
@@ -125,7 +125,8 @@ export function copyMethods(methods: RESTMethodEdit[]): RESTMethodMappingEdit[] 
 }
 
 /**
- * Gets all entities that can and should be added from one entity list (aEntities) to another (bEntities)
+ * Gets all entities that can and should be added from one entity list
+ * (aEntities) to another (bEntities)
  */
 export function getCompatibleEntitiesForList(entityNames: string[], aEntities: Entity[], bEntities: Entity[]) {
     const issues: string[] = [];
@@ -148,7 +149,7 @@ export function getCompatibleEntitiesForList(entityNames: string[], aEntities: E
     });
 
     entitiesToBeAdded = entitiesToBeAdded.filter((newEntity) => {
-        //We do this to make sure any sub types are available
+        // We do this to make sure any sub types are available
         return isSchemaEntityCompatible(newEntity, newEntity, aEntities, [...bEntities, ...entitiesToBeAdded]);
     });
 
@@ -156,8 +157,8 @@ export function getCompatibleEntitiesForList(entityNames: string[], aEntities: E
 }
 
 /**
- * Gets all the entities in use by a method that needs to be added to the bEntities to be able to copy method
- *
+ * Gets all the entities in use by a method that needs to be added to the
+ * bEntities to be able to copy method
  */
 export function getEntitiesToBeAddedForCopy(aContext: RESTMethodEditContext, bContext: RESTMethodEditContext) {
     const usedEntityNames = resolveEntitiesFromMethod(aContext);

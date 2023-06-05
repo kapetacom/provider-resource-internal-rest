@@ -58,7 +58,7 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 const oldMapping = connectionMapping;
                 _.forEach(oldMapping, (mapping, sourceMethodId) => {
                     if (!providerSpec.methods[sourceMethodId]) {
-                        //Some methods are gone - ignore and remove
+                        // Some methods are gone - ignore and remove
                         errors.push('Missing source method');
                         return;
                     }
@@ -149,7 +149,7 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 const oldMapping = connectionMapping;
                 _.forEach(oldMapping, (mapping, sourceMethodId) => {
                     if (!providerSpec.methods[sourceMethodId] || !consumerSpec.methods[mapping.targetId]) {
-                        //Some methods are gone - ignore and remove
+                        // Some methods are gone - ignore and remove
                         return;
                     }
 

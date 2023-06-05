@@ -24,7 +24,7 @@ export const hasMethod = (data: Resource, methodId: string): boolean => {
 
 export const validate = (context: RESTKindContext): string[] => {
     const errors: string[] = [];
-    let entityNames = resolveEntities(context);
+    const entityNames = resolveEntities(context);
 
     const missingEntities = entityNames.filter((entityName) => {
         return !context.entities.some((entity) => entity.name === entityName);
@@ -163,7 +163,7 @@ export function deleteRESTMethod(spec: RESTResourceSpec, id: string) {
 }
 
 export function convertRESTToDSLSource(spec: RESTResourceSpec): TypedValue {
-    let dslMethods = DSLConverters.fromSchemaMethods(spec.methods);
+    const dslMethods = DSLConverters.fromSchemaMethods(spec.methods);
     return {
         type: DSL_LANGUAGE_ID,
         value: DSLWriter.write(dslMethods),

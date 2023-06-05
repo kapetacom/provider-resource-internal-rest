@@ -1,5 +1,4 @@
-import _ from 'lodash';
-
+import {cloneDeep, forEach} from 'lodash';
 import {HTTPMethod, TypedValue, RESTMethod, TypeLike} from '@kapeta/ui-web-types';
 import {Entity, getCompatibilityIssuesForTypes, isCompatibleTypes, Resource, ResourceSpec} from '@kapeta/schemas';
 
@@ -52,7 +51,7 @@ export function toRESTKindContext(resource: RESTResource, entities: Entity[]): R
 
 export function convertAllToEditMethods(resource: RESTResource): RESTMethodEdit[] {
     const out: RESTMethodEdit[] = [];
-    _.forEach(resource.spec.methods, (method, methodId) => {
+    forEach(resource.spec.methods, (method, methodId) => {
         out.push(convertToEditMethod(methodId, method));
     });
 
@@ -69,7 +68,7 @@ export function convertToEditMethod(id: string, method: RESTMethod): RESTMethodE
         responseType: method.responseType,
     };
 
-    _.forEach(method.arguments, (arg, id) => {
+    forEach(method.arguments, (arg, id) => {
         tmp.arguments.push({...arg, id});
     });
 
@@ -77,14 +76,14 @@ export function convertToEditMethod(id: string, method: RESTMethod): RESTMethodE
 }
 
 export function convertToRestMethod(method: RESTMethodEdit): RESTMethod {
-    const tmp: any = {..._.cloneDeep(method), arguments: {}};
+    const tmp: any = {...cloneDeep(method), arguments: {}};
     delete tmp.copyOf;
     delete tmp.id;
 
     const args = {};
 
     method.arguments.forEach((argument) => {
-        args[argument.id] = _.cloneDeep(argument);
+        args[argument.id] = cloneDeep(argument);
         delete args[argument.id].id;
     });
 
@@ -125,6 +124,6 @@ export function isCompatibleRESTMethods(a: RESTMethodEditContext, b: RESTMethodE
     return getCompatibleRESTMethodsIssues(a, b).length === 0;
 }
 
-export let KIND_REST_API = 'kapeta/resource-type-rest-api';
+export const KIND_REST_API = 'kapeta/resource-type-rest-api';
 
-export let KIND_REST_CLIENT = 'kapeta/resource-type-rest-client';
+export const KIND_REST_CLIENT = 'kapeta/resource-type-rest-client';
