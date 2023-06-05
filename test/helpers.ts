@@ -36,7 +36,7 @@ function toTypeLike(type: TypeOrString): TypeLike {
 }
 
 export function makeMethod(args: TypeOrString[] = [], responseType?: TypeOrString): RESTMethod {
-    const argMap = {};
+    const argMap: Record<string, RESTMethodArgument> = {};
     args.forEach((type, ix) => {
         const typeLike = toTypeLike(type);
         const arg: RESTMethodArgument = {

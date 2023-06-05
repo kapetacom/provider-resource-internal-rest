@@ -1,14 +1,12 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {isEmpty} from 'lodash';
+import React from 'react';
 import type {RESTMethodEdit, RESTResource, RESTResourceSpec} from '../types';
-import type {MappedMethod, MappingHandlerContext} from './types';
+import type {MappedMethod} from './types';
 import {ItemTypes} from './types';
 import {ConnectionMethodsMapping, ResourceTypeProviderMappingProps} from '@kapeta/ui-web-types';
 import {DnDContainer, DnDDrag, DnDDrop, FormReadyHandler} from '@kapeta/ui-web-components';
 import RestMethodView from '../RestMethodView';
-import {MappingHandler} from './MappingHandler';
-import {MappingHandlerBuilder} from './MappingHandlerBuilder';
 import {toRESTKindContext} from '../types';
+import {useMappingHandlerBuilder} from './useMappingHandlerBuilder';
 
 import './APIToClientMapper.less';
 
@@ -35,63 +33,14 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     value,
     onDataChanged,
 }) => {
-    const [mappingHandler, setMappingHandler] = useState(
-        // We just init this to avoid having to null-check everywhere
-        new MappingHandler([], toRESTKindContext(source, sourceEntities), toRESTKindContext(target, targetEntities))
+    const {mappingHandler, ...mappingHandlerContext} = useMappingHandlerBuilder(
+        toRESTKindContext(source, sourceEntities),
+        toRESTKindContext(target, targetEntities),
+        value,
+        onDataChanged
     );
-    const [handlerContext, setHandlerContext] = useState<MappingHandlerContext>({
-        clientWasEmpty: false,
-        serverWasEmpty: false,
-        sourceName: '',
-        targetName: '',
-        issues: [],
-        warnings: [],
-    });
 
-    const isValid = () => {
-        if (handlerContext.issues.length > 0) {
-            return false;
-        }
-
-        return mappingHandler.isValid();
-    };
-
-    const createMappingHandler = (): MappingHandler => {
-        const sourceContext = toRESTKindContext(source, sourceEntities);
-        const targetContext = toRESTKindContext(target, targetEntities);
-        const builder = new MappingHandlerBuilder(sourceContext, targetContext);
-        const result = builder.build(value);
-
-        setHandlerContext(result);
-
-        return result.handler;
-    };
-
-    // forceUpdate is used to nudge React to re-render. This is needed when
-    // MappingHandlers internal state changes. MappingHandler is not a React
-    // component and doesn't have access to the React state.
-    const [, updateState] = useState({});
-    const forceUpdate = useCallback(() => updateState({}), []);
-
-    // On mount
-    useEffect(() => {
-        const onMappingChanged = () => {
-            if (onDataChanged) {
-                onDataChanged(mappingHandler.toData());
-            }
-            forceUpdate();
-        };
-
-        const newMappingHandler = createMappingHandler();
-        newMappingHandler.on('change', onMappingChanged);
-
-        const hasValidValue = value && !isEmpty(value);
-        if (!hasValidValue) {
-            onMappingChanged();
-        }
-
-        setMappingHandler(newMappingHandler);
-    }, []);
+    const isValid = () => mappingHandlerContext.issues.length === 0 && mappingHandler.isValid();
 
     const renderInnerSourceColumn = (
         ix: number,
@@ -152,7 +101,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
             return (
                 <DnDDrop
                     type={ItemTypes.API_METHOD}
-                    droppable={(source: RESTMethodEdit) => mappingHandler.canDropOnTarget(ix, source)}
+                    droppable={() => mappingHandler.canDropOnTarget(ix)}
                     onDrop={(type, source: RESTMethodEdit) => mappingHandler.addMappingForTarget(ix, source)}
                 >
                     {renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}
@@ -174,27 +123,27 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     return (
         <div className={'rest-resource-to-client-mapper'}>
             <FormReadyHandler name={title} ready={isValid()}>
-                {handlerContext.issues.length > 0 && (
+                {mappingHandlerContext.issues.length > 0 && (
                     <div className={'issues'}>
                         <DangerIcon />
                         <div className={'content'}>
                             <div>Identified the following incompatibility issues with entities in this connection:</div>
                             <ul>
-                                {handlerContext.issues.map((error, ix) => {
+                                {mappingHandlerContext.issues.map((error, ix) => {
                                     return <li key={`error_${ix}`}>{error}</li>;
                                 })}
                             </ul>
-                            <div>You'll need to correct these issues before you can fully map this connection.</div>
+                            <div>{"You'll need to correct these issues before you can fully map this connection."}</div>
                         </div>
                     </div>
                 )}
 
-                {handlerContext.warnings.length > 0 && (
+                {mappingHandlerContext.warnings.length > 0 && (
                     <div className={'warnings'}>
                         <div>The following warnings were encountered when reading connection mapping:</div>
                         <div className={'content'}>
                             <ul>
-                                {handlerContext.warnings.map((error, ix) => {
+                                {mappingHandlerContext.warnings.map((error, ix) => {
                                     return <li key={`error_${ix}`}>{error}</li>;
                                 })}
                             </ul>
@@ -203,9 +152,9 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                 )}
 
                 <div className={'header'}>
-                    <div className={'source'}>{handlerContext.sourceName}: REST API</div>
+                    <div className={'source'}>{mappingHandlerContext.sourceName}: REST API</div>
                     <div className={'mapping-seperator'}></div>
-                    <div className={'target'}>{handlerContext.targetName}: REST Client</div>
+                    <div className={'target'}>{mappingHandlerContext.targetName}: REST Client</div>
                 </div>
                 <DnDContainer>
                     <div className={'content'}>
@@ -253,7 +202,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                                                 )}
                                                 {!method.source &&
                                                     !method.target.copyOf &&
-                                                    handlerContext.serverWasEmpty && (
+                                                    mappingHandlerContext.serverWasEmpty && (
                                                         <div className={'actions'}>
                                                             <button
                                                                 type={'button'}

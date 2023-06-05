@@ -1,5 +1,6 @@
-import {RESTMethodEdit} from '../types';
-import {ConnectionMethodMappingType} from '@kapeta/ui-web-types';
+import {Entity} from '@kapeta/schemas';
+import {RESTMethodEdit, RESTResource} from '../types';
+import {ConnectionMethodMappingType, ConnectionMethodsMapping} from '@kapeta/ui-web-types';
 
 export enum ItemTypes {
     API_METHOD = 'API_METHOD',
@@ -43,6 +44,14 @@ export interface MappingHandlerContext {
     targetName: string;
     sourceName: string;
 }
+
+export type MappingHandlerData = {
+    source: RESTResource;
+    sourceEntities: Entity[];
+    target: RESTResource;
+    targetEntities: Entity[];
+    data: ConnectionMethodsMapping;
+};
 
 export function createEqualMapping(
     sourceMethod: RESTMethodMappingEdit,
