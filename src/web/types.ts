@@ -1,5 +1,5 @@
-import {cloneDeep, forEach} from 'lodash';
-import {HTTPMethod, TypedValue, RESTMethod, TypeLike} from '@kapeta/ui-web-types';
+import {forEach} from 'lodash';
+import {HTTPMethod, TypedValue, RESTMethod, TypeLike, RESTMethodArgument} from '@kapeta/ui-web-types';
 import {Entity, getCompatibilityIssuesForTypes, isCompatibleTypes, Resource, ResourceSpec} from '@kapeta/schemas';
 
 export interface RESTResourceSpec extends ResourceSpec {
@@ -49,15 +49,6 @@ export function toRESTKindContext(resource: RESTResource, entities: Entity[]): R
     };
 }
 
-export function convertAllToEditMethods(resource: RESTResource): RESTMethodEdit[] {
-    const out: RESTMethodEdit[] = [];
-    forEach(resource.spec.methods, (method, methodId) => {
-        out.push(convertToEditMethod(methodId, method));
-    });
-
-    return out;
-}
-
 export function convertToEditMethod(id: string, method: RESTMethod): RESTMethodEdit {
     const tmp: RESTMethodEdit = {
         id,
@@ -68,28 +59,35 @@ export function convertToEditMethod(id: string, method: RESTMethod): RESTMethodE
         responseType: method.responseType,
     };
 
-    forEach(method.arguments, (arg, id) => {
-        tmp.arguments.push({...arg, id});
+    forEach(method.arguments, (arg, argId) => {
+        tmp.arguments.push({...arg, id: argId});
     });
 
     return tmp;
 }
 
-export function convertToRestMethod(method: RESTMethodEdit): RESTMethod {
-    const tmp: any = {...cloneDeep(method), arguments: {}};
-    delete tmp.copyOf;
-    delete tmp.id;
-
-    const args = {};
-
-    method.arguments.forEach((argument) => {
-        args[argument.id] = cloneDeep(argument);
-        delete args[argument.id].id;
+export function convertAllToEditMethods(resource: RESTResource): RESTMethodEdit[] {
+    const out: RESTMethodEdit[] = [];
+    forEach(resource.spec.methods, (method, methodId) => {
+        out.push(convertToEditMethod(methodId, method));
     });
 
-    tmp.arguments = args;
+    return out;
+}
 
-    return tmp;
+export function convertToRestMethod(method: RESTMethodEdit): RESTMethod {
+    const args: Record<string, RESTMethodArgument> = {};
+    method.arguments.forEach(({id, transport, type, ref}) => {
+        args[id] = {transport, type, ref};
+    });
+
+    return {
+        description: method.description,
+        method: method.method,
+        path: method.path,
+        arguments: args,
+        responseType: method.responseType,
+    } satisfies RESTMethod;
 }
 
 export function getCompatibleRESTMethodsIssues(
