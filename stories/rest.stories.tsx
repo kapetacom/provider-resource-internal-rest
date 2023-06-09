@@ -7,16 +7,16 @@ import {
     Traffic,
 } from '@kapeta/ui-web-types';
 
-import {Entity} from '@kapeta/schemas';
+import { Entity } from '@kapeta/schemas';
 
-import {RESTEditorComponent} from '../src/web/RESTEditorComponent';
-import {convertToEditMethod, RESTResource} from '../src/web/types';
+import { RESTEditorComponent } from '../src/web/RESTEditorComponent';
+import { convertToEditMethod, RESTResource } from '../src/web/types';
 import RestMethodView from '../src/web/RestMethodView';
 import APIToClientMapper from '../src/web/mapping/APIToClientMapper';
 import InspectConnectionContent from '../src/web/inspectors/InspectConnectionContent';
 
 import '@kapeta/ui-web-components/styles/index.less';
-import {FormContainer, ToastContainer} from '@kapeta/ui-web-components';
+import { FormContainer, ToastContainer } from '@kapeta/ui-web-components';
 
 const API_KIND = 'kapeta/resource-type-rest-api';
 const CLIENT_KIND = 'kapeta/resource-type-rest-client';
@@ -111,7 +111,7 @@ const getTaskMethod: RESTMethod = {
     path: '/tasks/{id}',
     method: HTTPMethod.GET,
     description: 'Get a task by id',
-    responseType: {ref: 'Task'},
+    responseType: { ref: 'Task' },
     arguments: {
         id: {
             transport: 'PATH',
@@ -155,7 +155,7 @@ const addSimpleTaskMethod: RESTMethod = {
 const deleteTaskMethod: RESTMethod = {
     path: '/tasks/{id}',
     method: HTTPMethod.DELETE,
-    responseType: {type: 'void'},
+    responseType: { type: 'void' },
     description: 'Deletes a task from the system',
     arguments: {
         id: {
@@ -316,14 +316,16 @@ const trafficLines: Traffic[] = [
 ];
 
 import './stories.less';
-import {BlockDefinition, EntityType} from '@kapeta/schemas/dist/cjs';
+import { BlockDefinition, EntityType } from '@kapeta/schemas/dist/cjs';
 
 export default {
     title: 'REST',
 };
 
 export const Editor = () => (
-    <div style={{padding: '10px', width: '850px', height: '100%', backgroundColor: 'white', border: '1px solid gray'}}>
+    <div
+        style={{ padding: '10px', width: '850px', height: '100%', backgroundColor: 'white', border: '1px solid gray' }}
+    >
         <FormContainer initialValue={RESTApiResource} onChange={(data) => console.log('Data changed', data)}>
             <RESTEditorComponent block={block} />
         </FormContainer>
@@ -337,7 +339,7 @@ export const MethodViewCompact = () => (
 );
 
 export const APIToClientMapperViewProblem = () => (
-    <div style={{padding: '25px', width: '750px', height: '100%'}}>
+    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -351,7 +353,7 @@ export const APIToClientMapperViewProblem = () => (
 );
 
 export const APIToClientMapperViewValueProblem = () => (
-    <div style={{padding: '25px', width: '750px', height: '100%'}}>
+    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -379,7 +381,7 @@ export const APIToClientMapperViewValueProblem = () => (
 );
 
 export const APIToClientMapperViewOK = () => (
-    <div style={{padding: '25px', width: '750px', height: '100%'}}>
+    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -393,7 +395,7 @@ export const APIToClientMapperViewOK = () => (
 );
 
 export const APIToClientMapperViewEmptyServerProblem = () => (
-    <div style={{padding: '25px', width: '750px', height: '100%'}}>
+    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -407,7 +409,7 @@ export const APIToClientMapperViewEmptyServerProblem = () => (
 );
 
 export const APIToClientMapperViewEmptyServerOK = () => (
-    <div style={{padding: '25px', width: '750px', height: '100%'}}>
+    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -421,7 +423,7 @@ export const APIToClientMapperViewEmptyServerOK = () => (
 );
 
 export const APIToClientMapperViewEmptyClientProblem = () => (
-    <div style={{padding: '25px', width: '750px', height: '100%'}}>
+    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -435,7 +437,7 @@ export const APIToClientMapperViewEmptyClientProblem = () => (
 );
 
 export const APIToClientMapperViewEmptyClientOK = () => (
-    <div style={{padding: '25px', width: '750px', height: '100%'}}>
+    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}

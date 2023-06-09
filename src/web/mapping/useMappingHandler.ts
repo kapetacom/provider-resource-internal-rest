@@ -1,11 +1,11 @@
-import {useCallback, useEffect, useState} from 'react';
-import {cloneDeep, find, pull} from 'lodash';
-import {ToastType, showToasty} from '@kapeta/ui-web-components';
-import {ConnectionMethodMappingType, ConnectionMethodsMapping} from '@kapeta/ui-web-types';
-import {RESTKindContext, RESTMethodEdit, RESTResourceSpec, getCompatibleRESTMethodsIssues} from '../types';
-import {MappedMethod, MappingHandlerData, createEqualMapping, createSourceOnlyMapping} from './types';
-import {getEntitiesToBeAddedForCopy} from './MappingUtils';
-import {deleteRESTMethod, setRESTMethod} from '../RESTUtils';
+import { useCallback, useEffect, useState } from 'react';
+import { cloneDeep, find, pull } from 'lodash';
+import { ToastType, showToasty } from '@kapeta/ui-web-components';
+import { ConnectionMethodMappingType, ConnectionMethodsMapping } from '@kapeta/ui-web-types';
+import { RESTKindContext, RESTMethodEdit, RESTResourceSpec, getCompatibleRESTMethodsIssues } from '../types';
+import { MappedMethod, MappingHandlerData, createEqualMapping, createSourceOnlyMapping } from './types';
+import { getEntitiesToBeAddedForCopy } from './MappingUtils';
+import { deleteRESTMethod, setRESTMethod } from '../RESTUtils';
 
 export const useMappingHandler = (
     initialMethods: MappedMethod[],
@@ -107,11 +107,11 @@ export const useMappingHandler = (
                 return;
             }
 
-            const newTarget = {...currentSource, copyOf: currentSource};
+            const newTarget = { ...currentSource, copyOf: currentSource };
 
-            const {issues, entitiesToBeAdded} = getEntitiesToBeAddedForCopy(
-                {method: currentSource, entities: source.entities},
-                {method: newTarget, entities: target.entities}
+            const { issues, entitiesToBeAdded } = getEntitiesToBeAddedForCopy(
+                { method: currentSource, entities: source.entities },
+                { method: newTarget, entities: target.entities }
             );
 
             if (issues.length > 0) {
@@ -149,11 +149,11 @@ export const useMappingHandler = (
                 return;
             }
 
-            const newSource = {...currentTarget, copyOf: currentTarget};
+            const newSource = { ...currentTarget, copyOf: currentTarget };
 
-            const {issues, entitiesToBeAdded} = getEntitiesToBeAddedForCopy(
-                {method: currentTarget, entities: target.entities},
-                {method: newSource, entities: source.entities}
+            const { issues, entitiesToBeAdded } = getEntitiesToBeAddedForCopy(
+                { method: currentTarget, entities: target.entities },
+                { method: newSource, entities: source.entities }
             );
 
             if (issues.length > 0) {
@@ -257,8 +257,8 @@ export const useMappingHandler = (
             }
 
             const errors = getCompatibleRESTMethodsIssues(
-                {method: currentTarget, entities: target.entities},
-                {method: sourceMethod, entities: source.entities}
+                { method: currentTarget, entities: target.entities },
+                { method: sourceMethod, entities: source.entities }
             );
 
             if (errors.length > 0) {
@@ -274,7 +274,7 @@ export const useMappingHandler = (
             methodsClone[ix].sourceId = sourceMethod.id;
             methodsClone[ix].mapped = true;
 
-            const existing = find(methodsClone, {source: sourceMethod, mapped: false});
+            const existing = find(methodsClone, { source: sourceMethod, mapped: false });
             pull(methodsClone, existing);
 
             setMethods(methodsClone);
