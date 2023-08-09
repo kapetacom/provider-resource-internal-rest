@@ -59,13 +59,17 @@ module.exports = {
     devtool: process.env.NODE_ENV === 'production' ? 'source-map' : 'inline-source-map',
     resolve: {
         extensions: ['.js', '.ts', '.tsx', '.less', '.yml', '.yaml'],
+        fallback: {
+            "path": require.resolve("path-browserify")
+        }
     },
     externals: {
-        react: 'React',
-        'mobx-react': 'MobXReact',
-        mobx: 'MobX',
-        lodash: '_',
+        'react': 'React',
+        'react-dom': 'ReactDOM',
+        'lodash': '_',
         '@kapeta/ui-web-components': 'Kapeta.Components',
         '@kapeta/ui-web-types': 'Kapeta.Types',
-    },
+        '@kapeta/ui-web-utils': 'Kapeta.Utils',
+        '@kapeta/ui-web-context': 'Kapeta.Context'
+    }
 };
