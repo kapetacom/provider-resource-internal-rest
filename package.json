@@ -39,6 +39,7 @@
         "@babel/preset-typescript": "^7.3.3",
         "@jest/globals": "^29.5.0",
         "@kapeta/eslint-config": "^0.6.1",
+        "@kapeta/prettier-config": "^0.6.0",
         "@kapeta/schemas": "<2",
         "@kapeta/ui-web-components": "<2",
         "@kapeta/ui-web-context": "<2",
