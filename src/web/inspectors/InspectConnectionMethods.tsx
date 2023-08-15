@@ -1,7 +1,7 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
-import {observer} from 'mobx-react';
-import type {Traffic, ConnectionMethodsMapping, HTTPResponse} from '@kapeta/ui-web-types';
+import { observer } from 'mobx-react';
+import type { Traffic, ConnectionMethodsMapping, HTTPResponse } from '@kapeta/ui-web-types';
 
 import './InspectConnectionMethods.less';
 
@@ -35,7 +35,7 @@ export default class InspectConnectionMethods extends Component<InspectConnectio
 
     private extractMethodsFromMapping(mapping: ConnectionMethodsMapping) {
         const methods: ConnectionMethod[] = [];
-        const methodStats: {[key: string]: ConnectionMethod} = {};
+        const methodStats: { [key: string]: ConnectionMethod } = {};
 
         if (!mapping) {
             return methods;

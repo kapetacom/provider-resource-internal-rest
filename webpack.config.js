@@ -30,11 +30,11 @@ module.exports = {
                     sourceMaps: true,
                     presets: ['@babel/env', '@babel/typescript', '@babel/react'],
                     plugins: [
-                        ['@babel/plugin-proposal-decorators', {legacy: true}],
-                        ['@babel/plugin-proposal-private-methods', {loose: true}],
-                        ['@babel/plugin-proposal-private-property-in-object', {loose: true}],
+                        ['@babel/plugin-proposal-decorators', { legacy: true }],
+                        ['@babel/plugin-proposal-private-methods', { loose: true }],
+                        ['@babel/plugin-proposal-private-property-in-object', { loose: true }],
 
-                        ['@babel/plugin-proposal-class-properties', {loose: true}],
+                        ['@babel/plugin-proposal-class-properties', { loose: true }],
                         '@babel/proposal-object-rest-spread',
                     ],
                 },
@@ -60,16 +60,16 @@ module.exports = {
     resolve: {
         extensions: ['.js', '.ts', '.tsx', '.less', '.yml', '.yaml'],
         fallback: {
-            "path": require.resolve("path-browserify")
-        }
+            path: require.resolve('path-browserify'),
+        },
     },
     externals: {
-        'react': 'React',
+        react: 'React',
         'react-dom': 'ReactDOM',
-        'lodash': '_',
+        lodash: '_',
         '@kapeta/ui-web-components': 'Kapeta.Components',
         '@kapeta/ui-web-types': 'Kapeta.Types',
         '@kapeta/ui-web-utils': 'Kapeta.Utils',
-        '@kapeta/ui-web-context': 'Kapeta.Context'
-    }
+        '@kapeta/ui-web-context': 'Kapeta.Context',
+    },
 };

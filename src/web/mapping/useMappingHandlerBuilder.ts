@@ -1,6 +1,6 @@
-import {useEffect, useReducer} from 'react';
-import {useMappingHandler} from './useMappingHandler';
-import {RESTKindContext, RESTMethodEdit, convertAllToEditMethods, isCompatibleRESTMethods} from '../types';
+import { useEffect, useReducer } from 'react';
+import { useMappingHandler } from './useMappingHandler';
+import { RESTKindContext, RESTMethodEdit, convertAllToEditMethods, isCompatibleRESTMethods } from '../types';
 import {
     MappedMethod,
     MappingHandlerContext,
@@ -10,15 +10,15 @@ import {
     createSourceOnlyMapping,
     createTargetOnlyMapping,
 } from './types';
-import {cloneDeep, isEmpty} from 'lodash';
-import {ConnectionMethodMappingType, ConnectionMethodsMapping} from '@kapeta/ui-web-types';
+import { cloneDeep, isEmpty } from 'lodash';
+import { ConnectionMethodMappingType, ConnectionMethodsMapping } from '@kapeta/ui-web-types';
 import {
     determineEntityIssues,
     getCompatibleMethodsAndEntities,
     getEntitiesToBeAddedForCopy,
     mappedMethodSorter,
 } from './MappingUtils';
-import {setRESTMethod} from '../RESTUtils';
+import { setRESTMethod } from '../RESTUtils';
 
 type MappingBuilderState = {
     sourceContext: RESTKindContext;
@@ -34,13 +34,13 @@ type MappingBuilderState = {
 };
 
 type ActionType =
-    | {type: 'initializeContext'}
-    | {type: 'convertToEditMethods'}
-    | {type: 'handleTargetMethods'}
-    | {type: 'handleSourceMethods'}
-    | {type: 'copyCompatibleMethodsAndEntities'}
-    | {type: 'readAndValidateMappingFromValue'; payload: {value?: ConnectionMethodsMapping}}
-    | {type: 'sortMappedMethods'};
+    | { type: 'initializeContext' }
+    | { type: 'convertToEditMethods' }
+    | { type: 'handleTargetMethods' }
+    | { type: 'handleSourceMethods' }
+    | { type: 'copyCompatibleMethodsAndEntities' }
+    | { type: 'readAndValidateMappingFromValue'; payload: { value?: ConnectionMethodsMapping } }
+    | { type: 'sortMappedMethods' };
 
 const isValueValid = (value?: ConnectionMethodsMapping): value is ConnectionMethodsMapping => {
     return Boolean(value && !isEmpty(value));
@@ -105,9 +105,9 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                             continue;
                         }
 
-                        const {issues, entitiesToBeAdded} = getEntitiesToBeAddedForCopy(
-                            {method: sourceMethod, entities: state.sourceContext.entities},
-                            {method: targetMethod, entities: state.targetContext.entities}
+                        const { issues, entitiesToBeAdded } = getEntitiesToBeAddedForCopy(
+                            { method: sourceMethod, entities: state.sourceContext.entities },
+                            { method: targetMethod, entities: state.targetContext.entities }
                         );
 
                         if (issues.length === 0) {
@@ -141,7 +141,7 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
 
             // If target or source methods are empty we assume it is a new connection and mapping - and copy everything
             if (state.targetMethods.length === 0) {
-                const {compatibleMethods, compatibleEntities} = getCompatibleMethodsAndEntities(
+                const { compatibleMethods, compatibleEntities } = getCompatibleMethodsAndEntities(
                     state.sourceMethods,
                     state.sourceContext,
                     state.targetContext
@@ -158,7 +158,7 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                 handlerContextClone.targetName = handlerContextClone.sourceName;
                 handlerContextClone.clientWasEmpty = true;
             } else if (sourceMethodsClone.length === 0) {
-                const {compatibleMethods, compatibleEntities} = getCompatibleMethodsAndEntities(
+                const { compatibleMethods, compatibleEntities } = getCompatibleMethodsAndEntities(
                     state.targetMethods,
                     state.targetContext,
                     state.sourceContext
@@ -189,7 +189,7 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
         }
 
         case 'readAndValidateMappingFromValue': {
-            const {value} = action.payload;
+            const { value } = action.payload;
             const handlerContextClone = cloneDeep(state.handlerContext);
             const mappedSourcesClone = cloneDeep(state.mappedSources);
             const mappedTargetsClone = cloneDeep(state.mappedTargets);
@@ -218,8 +218,8 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                     mappedSourcesClone.push(sourceMethod);
 
                     const isCompatible = isCompatibleRESTMethods(
-                        {method: sourceMethod, entities: state.sourceContext.entities},
-                        {method: targetMethod, entities: state.targetContext.entities}
+                        { method: sourceMethod, entities: state.sourceContext.entities },
+                        { method: targetMethod, entities: state.targetContext.entities }
                     );
 
                     if (!isCompatible) {
@@ -261,7 +261,7 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
         }
 
         default: {
-            return {...state};
+            return { ...state };
         }
     }
 }
@@ -293,16 +293,16 @@ export const useMappingHandlerBuilder = (
     });
 
     const init = (value?: ConnectionMethodsMapping) => {
-        dispatch({type: 'initializeContext'});
-        dispatch({type: 'convertToEditMethods'});
+        dispatch({ type: 'initializeContext' });
+        dispatch({ type: 'convertToEditMethods' });
         if (isValueValid(value)) {
-            dispatch({type: 'readAndValidateMappingFromValue', payload: {value}});
+            dispatch({ type: 'readAndValidateMappingFromValue', payload: { value } });
         } else {
-            dispatch({type: 'copyCompatibleMethodsAndEntities'});
+            dispatch({ type: 'copyCompatibleMethodsAndEntities' });
         }
-        dispatch({type: 'handleSourceMethods'});
-        dispatch({type: 'handleTargetMethods'});
-        dispatch({type: 'sortMappedMethods'});
+        dispatch({ type: 'handleSourceMethods' });
+        dispatch({ type: 'handleTargetMethods' });
+        dispatch({ type: 'sortMappedMethods' });
     };
 
     const mappingHandler = useMappingHandler(

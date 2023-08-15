@@ -1,10 +1,10 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
-import {TabContainer, TabPage} from '@kapeta/ui-web-components';
-import {httpStatusPhrase} from '@kapeta/ui-web-utils';
+import { TabContainer, TabPage } from '@kapeta/ui-web-components';
+import { httpStatusPhrase } from '@kapeta/ui-web-utils';
 
 import './InspectConnectionPayload.less';
-import {Traffic} from '@kapeta/ui-web-types';
+import { Traffic } from '@kapeta/ui-web-types';
 
 interface InspectTrafficPayloadProps {
     traffic: Traffic;
@@ -18,7 +18,7 @@ export default class InspectConnectionPayload extends Component<
     InspectTrafficPayloadProps,
     InspectTrafficPayloadState
 > {
-    private renderHeaders(headers: {[key: string]: string}) {
+    private renderHeaders(headers: { [key: string]: string }) {
         return Object.keys(headers).map((headerKey: string) => {
             return (
                 <tr>

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import {RESTMethodArgument, TypedValue} from '@kapeta/ui-web-types';
+import { RESTMethodArgument, TypedValue } from '@kapeta/ui-web-types';
 
 import {
     convertToRestMethod,
@@ -11,8 +11,8 @@ import {
     RESTResourceSpec,
 } from './types';
 
-import {DSL_LANGUAGE_ID, DSLConverters, DSLWriter} from '@kapeta/ui-web-components';
-import {Entity, isBuiltInType, isDTO, isList, Resource, TypeLike, typeName} from '@kapeta/schemas';
+import { DSL_LANGUAGE_ID, DSLConverters, DSLWriter } from '@kapeta/ui-web-components';
+import { Entity, isBuiltInType, isDTO, isList, Resource, TypeLike, typeName } from '@kapeta/schemas';
 
 export const getCounterValue = (data: Resource): number => {
     return _.size(data.spec.methods);
@@ -180,7 +180,7 @@ export function resolveEntities(context: RESTKindContext): string[] {
     const restSpec = context.resource.spec as RESTResourceSpec;
 
     Object.values(restSpec.methods).forEach((method) => {
-        const usedEntities = resolveEntitiesFromMethod({method, entities: context.entities});
+        const usedEntities = resolveEntitiesFromMethod({ method, entities: context.entities });
 
         usedEntities.forEach((entity) => {
             if (out.indexOf(entity) === -1) {
@@ -203,10 +203,10 @@ export function renameEntityReferences(resource: Resource, from: string, to: str
         }
 
         if (isList(type)) {
-            return {ref: to + '[]'};
+            return { ref: to + '[]' };
         }
 
-        return {ref: to};
+        return { ref: to };
     }
 
     const restSpec = resource.spec as RESTResourceSpec;

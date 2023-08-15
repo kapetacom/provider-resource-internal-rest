@@ -1,10 +1,10 @@
-import React, {Component} from 'react';
-import {observer} from 'mobx-react';
+import React, { Component } from 'react';
+import { observer } from 'mobx-react';
 
-import {ResourceRole, Traffic} from '@kapeta/ui-web-types';
+import { ResourceRole, Traffic } from '@kapeta/ui-web-types';
 
-import {countdown} from '@kapeta/ui-web-utils';
-import {toClass, httpStatusPhrase} from '@kapeta/ui-web-utils';
+import { countdown } from '@kapeta/ui-web-utils';
+import { toClass, httpStatusPhrase } from '@kapeta/ui-web-utils';
 
 import byteSize from 'byte-size';
 
@@ -42,7 +42,7 @@ export default class InspectConnectionTraffic extends Component<InspectMethodTra
 
         function asByte(traffic: Traffic) {
             if (traffic.response && traffic.response.headers && traffic.response.headers['content-length']) {
-                const {value, unit} = byteSize(traffic.response.headers['content-length']);
+                const { value, unit } = byteSize(traffic.response.headers['content-length']);
                 return `${value} ${unit}`;
             }
 

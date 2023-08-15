@@ -8,7 +8,7 @@ import {
     FormField,
     useFormContextField,
 } from '@kapeta/ui-web-components';
-import type {ResourceTypeProviderEditorProps} from '@kapeta/ui-web-types';
+import type { ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
 import './RESTEditorComponent.less';
 
@@ -29,7 +29,7 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const setResult = (code: string, methods: DSLMethod[]) => {
         try {
             methodField.set(DSLConverters.toSchemaMethods(methods));
-            methodSource.set({type: DSL_LANGUAGE_ID, value: code});
+            methodSource.set({ type: DSL_LANGUAGE_ID, value: code });
         } catch (e) {
             console.error('Failed to trigger change', e);
         }
@@ -51,7 +51,7 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                     restMethods={true}
                     validTypes={validTypes}
                     value={{
-                        code: methodSource.get({value: ''}).value,
+                        code: methodSource.get({ value: '' }).value,
                         entities: DSLConverters.fromSchemaMethods(methodField.get([])),
                     }}
                     onChange={(result) => {
