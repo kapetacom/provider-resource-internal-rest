@@ -5,13 +5,13 @@
 document.queryCommandSupported = function () {
     return false;
 };
-import {TextEncoder, TextDecoder} from 'util';
+import { TextEncoder, TextDecoder } from 'util';
 global['TextEncoder'] = TextEncoder as any;
 global['TextDecoder'] = TextDecoder as any;
 
-import {describe, expect, test} from '@jest/globals';
-import {getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate} from '../src/web/RESTUtils';
-import {ENTITIES, makeAPI, makeAPIContext, makeMethod} from './helpers';
+import { describe, expect, test } from '@jest/globals';
+import { getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate } from '../src/web/RESTUtils';
+import { ENTITIES, makeAPI, makeAPIContext, makeMethod } from './helpers';
 
 describe('RESTUtils', () => {
     test('can get counter value (number of methods in API)', () => {
@@ -68,9 +68,9 @@ describe('RESTUtils', () => {
         expect(
             resolveEntities(
                 makeAPIContext({
-                    test1: makeMethod([{ref: 'User'}, 'string']),
-                    test2: makeMethod([], {ref: 'Person'}),
-                    test3: makeMethod(['string', {ref: 'Staff'}]),
+                    test1: makeMethod([{ ref: 'User' }, 'string']),
+                    test2: makeMethod([], { ref: 'Person' }),
+                    test3: makeMethod(['string', { ref: 'Staff' }]),
                 })
             )
         ).toEqual(['User', 'Person', 'Staff']);
@@ -78,9 +78,9 @@ describe('RESTUtils', () => {
 
     test('can rename reference', () => {
         const api = makeAPI({
-            test1: makeMethod([{ref: 'User'}, 'string']),
-            test2: makeMethod([], {ref: 'Person[]'}),
-            test3: makeMethod(['string', {ref: 'Staff'}]),
+            test1: makeMethod([{ ref: 'User' }, 'string']),
+            test2: makeMethod([], { ref: 'Person[]' }),
+            test3: makeMethod(['string', { ref: 'Staff' }]),
         });
 
         expect(api.spec.methods?.test1?.arguments?.arg_0?.ref).toBe('User');
@@ -98,7 +98,7 @@ describe('RESTUtils', () => {
                 validate(
                     makeAPIContext(
                         {
-                            test: makeMethod([{ref: 'Company'}], {ref: 'Department'}),
+                            test: makeMethod([{ ref: 'Company' }], { ref: 'Department' }),
                         },
                         ENTITIES
                     )

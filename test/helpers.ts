@@ -1,4 +1,4 @@
-import {HTTPMethod, RESTMethod, RESTMethodArgument, TypeLike} from '@kapeta/ui-web-types';
+import { HTTPMethod, RESTMethod, RESTMethodArgument, TypeLike } from '@kapeta/ui-web-types';
 import {
     convertToEditMethod,
     KIND_REST_API,
@@ -7,16 +7,16 @@ import {
     RESTMethodEditContext,
     RESTResource,
 } from '../src/web/types';
-import {Entity, EntityDTO, EntityType, isStringableType, typeName, TypeOrString} from '@kapeta/schemas';
+import { Entity, EntityDTO, EntityType, isStringableType, typeName, TypeOrString } from '@kapeta/schemas';
 
-export function makeAPIContext(methods: {[key: string]: RESTMethod}, entities?: Entity[]): RESTKindContext {
+export function makeAPIContext(methods: { [key: string]: RESTMethod }, entities?: Entity[]): RESTKindContext {
     return {
         resource: makeAPI(methods),
         entities: entities ? entities : [],
     };
 }
 
-export function makeAPI(methods: {[key: string]: RESTMethod}, entities?: Entity[]): RESTResource {
+export function makeAPI(methods: { [key: string]: RESTMethod }, entities?: Entity[]): RESTResource {
     return {
         kind: KIND_REST_API,
         metadata: {
@@ -32,7 +32,7 @@ export function makeAPI(methods: {[key: string]: RESTMethod}, entities?: Entity[
 }
 
 function toTypeLike(type: TypeOrString): TypeLike {
-    return typeof type === 'string' ? {type} : type;
+    return typeof type === 'string' ? { type } : type;
 }
 
 export function makeMethod(args: TypeOrString[] = [], responseType?: TypeOrString): RESTMethod {
@@ -50,7 +50,7 @@ export function makeMethod(args: TypeOrString[] = [], responseType?: TypeOrStrin
         description: '',
         arguments: argMap,
         path: '/',
-        responseType: responseType ? toTypeLike(toTypeLike(responseType)) : {type: 'void'},
+        responseType: responseType ? toTypeLike(toTypeLike(responseType)) : { type: 'void' },
     };
 }
 

@@ -1,12 +1,12 @@
 import React from 'react';
-import type {RESTMethodEdit, RESTResource, RESTResourceSpec} from '../types';
-import type {MappedMethod} from './types';
-import {ItemTypes} from './types';
-import {ConnectionMethodsMapping, ResourceTypeProviderMappingProps} from '@kapeta/ui-web-types';
-import {DnDContainer, DnDDrag, DnDDrop, FormReadyHandler} from '@kapeta/ui-web-components';
+import type { RESTMethodEdit, RESTResource, RESTResourceSpec } from '../types';
+import type { MappedMethod } from './types';
+import { ItemTypes } from './types';
+import { ConnectionMethodsMapping, ResourceTypeProviderMappingProps } from '@kapeta/ui-web-types';
+import { DnDContainer, DnDDrag, DnDDrop, FormReadyHandler } from '@kapeta/ui-web-components';
 import RestMethodView from '../RestMethodView';
-import {toRESTKindContext} from '../types';
-import {useMappingHandlerBuilder} from './useMappingHandlerBuilder';
+import { toRESTKindContext } from '../types';
+import { useMappingHandlerBuilder } from './useMappingHandlerBuilder';
 
 import './APIToClientMapper.less';
 
@@ -33,7 +33,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     value,
     onDataChanged,
 }) => {
-    const {mappingHandler, ...mappingHandlerContext} = useMappingHandlerBuilder(
+    const { mappingHandler, ...mappingHandlerContext } = useMappingHandlerBuilder(
         toRESTKindContext(source, sourceEntities),
         toRESTKindContext(target, targetEntities),
         value,

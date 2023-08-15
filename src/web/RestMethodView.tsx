@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
-import {typeName} from '@kapeta/schemas';
+import { typeName } from '@kapeta/schemas';
 
-import {RESTMethodEdit} from './types';
+import { RESTMethodEdit } from './types';
 
 import './RestMethodView.less';
 

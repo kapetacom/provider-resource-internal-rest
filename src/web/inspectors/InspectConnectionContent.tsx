@@ -1,13 +1,13 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
-import {observer} from 'mobx-react';
+import { observer } from 'mobx-react';
 
-import {StackContainer, StackPage} from '@kapeta/ui-web-components';
+import { StackContainer, StackPage } from '@kapeta/ui-web-components';
 
 import InspectConnectionMethods from './InspectConnectionMethods';
 import InspectConnectionTraffic from './InspectConnectionTraffic';
 import InspectConnectionPayload from './InspectConnectionPayload';
-import type {ResourceTypeProviderInspectorProps, Traffic} from '@kapeta/ui-web-types';
+import type { ResourceTypeProviderInspectorProps, Traffic } from '@kapeta/ui-web-types';
 
 interface InspectConnectionContentState {
     currentPageId: string;
@@ -28,11 +28,11 @@ export default class InspectConnectionContent extends Component<
     }
 
     private showTraffic(method: string) {
-        this.setState({selectedMethod: method, currentPageId: 'traffic'});
+        this.setState({ selectedMethod: method, currentPageId: 'traffic' });
     }
 
     private showPayload(traffic: Traffic) {
-        this.setState({selectedPayload: traffic, currentPageId: 'payload'});
+        this.setState({ selectedPayload: traffic, currentPageId: 'payload' });
     }
 
     private onPageRequest(pageId: string) {

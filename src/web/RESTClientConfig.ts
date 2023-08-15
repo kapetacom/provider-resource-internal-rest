@@ -1,5 +1,11 @@
 import _ from 'lodash';
-import {convertToEditMethod, isCompatibleRESTMethods, KIND_REST_API, KIND_REST_CLIENT, RESTResourceSpec} from './types';
+import {
+    convertToEditMethod,
+    isCompatibleRESTMethods,
+    KIND_REST_API,
+    KIND_REST_CLIENT,
+    RESTResourceSpec,
+} from './types';
 
 import {
     ConnectionMethodMappingType,
@@ -9,10 +15,10 @@ import {
     ResourceProviderType,
 } from '@kapeta/ui-web-types';
 
-import {Connection, Entity, Metadata, Resource} from '@kapeta/schemas';
+import { Connection, Entity, Metadata, Resource } from '@kapeta/schemas';
 
-import {getCounterValue, hasMethod, resolveEntities, validate} from './RESTUtils';
-import {RESTEditorComponent} from './RESTEditorComponent';
+import { getCounterValue, hasMethod, resolveEntities, validate } from './RESTUtils';
+import { RESTEditorComponent } from './RESTEditorComponent';
 import APIToClientMapper from './mapping/APIToClientMapper';
 import InspectConnectionContent from './inspectors/InspectConnectionContent';
 
@@ -34,7 +40,7 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 if (!data.kind?.startsWith(KIND_REST_CLIENT)) {
                     throw new Error(`Invalid resource kind: ${data.kind}. Expected ${KIND_REST_CLIENT}`);
                 }
-                return {...data};
+                return { ...data };
             },
             validateMapping: (
                 connection: Connection,
@@ -76,7 +82,7 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                     if (
                         mapping.type === ConnectionMethodMappingType.EXACT &&
                         !isCompatibleRESTMethods(
-                            {method: fromMethod, entities: fromEntities},
+                            { method: fromMethod, entities: fromEntities },
                             {
                                 method: toMethod,
                                 entities: toEntities,
@@ -163,10 +169,10 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
     getCounterValue,
     hasMethod,
     resolveEntities: (resource) => {
-        return resolveEntities({resource, entities: []});
+        return resolveEntities({ resource, entities: [] });
     },
     validate: (resource, entities) => {
-        return validate({resource, entities});
+        return validate({ resource, entities });
     },
     definition: {
         kind: 'core/resource-type-internal',
