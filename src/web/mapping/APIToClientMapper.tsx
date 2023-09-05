@@ -19,8 +19,7 @@ const DangerIcon: React.FC = () => (
 );
 
 interface RestResourceToClientMapperProps
-    extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping> {
-}
+    extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping> {}
 
 const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     title,

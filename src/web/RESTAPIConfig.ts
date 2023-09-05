@@ -1,5 +1,5 @@
 import { RESTEditorComponent } from './RESTEditorComponent';
-import { KIND_REST_API, KIND_REST_CLIENT, RESTResourceSpec } from './types';
+import { KIND_REST_API, KIND_REST_CLIENT, RESTResource, RESTResourceSpec } from './types';
 import { getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate } from './RESTUtils';
 import { IResourceTypeProvider, ResourceRole, ResourceProviderType } from '@kapeta/ui-web-types';
 import { Metadata } from '@kapeta/schemas';
@@ -17,11 +17,11 @@ export const RESTAPIConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = 
     getCounterValue,
     hasMethod,
     resolveEntities: (resource) => {
-        return resolveEntities({ resource, entities: [] });
+        return resolveEntities({ resource: resource as RESTResource, entities: [] });
     },
     renameEntityReferences,
     validate: (resource, entities) => {
-        return validate({ resource, entities });
+        return validate({ resource: resource as RESTResource, entities });
     },
     definition: {
         kind: 'core/resource-type-internal',

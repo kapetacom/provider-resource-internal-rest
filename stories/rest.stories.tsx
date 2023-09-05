@@ -14,9 +14,10 @@ import { convertToEditMethod, RESTResource } from '../src/web/types';
 import RestMethodView from '../src/web/RestMethodView';
 import APIToClientMapper from '../src/web/mapping/APIToClientMapper';
 import InspectConnectionContent from '../src/web/inspectors/InspectConnectionContent';
-
-import '@kapeta/ui-web-components/styles/index.less';
 import { FormContainer, ToastContainer } from '@kapeta/ui-web-components';
+import { BlockDefinition, EntityType } from '@kapeta/schemas';
+import '@kapeta/ui-web-components/styles/index.less';
+import './stories.less';
 
 const API_KIND = 'kapeta/resource-type-rest-api';
 const CLIENT_KIND = 'kapeta/resource-type-rest-client';
@@ -315,9 +316,6 @@ const trafficLines: Traffic[] = [
     },
 ];
 
-import './stories.less';
-import { BlockDefinition, EntityType } from '@kapeta/schemas/dist/cjs';
-
 export default {
     title: 'REST',
 };
@@ -436,13 +434,39 @@ export const APIToClientMapperViewEmptyClientProblem = () => (
     </div>
 );
 
-export const APIToClientMapperViewEmptyClientOK = () => (
+export const APIToClientMapperViewNullMethodsServerOK = () => (
+    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+        <ToastContainer />
+        <APIToClientMapper
+            title={'My Connection'}
+            source={{
+                ...RESTApiResource,
+                spec: {
+                    ...RESTApiResource.spec,
+                    methods: null,
+                },
+            }}
+            target={RESTClientResourceEmpty}
+            onDataChanged={(change) => console.log('Data changed', change)}
+            sourceEntities={API_ENTITIES}
+            targetEntities={[]}
+        />
+    </div>
+);
+
+export const APIToClientMapperViewNullMethodsClientOK = () => (
     <div style={{ padding: '25px', width: '750px', height: '100%' }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
             source={RESTApiResource}
-            target={RESTClientResourceEmpty}
+            target={{
+                ...RESTClientResource,
+                spec: {
+                    ...RESTClientResource.spec,
+                    methods: null,
+                },
+            }}
             onDataChanged={(change) => console.log('Data changed', change)}
             sourceEntities={API_ENTITIES}
             targetEntities={[]}

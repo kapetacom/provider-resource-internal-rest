@@ -1,10 +1,13 @@
 import { forEach } from 'lodash';
 import { HTTPMethod, TypedValue, RESTMethod, TypeLike, RESTMethodArgument } from '@kapeta/ui-web-types';
-import { Entity, getCompatibilityIssuesForTypes, isCompatibleTypes, Resource, ResourceSpec } from '@kapeta/schemas';
+import { Entity, getCompatibilityIssuesForTypes, isCompatibleTypes, Resource } from '@kapeta/schemas';
 
-export interface RESTResourceSpec extends ResourceSpec {
+export interface RESTResourceSpec {
+    port: {
+        type: string;
+    };
     source?: TypedValue;
-    methods: {
+    methods?: {
         [key: string]: RESTMethod;
     };
 }
@@ -68,6 +71,9 @@ export function convertToEditMethod(id: string, method: RESTMethod): RESTMethodE
 
 export function convertAllToEditMethods(resource: RESTResource): RESTMethodEdit[] {
     const out: RESTMethodEdit[] = [];
+    if (!resource.spec.methods) {
+        return out;
+    }
     forEach(resource.spec.methods, (method, methodId) => {
         out.push(convertToEditMethod(methodId, method));
     });

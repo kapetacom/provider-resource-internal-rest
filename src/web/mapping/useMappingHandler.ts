@@ -7,6 +7,61 @@ import { MappedMethod, MappingHandlerData, createEqualMapping, createSourceOnlyM
 import { getEntitiesToBeAddedForCopy } from './MappingUtils';
 import { deleteRESTMethod, setRESTMethod } from '../RESTUtils';
 
+const toMappingData = (methods: MappedMethod[]): ConnectionMethodsMapping => {
+    const map: ConnectionMethodsMapping = {};
+    methods.forEach((method) => {
+        if (!method.source || !method.target || !method.mapped) {
+            return;
+        }
+
+        map[method.source.id] = {
+            targetId: method.target.id,
+            type: ConnectionMethodMappingType.EXACT, // We only support exact at the moment
+        };
+    });
+
+    return map;
+};
+const toResultData = (
+    source: RESTKindContext,
+    target: RESTKindContext,
+    methods: MappedMethod[]
+): MappingHandlerData => {
+    return {
+        source: source.resource,
+        sourceEntities: source.entities,
+        target: target.resource,
+        targetEntities: target.entities,
+        data: toMappingData(methods),
+    };
+};
+const canAddToTarget = (methods: MappedMethod[], ix: number): boolean => {
+    const source = methods[ix].source;
+    if (!source) {
+        return false;
+    }
+
+    return !find(methods, (method) => {
+        if (method.source === source) {
+            return false;
+        }
+
+        return method.target && method.target.id === source.id;
+    });
+};
+const canDropOnTarget = (methods: MappedMethod[], ix: number): boolean => !!methods[ix].target;
+const isValid = (methods: MappedMethod[]): boolean => {
+    for (let i = 0; i < methods.length; i++) {
+        const method = methods[i];
+        if (method.target && !method.mapped) {
+            // All targets must be mapped to be valid
+            return false;
+        }
+    }
+
+    return methods.length > 0;
+};
+
 export const useMappingHandler = (
     initialMethods: MappedMethod[],
     initialSource: RESTKindContext,
@@ -19,83 +74,19 @@ export const useMappingHandler = (
     const [target, setTarget] = useState(initialTarget);
 
     // Update state when props change
-    const [prevMethods, setPrevMethods] = useState(methods);
-    const [prevSource, setPrevSource] = useState(source);
-    const [prevTarget, setPrevTarget] = useState(target);
-    if (prevMethods !== initialMethods) {
-        setPrevMethods(methods);
+    useEffect(() => {
         setMethods(initialMethods);
-    }
-    if (prevSource !== initialSource) {
-        setPrevSource(source);
+    }, [initialMethods]);
+    useEffect(() => {
         setSource(initialSource);
-    }
-    if (prevTarget !== initialTarget) {
-        setPrevTarget(target);
+    }, [initialSource]);
+    useEffect(() => {
         setTarget(initialTarget);
-    }
+    }, [initialTarget]);
 
-    const isValid = useCallback((): boolean => {
-        for (let i = 0; i < methods.length; i++) {
-            const method = methods[i];
-            if (method.target && !method.mapped) {
-                // All targets must be mapped to be valid
-                return false;
-            }
-        }
-
-        return methods.length > 0;
-    }, [methods]);
-
-    const toMappingData = useCallback((): ConnectionMethodsMapping => {
-        const map: ConnectionMethodsMapping = {};
-        methods.forEach((method) => {
-            if (!method.source || !method.target || !method.mapped) {
-                return;
-            }
-
-            map[method.source.id] = {
-                targetId: method.target.id,
-                type: ConnectionMethodMappingType.EXACT, // We only support exact at the moment
-            };
-        });
-
-        return map;
-    }, [methods]);
-
-    const toData = useCallback((): MappingHandlerData => {
-        return {
-            source: source.resource,
-            sourceEntities: source.entities,
-            target: target.resource,
-            targetEntities: target.entities,
-            data: toMappingData(),
-        };
-    }, [source.entities, source.resource, target.entities, target.resource, toMappingData]);
-
-    const onStateChange = useCallback((): void => {
-        onDataChanged?.(toData());
-    }, [onDataChanged, toData]);
-
-    const canAddToTarget = useCallback(
-        (ix: number): boolean => {
-            const source = methods[ix].source;
-            if (!source) {
-                return false;
-            }
-
-            return !find(methods, (method) => {
-                if (method.source === source) {
-                    return false;
-                }
-
-                return method.target && method.target.id === source.id;
-            });
-        },
-        [methods]
-    );
-
-    const canDropOnTarget = useCallback((ix: number): boolean => !!methods[ix].target, [methods]);
+    const onStateChange = (source: RESTKindContext, target: RESTKindContext, methods: MappedMethod[]): void => {
+        onDataChanged && onDataChanged(toResultData(source, target, methods));
+    };
 
     const addToTarget = useCallback(
         (ix: number): void => {
@@ -133,10 +124,9 @@ export const useMappingHandler = (
 
             setTarget(targetClone);
             setMethods(methodsClone);
-
-            onStateChange();
+            onStateChange(source, targetClone, methodsClone);
         },
-        [methods, onStateChange, source.entities, target]
+        [methods, source.entities, target]
     );
 
     const addToSource = useCallback(
@@ -175,10 +165,9 @@ export const useMappingHandler = (
 
             setSource(sourceClone);
             setMethods(methodsClone);
-
-            onStateChange();
+            onStateChange(sourceClone, target, methodsClone);
         },
-        [methods, onStateChange, source, target.entities]
+        [methods, source, target.entities]
     );
 
     const removeTarget = useCallback(
@@ -195,9 +184,9 @@ export const useMappingHandler = (
             deleteRESTMethod(targetClone.resource.spec, currentTarget.id);
 
             // Then remove mapping for it
-            const source = methodsClone[ix].source;
-            if (source) {
-                methodsClone.splice(ix, 1, createSourceOnlyMapping(source));
+            const sourceMethod = methodsClone[ix].source;
+            if (sourceMethod) {
+                methodsClone.splice(ix, 1, createSourceOnlyMapping(sourceMethod));
             } else {
                 methodsClone.splice(ix, 1);
             }
@@ -205,14 +194,15 @@ export const useMappingHandler = (
             setTarget(targetClone);
             setMethods(methodsClone);
 
-            onStateChange();
+            onStateChange(source, targetClone, methodsClone);
         },
-        [methods, onStateChange, target]
+        [methods, target]
     );
 
     const removeSource = useCallback(
         (ix: number): void => {
             const methodsClone = cloneDeep(methods);
+            const sourceClone = cloneDeep(source);
             const currentMethod = methodsClone[ix];
             const currentSource = currentMethod.source;
             if (!currentSource) {
@@ -228,10 +218,8 @@ export const useMappingHandler = (
                 // If the target is a copy
 
                 // First remove the method from the source resource
-                const sourceClone = cloneDeep(source);
                 deleteRESTMethod(sourceClone.resource.spec as RESTResourceSpec, currentSource.id);
                 setSource(sourceClone);
-
                 // And remove the entire line
                 pull(methodsClone, currentMethod);
             } else {
@@ -241,10 +229,9 @@ export const useMappingHandler = (
             }
 
             setMethods(methodsClone);
-
-            onStateChange();
+            onStateChange(sourceClone, target, methodsClone);
         },
-        [methods, onStateChange, source]
+        [methods, source]
     );
 
     const addMappingForTarget = useCallback(
@@ -279,25 +266,24 @@ export const useMappingHandler = (
 
             setMethods(methodsClone);
 
-            onStateChange();
+            onStateChange(source, target, methodsClone);
         },
-        [methods, onStateChange, source.entities, target.entities]
+        [methods, source.entities, target.entities]
     );
 
     // If we did auto map, we notify the parent component that the data has changed
     useEffect(() => {
         if (didAutoMap) {
-            onStateChange();
+            // Emit state change but use the initial data since that's where the didAutoMap flag is set
+            onStateChange(initialSource, initialTarget, initialMethods);
         }
-    }, [didAutoMap, onStateChange]);
+    }, [didAutoMap]);
 
     return {
+        isValid: () => isValid(methods),
+        canAddToTarget: (ix: number) => canAddToTarget(methods, ix),
+        canDropOnTarget: (ix: number) => canDropOnTarget(methods, ix),
         methods,
-        isValid,
-        toData,
-        toMappingData,
-        canAddToTarget,
-        canDropOnTarget,
         addToTarget,
         addToSource,
         removeTarget,
