@@ -20,8 +20,6 @@ const DangerIcon: React.FC = () => (
 
 interface RestResourceToClientMapperProps
     extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping> {
-    source: RESTResource;
-    target: RESTResource;
 }
 
 const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
@@ -34,8 +32,8 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     onDataChanged,
 }) => {
     const { mappingHandler, ...mappingHandlerContext } = useMappingHandlerBuilder(
-        toRESTKindContext(source, sourceEntities),
-        toRESTKindContext(target, targetEntities),
+        toRESTKindContext(source as RESTResource, sourceEntities),
+        toRESTKindContext(target as RESTResource, targetEntities),
         value,
         onDataChanged
     );
