@@ -18,7 +18,6 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
         if (!method.arguments) {
             method.arguments = [];
         }
-        console.log('method.responseType', method.responseType);
 
         return (
             <div className={'rest-method-erasure' + (compact ? ' compact' : '')}>

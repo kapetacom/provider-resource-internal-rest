@@ -153,17 +153,23 @@ export function resolveEntitiesFromMethod(context: RESTMethodContext | RESTMetho
 }
 
 export function setRESTMethod(spec: RESTResourceSpec, id: string, method: RESTMethodEdit) {
+    if (!spec.methods) {
+        spec.methods = {};
+    }
     spec.methods[id] = convertToRestMethod(method);
     spec.source = convertRESTToDSLSource(spec);
 }
 
 export function deleteRESTMethod(spec: RESTResourceSpec, id: string) {
+    if (!spec.methods) {
+        spec.methods = {};
+    }
     delete spec.methods[id];
     spec.source = convertRESTToDSLSource(spec);
 }
 
 export function convertRESTToDSLSource(spec: RESTResourceSpec): TypedValue {
-    const dslMethods = DSLConverters.fromSchemaMethods(spec.methods);
+    const dslMethods = spec.methods ? DSLConverters.fromSchemaMethods(spec.methods) : [];
     return {
         type: DSL_LANGUAGE_ID,
         value: DSLWriter.write(dslMethods),
@@ -178,6 +184,9 @@ export function resolveEntities(context: RESTKindContext): string[] {
     }
 
     const restSpec = context.resource.spec as RESTResourceSpec;
+    if (!restSpec.methods) {
+        return out;
+    }
 
     Object.values(restSpec.methods).forEach((method) => {
         const usedEntities = resolveEntitiesFromMethod({ method, entities: context.entities });
@@ -210,6 +219,9 @@ export function renameEntityReferences(resource: Resource, from: string, to: str
     }
 
     const restSpec = resource.spec as RESTResourceSpec;
+    if (!restSpec.methods) {
+        return;
+    }
 
     Object.values(restSpec.methods).forEach((method) => {
         if (method.responseType) {

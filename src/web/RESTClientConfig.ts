@@ -1,9 +1,10 @@
-import _ from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import {
     convertToEditMethod,
     isCompatibleRESTMethods,
     KIND_REST_API,
-    KIND_REST_CLIENT, RESTResource,
+    KIND_REST_CLIENT,
+    RESTResource,
     RESTResourceSpec,
 } from './types';
 
@@ -39,7 +40,20 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 if (!data.kind?.startsWith(KIND_REST_CLIENT)) {
                     throw new Error(`Invalid resource kind: ${data.kind}. Expected ${KIND_REST_CLIENT}`);
                 }
-                return { ...data };
+                const copy = cloneDeep(data) as RESTResource;
+                if (!copy.spec) {
+                    copy.spec = {
+                        port: {
+                            type: 'rest',
+                        },
+                    };
+                }
+
+                if (!copy.spec.methods) {
+                    copy.spec.methods = {};
+                }
+
+                return copy;
             },
             validateMapping: (
                 connection: Connection,
@@ -58,17 +72,17 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 const consumerSpec = consumer.spec as RESTResourceSpec;
                 const providerSpec = provider.spec as RESTResourceSpec;
 
-                const targetMethods = Object.keys(consumerSpec.methods);
+                const targetMethods = consumerSpec.methods ? Object.keys(consumerSpec.methods) : [];
 
                 const oldMapping = connectionMapping;
                 _.forEach(oldMapping, (mapping, sourceMethodId) => {
-                    if (!providerSpec.methods[sourceMethodId]) {
+                    if (!providerSpec.methods || !providerSpec.methods[sourceMethodId]) {
                         // Some methods are gone - ignore and remove
                         errors.push('Missing source method');
                         return;
                     }
 
-                    if (!consumerSpec.methods[mapping.targetId]) {
+                    if (!consumerSpec.methods || !consumerSpec.methods[mapping.targetId]) {
                         errors.push('Missing target method');
                         return;
                     }
@@ -104,9 +118,8 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 fromEntities: Entity[],
                 toEntities: Entity[]
             ): ConnectionMethodsMapping => {
-                const newMapping:ConnectionMethodsMapping = {};
-                if (!to.spec.methods ||
-                    !from.spec.methods) {
+                const newMapping: ConnectionMethodsMapping = {};
+                if (!to.spec.methods || !from.spec.methods) {
                     return newMapping;
                 }
 
@@ -138,7 +151,6 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                         type: ConnectionMethodMappingType.EXACT,
                     };
                 });
-
                 return newMapping;
             },
             updateMapping: (
@@ -146,13 +158,11 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 provider: Resource,
                 consumer: Resource
             ): ConnectionMethodsMapping => {
-                const newMapping:ConnectionMethodsMapping = {};
+                const newMapping: ConnectionMethodsMapping = {};
                 const consumerSpec = consumer.spec as RESTResourceSpec;
                 const providerSpec = provider.spec as RESTResourceSpec;
 
-                if (!_.isObject(connection.mapping) ||
-                    !providerSpec?.methods ||
-                    !consumerSpec?.methods) {
+                if (!_.isObject(connection.mapping) || !providerSpec?.methods || !consumerSpec?.methods) {
                     return newMapping;
                 }
 
@@ -160,7 +170,7 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
 
                 const oldMapping = connectionMapping;
                 _.forEach(oldMapping, (mapping, sourceMethodId) => {
-                    if (!providerSpec.methods[sourceMethodId] || !consumerSpec.methods[mapping.targetId]) {
+                    if (!providerSpec.methods?.[sourceMethodId] || !consumerSpec.methods?.[mapping.targetId]) {
                         // Some methods are gone - ignore and remove
                         return;
                     }

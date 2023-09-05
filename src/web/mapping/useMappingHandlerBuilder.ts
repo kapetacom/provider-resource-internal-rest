@@ -39,12 +39,14 @@ type ActionType =
     | { type: 'handleTargetMethods' }
     | { type: 'handleSourceMethods' }
     | { type: 'copyCompatibleMethodsAndEntities' }
-    | { type: 'readAndValidateMappingFromValue'; payload: { value?: ConnectionMethodsMapping } }
+    | { type: 'readAndValidateMappingFromValue'; payload: { value: ConnectionMethodsMapping } }
     | { type: 'sortMappedMethods' };
 
 const isValueValid = (value?: ConnectionMethodsMapping): value is ConnectionMethodsMapping => {
     return Boolean(value && !isEmpty(value));
 };
+
+const compareToMethod = (sourceMethod: RESTMethodEdit) => (mS: RESTMethodEdit) => mS.id === sourceMethod.id;
 
 function reducer(state: MappingBuilderState, action: ActionType): MappingBuilderState {
     switch (action.type) {
@@ -54,9 +56,16 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
             handlerContextClone.targetName = state.targetContext.resource.metadata.name;
             handlerContextClone.issues = determineEntityIssues(state.sourceContext, state.targetContext);
             return {
-                ...state,
+                value: state.value,
+                sourceContext: state.sourceContext,
+                sourceMethods: state.sourceMethods,
+                targetContext: state.targetContext,
+                targetMethods: state.targetMethods,
                 handlerContext: handlerContextClone,
                 didAutoMap: false,
+                mappedSources: [],
+                mappedMethods: [],
+                mappedTargets: [],
             };
         }
 
@@ -70,16 +79,19 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
 
         case 'handleTargetMethods': {
             const unmappedTargetMethods: MappedMethod[] = [];
+            let didAutoMap = state.didAutoMap;
             state.targetMethods.forEach((targetMethod) => {
-                if (state.mappedTargets.indexOf(targetMethod) > -1) {
+                if (state.mappedTargets.some(compareToMethod(targetMethod))) {
                     return;
                 }
+                didAutoMap = true;
                 unmappedTargetMethods.push(createTargetOnlyMapping(targetMethod));
             });
 
             return {
                 ...state,
                 mappedMethods: [...state.mappedMethods, ...unmappedTargetMethods],
+                didAutoMap,
             };
         }
 
@@ -89,8 +101,10 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
             const targetContextClone = cloneDeep(state.targetContext);
             const mappedMethodsClone = cloneDeep(state.mappedMethods);
 
+            let didAutoMap = state.didAutoMap;
+
             state.sourceMethods.forEach((sourceMethod) => {
-                if (state.mappedSources.indexOf(sourceMethod) > -1) {
+                if (state.mappedSources.some(compareToMethod(sourceMethod))) {
                     return;
                 }
 
@@ -101,7 +115,7 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                     for (let i = 0; i < state.targetMethods.length; i++) {
                         const targetMethod = state.targetMethods[i];
 
-                        if (state.mappedTargets.indexOf(targetMethod) > -1) {
+                        if (state.mappedTargets.some(compareToMethod(targetMethod))) {
                             continue;
                         }
 
@@ -114,6 +128,7 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                             mappedTargetsClone.push(targetMethod);
                             targetContextClone.entities.push(...entitiesToBeAdded);
                             mappedMethodsClone.push(createEqualMapping(sourceMethod, targetMethod));
+                            didAutoMap = true;
                             return;
                         }
                     }
@@ -121,6 +136,7 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
 
                 // No matching target found
                 mappedMethodsClone.push(createSourceOnlyMapping(sourceMethod));
+                didAutoMap = true;
             });
 
             return {
@@ -129,6 +145,7 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                 mappedTargets: mappedTargetsClone,
                 targetContext: targetContextClone,
                 mappedMethods: mappedMethodsClone,
+                didAutoMap,
             };
         }
 
@@ -138,6 +155,8 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
             const sourceContextClone = cloneDeep(state.sourceContext);
             const targetMethodsClone = cloneDeep(state.targetMethods);
             const targetContextClone = cloneDeep(state.targetContext);
+
+            let anyChanged = false;
 
             // If target or source methods are empty we assume it is a new connection and mapping - and copy everything
             if (state.targetMethods.length === 0) {
@@ -153,11 +172,11 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                     compatibleMethods.forEach((method) => {
                         setRESTMethod(targetContextClone.resource.spec, method.id, method);
                     });
+                    handlerContextClone.targetName = handlerContextClone.sourceName;
+                    handlerContextClone.clientWasEmpty = true;
+                    anyChanged = true;
                 }
-
-                handlerContextClone.targetName = handlerContextClone.sourceName;
-                handlerContextClone.clientWasEmpty = true;
-            } else if (sourceMethodsClone.length === 0) {
+            } else if (state.sourceMethods.length === 0) {
                 const { compatibleMethods, compatibleEntities } = getCompatibleMethodsAndEntities(
                     state.targetMethods,
                     state.targetContext,
@@ -171,85 +190,93 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                     compatibleMethods.forEach((method) => {
                         setRESTMethod(sourceContextClone.resource.spec, method.id, method);
                     });
+                    handlerContextClone.sourceName = handlerContextClone.targetName;
+                    handlerContextClone.serverWasEmpty = true;
+                    anyChanged = true;
                 }
+            }
 
-                handlerContextClone.sourceName = handlerContextClone.targetName;
-                handlerContextClone.serverWasEmpty = true;
+            if (!anyChanged) {
+                // No reason the mutate the state
+                return { ...state };
             }
 
             return {
-                ...state,
                 handlerContext: handlerContextClone,
                 sourceMethods: sourceMethodsClone,
                 sourceContext: sourceContextClone,
                 targetContext: targetContextClone,
                 targetMethods: targetMethodsClone,
                 didAutoMap: true,
+                mappedTargets: [],
+                mappedSources: [],
+                mappedMethods: [],
             };
         }
 
         case 'readAndValidateMappingFromValue': {
             const { value } = action.payload;
-            const handlerContextClone = cloneDeep(state.handlerContext);
-            const mappedSourcesClone = cloneDeep(state.mappedSources);
-            const mappedTargetsClone = cloneDeep(state.mappedTargets);
-            const mappedMethodsClone = cloneDeep(state.mappedMethods);
 
-            if (isValueValid(value)) {
-                Object.entries(value).forEach(([sourceMethodId, mapping]) => {
-                    const sourceMethod = state.sourceMethods.find((m) => m.id === sourceMethodId);
+            const handlerContextClone: MappingHandlerContext = {
+                issues: [],
+                warnings: [],
+                clientWasEmpty: false,
+                serverWasEmpty: false,
+                sourceName: state.sourceContext.resource.metadata.name,
+                targetName: state.targetContext.resource.metadata.name,
+            };
+            const mappedSources: RESTMethodEdit[] = [];
+            const mappedTargets: RESTMethodEdit[] = [];
+            const mappedMethods: MappedMethod[] = [];
 
-                    if (!sourceMethod) {
-                        handlerContextClone.warnings.push(
-                            `Mapped method ${sourceMethodId} did not exist and was removed.`
-                        );
-                        return;
-                    }
+            Object.entries(value).forEach(([sourceMethodId, mapping]) => {
+                const sourceMethod = state.sourceMethods.find((m) => m.id === sourceMethodId);
 
-                    const targetMethod = state.targetMethods.find((m) => m.id === mapping.targetId);
-                    if (!targetMethod) {
-                        handlerContextClone.warnings.push(
-                            `Mapped method ${mapping.targetId} did not exist and was removed.`
-                        );
-                        return;
-                    }
+                if (!sourceMethod) {
+                    handlerContextClone.warnings.push(`Mapped method ${sourceMethodId} did not exist and was removed.`);
+                    return;
+                }
 
-                    mappedTargetsClone.push(targetMethod);
-                    mappedSourcesClone.push(sourceMethod);
+                const targetMethod = state.targetMethods.find((m) => m.id === mapping.targetId);
+                if (!targetMethod) {
+                    handlerContextClone.warnings.push(
+                        `Mapped method ${mapping.targetId} did not exist and was removed.`
+                    );
+                    return;
+                }
 
-                    const isCompatible = isCompatibleRESTMethods(
-                        { method: sourceMethod, entities: state.sourceContext.entities },
-                        { method: targetMethod, entities: state.targetContext.entities }
+                mappedTargets.push(targetMethod);
+                mappedSources.push(sourceMethod);
+
+                const isCompatible = isCompatibleRESTMethods(
+                    { method: sourceMethod, entities: state.sourceContext.entities },
+                    { method: targetMethod, entities: state.targetContext.entities }
+                );
+
+                if (!isCompatible) {
+                    // Something changed and methods are no longer compatible
+                    handlerContextClone.warnings.push(
+                        `Mapping for ${handlerContextClone.sourceName}.${sourceMethodId} and ${handlerContextClone.targetName}.${mapping.targetId} was invalid and was removed.`
                     );
 
-                    if (!isCompatible) {
-                        // Something changed and methods are no longer compatible
-                        handlerContextClone.warnings.push(
-                            `Mapping for ${handlerContextClone.sourceName}.${sourceMethodId} and ${handlerContextClone.targetName}.${mapping.targetId} was invalid and was removed.`
-                        );
+                    mappedMethods.push(createSourceOnlyMapping(sourceMethod), createTargetOnlyMapping(targetMethod));
+                    return;
+                }
 
-                        mappedMethodsClone.push(
-                            createSourceOnlyMapping(sourceMethod),
-                            createTargetOnlyMapping(targetMethod)
-                        );
-                        return;
-                    }
-
-                    switch (mapping.type) {
-                        case ConnectionMethodMappingType.EXACT: // Only exact mapping supported right now
-                            mappedMethodsClone.push(createEqualMapping(sourceMethod, targetMethod));
-                            break;
-                    }
-                });
-            }
+                switch (mapping.type) {
+                    case ConnectionMethodMappingType.EXACT: // Only exact mapping supported right now
+                        mappedMethods.push(createEqualMapping(sourceMethod, targetMethod));
+                        break;
+                }
+            });
 
             return {
                 ...state,
                 value,
                 handlerContext: handlerContextClone,
-                mappedSources: mappedSourcesClone,
-                mappedTargets: mappedTargetsClone,
-                mappedMethods: mappedMethodsClone,
+                mappedSources: mappedSources,
+                mappedTargets: mappedTargets,
+                mappedMethods: mappedMethods,
             };
         }
 
@@ -295,10 +322,10 @@ export const useMappingHandlerBuilder = (
     const init = (value?: ConnectionMethodsMapping) => {
         dispatch({ type: 'initializeContext' });
         dispatch({ type: 'convertToEditMethods' });
+        dispatch({ type: 'copyCompatibleMethodsAndEntities' });
+
         if (isValueValid(value)) {
             dispatch({ type: 'readAndValidateMappingFromValue', payload: { value } });
-        } else {
-            dispatch({ type: 'copyCompatibleMethodsAndEntities' });
         }
         dispatch({ type: 'handleSourceMethods' });
         dispatch({ type: 'handleTargetMethods' });
@@ -313,10 +340,10 @@ export const useMappingHandlerBuilder = (
         onDataChanged
     );
 
-    // Initialize on mount and when `value` changes
+    // Initialize on mount
     useEffect(() => {
         init(value);
-    }, [value]);
+    }, []);
 
     return {
         mappingHandler,
