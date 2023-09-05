@@ -3,7 +3,7 @@ import {
     convertToEditMethod,
     isCompatibleRESTMethods,
     KIND_REST_API,
-    KIND_REST_CLIENT,
+    KIND_REST_CLIENT, RESTResource,
     RESTResourceSpec,
 } from './types';
 
@@ -21,7 +21,6 @@ import { getCounterValue, hasMethod, resolveEntities, validate } from './RESTUti
 import { RESTEditorComponent } from './RESTEditorComponent';
 import APIToClientMapper from './mapping/APIToClientMapper';
 import InspectConnectionContent from './inspectors/InspectConnectionContent';
-
 const packageJson = require('../../package.json');
 
 const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
@@ -105,7 +104,12 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 fromEntities: Entity[],
                 toEntities: Entity[]
             ): ConnectionMethodsMapping => {
-                const newMapping = {};
+                const newMapping:ConnectionMethodsMapping = {};
+                if (!to.spec.methods ||
+                    !from.spec.methods) {
+                    return newMapping;
+                }
+
                 Object.keys(from.spec.methods).forEach((sourceMethodId) => {
                     if (!to.spec.methods[sourceMethodId]) {
                         return;
@@ -142,15 +146,17 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 provider: Resource,
                 consumer: Resource
             ): ConnectionMethodsMapping => {
-                const newMapping = {};
+                const newMapping:ConnectionMethodsMapping = {};
+                const consumerSpec = consumer.spec as RESTResourceSpec;
+                const providerSpec = provider.spec as RESTResourceSpec;
 
-                if (!_.isObject(connection.mapping)) {
+                if (!_.isObject(connection.mapping) ||
+                    !providerSpec?.methods ||
+                    !consumerSpec?.methods) {
                     return newMapping;
                 }
 
                 const connectionMapping = connection.mapping as ConnectionMethodsMapping;
-                const consumerSpec = consumer.spec as RESTResourceSpec;
-                const providerSpec = provider.spec as RESTResourceSpec;
 
                 const oldMapping = connectionMapping;
                 _.forEach(oldMapping, (mapping, sourceMethodId) => {
@@ -169,10 +175,10 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
     getCounterValue,
     hasMethod,
     resolveEntities: (resource) => {
-        return resolveEntities({ resource, entities: [] });
+        return resolveEntities({ resource: resource as RESTResource, entities: [] });
     },
     validate: (resource, entities) => {
-        return validate({ resource, entities });
+        return validate({ resource: resource as RESTResource, entities });
     },
     definition: {
         kind: 'core/resource-type-internal',
