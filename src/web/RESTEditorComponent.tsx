@@ -11,16 +11,8 @@ import {
 import type { ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
 import './RESTEditorComponent.less';
+import { validateApiName } from './RESTUtils';
 
-function validateApiName(fieldName: string, name: string) {
-    if (!name) {
-        return;
-    }
-
-    if (!/^[a-z]([a-z0-9_-]*[a-z0-9_])?$/i.test(name)) {
-        throw new Error('Invalid API name');
-    }
-}
 
 export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const methodField = useFormContextField('spec.methods');
