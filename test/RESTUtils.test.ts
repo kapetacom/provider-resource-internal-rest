@@ -10,10 +10,18 @@ global['TextEncoder'] = TextEncoder as any;
 global['TextDecoder'] = TextDecoder as any;
 
 import { describe, expect, test } from '@jest/globals';
-import { getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate } from '../src/web/RESTUtils';
+import { getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate, validateApiName } from '../src/web/RESTUtils';
 import { ENTITIES, makeAPI, makeAPIContext, makeMethod } from './helpers';
 
 describe('RESTUtils', () => {
+
+    test('can validate api names', () => {
+        expect(() => validateApiName("", "test")).not.toThrowError();
+        expect(() => validateApiName("", "test-")).toThrowError();
+        expect(() => validateApiName("", "-test")).toThrowError();
+        expect(() => validateApiName("", "backend-api")).toThrowError();
+        expect(() => validateApiName("", "backend.api")).toThrowError();
+    });
     test('can get counter value (number of methods in API)', () => {
         expect(getCounterValue(makeAPI({}))).toBe(0);
 
@@ -204,5 +212,6 @@ describe('RESTUtils', () => {
                 )
             ).toEqual([]);
         });
+        
     });
 });

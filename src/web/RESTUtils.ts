@@ -22,6 +22,16 @@ export const hasMethod = (data: Resource, methodId: string): boolean => {
     return methodId in data.spec.methods;
 };
 
+export function validateApiName(fieldName: string, name: string) {
+    if (!name) {
+        return;
+    }
+
+    if (!/^[a-zA-Z_$][a-zA-Z\d_$]*$/.test(name)) {
+        throw new Error('Invalid API name');
+    }
+}
+
 export const validate = (context: RESTKindContext): string[] => {
     const errors: string[] = [];
     const entityNames = resolveEntities(context);
