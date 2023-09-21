@@ -3,6 +3,7 @@ metadata:
   name: kapeta/resource-type-rest-api
   title: REST API
   description: Provides REST API in your plans
+  visibility: public
 spec:
   ports:
     - name: rest
