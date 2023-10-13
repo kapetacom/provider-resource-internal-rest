@@ -49,6 +49,7 @@ metadata:
   name: kapeta/resource-type-rest-client
   title: REST Client
   description: Provides REST Clients in your plans
+  visibility: public
 spec:
   ports:
     - name: rest
