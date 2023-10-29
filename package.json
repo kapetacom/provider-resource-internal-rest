@@ -7,6 +7,12 @@
         "rest",
         "resource-type"
     ],
+    "license": "MIT",
+    "author": {
+        "email": "engineering@kapeta.com",
+        "name": "Kapeta",
+        "url": "https://kapeta.com"
+    },
     "private": false,
     "publishConfig": {
         "access": "public"

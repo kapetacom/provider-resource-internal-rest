@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { useCallback, useEffect, useState } from 'react';
 import { cloneDeep, find, pull } from 'lodash';
 import { ToastType, showToasty } from '@kapeta/ui-web-components';

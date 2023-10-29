@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { useEffect, useReducer } from 'react';
 import { useMappingHandler } from './useMappingHandler';
 import { RESTKindContext, RESTMethodEdit, convertAllToEditMethods, isCompatibleRESTMethods } from '../types';

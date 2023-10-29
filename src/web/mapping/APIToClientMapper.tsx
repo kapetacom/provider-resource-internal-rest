@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import React from 'react';
 import type { RESTMethodEdit, RESTResource, RESTResourceSpec } from '../types';
 import type { MappedMethod } from './types';
