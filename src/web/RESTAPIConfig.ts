@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { RESTEditorComponent } from './RESTEditorComponent';
 import { KIND_REST_API, KIND_REST_CLIENT, RESTResource, RESTResourceSpec } from './types';
 import { getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate } from './RESTUtils';

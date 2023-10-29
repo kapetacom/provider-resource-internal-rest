@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import _ from 'lodash';
 
 import { RESTMethodArgument, TypedValue } from '@kapeta/ui-web-types';

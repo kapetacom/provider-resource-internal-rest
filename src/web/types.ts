@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { forEach } from 'lodash';
 import { HTTPMethod, TypedValue, RESTMethod, TypeLike, RESTMethodArgument } from '@kapeta/ui-web-types';
 import { Entity, getCompatibilityIssuesForTypes, isCompatibleTypes, Resource } from '@kapeta/schemas';

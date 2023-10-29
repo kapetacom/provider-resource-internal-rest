@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { Entity } from '@kapeta/schemas';
 import { RESTMethodEdit, RESTResource } from '../types';
 import { ConnectionMethodMappingType, ConnectionMethodsMapping } from '@kapeta/ui-web-types';

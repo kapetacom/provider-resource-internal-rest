@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import React, { Component } from 'react';
 
 import { TabContainer, TabPage } from '@kapeta/ui-web-components';
