@@ -1,13 +1,6 @@
 /**
  * @jest-environment jsdom
  */
-//This is all needed due to monaco editor getting pulled in
-document.queryCommandSupported = function () {
-    return false;
-};
-import { TextEncoder, TextDecoder } from 'util';
-global['TextEncoder'] = TextEncoder as any;
-global['TextDecoder'] = TextDecoder as any;
 
 import { describe, expect, test } from '@jest/globals';
 import { getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate, validateApiName } from '../src/web/RESTUtils';

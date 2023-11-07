@@ -77,7 +77,7 @@ describe('Types', () => {
             ).toBe(true);
 
             expect(
-                isCompatibleRESTMethods(makeEditContext('test1', ['string']), makeEditContext('test2', ['boolean']))
+                isCompatibleRESTMethods(makeEditContext('test1', ['string']), makeEditContext('test2', ['byte']))
             ).toBe(false);
         });
 
