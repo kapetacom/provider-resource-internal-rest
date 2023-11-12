@@ -23,7 +23,7 @@ import {
 
 import { Connection, Entity, Metadata, Resource } from '@kapeta/schemas';
 
-import { getCounterValue, hasMethod, resolveEntities, validate } from './RESTUtils';
+import { getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate } from './RESTUtils';
 import { RESTEditorComponent } from './RESTEditorComponent';
 import APIToClientMapper from './mapping/APIToClientMapper';
 import InspectConnectionContent from './inspectors/InspectConnectionContent';
@@ -189,6 +189,7 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
     ],
     getCounterValue,
     hasMethod,
+    renameEntityReferences,
     resolveEntities: (resource) => {
         return resolveEntities({ resource: resource as RESTResource, entities: [] });
     },

@@ -11,14 +11,14 @@ import {
     DSLMethod,
     MethodEditor,
     FormField,
-    useFormContextField, useIsFormSubmitAttempted,
+    useFormContextField,
+    useIsFormSubmitAttempted,
 } from '@kapeta/ui-web-components';
 import type { ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
 import './RESTEditorComponent.less';
 import { validateApiName } from './RESTUtils';
-import {Alert, Stack} from '@mui/material';
-
+import { Alert, Stack } from '@mui/material';
 
 export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const methodField = useFormContextField('spec.methods');
@@ -50,7 +50,7 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                 <MethodEditor
                     restMethods={true}
                     validTypes={validTypes}
-                    onError={(err:any) => {
+                    onError={(err: any) => {
                         methodSource.invalid();
                         setMethodsError(err.message);
                     }}

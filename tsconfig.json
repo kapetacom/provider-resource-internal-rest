@@ -22,6 +22,6 @@
         "emitDecoratorMetadata": true,
         "isolatedModules": true
     },
-    "include": ["definitions", "stories", "src", "src/**/*", "test"],
+    "include": ["definitions", "stories", "src", "src/**/*", "test/*.ts"],
     "exclude": ["node_modules", "build", "scripts"]
 }

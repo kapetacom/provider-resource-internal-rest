@@ -70,13 +70,22 @@ export function makeEditMethod(id: string, args: TypeOrString[] = [], responseTy
     return convertToEditMethod(id, makeMethod(args, responseType));
 }
 
-export const ENTITIES: EntityDTO[] = [
+export const ENTITIES: Entity[] = [
+    {
+        type: EntityType.Enum,
+        name: 'UserType',
+        values: ['PERSON', 'STAFF'],
+    },
     {
         type: EntityType.Dto,
         name: 'User',
         properties: {
             id: {
                 type: 'string',
+            },
+            type: {
+                ref: 'UserType',
+                defaultValue: 'UserType.PERSON',
             },
         },
     },
@@ -89,6 +98,9 @@ export const ENTITIES: EntityDTO[] = [
             },
             name: {
                 type: 'string',
+            },
+            staff: {
+                ref: 'Staff',
             },
         },
     },
@@ -108,6 +120,10 @@ export const ENTITIES: EntityDTO[] = [
             boss: {
                 ref: 'Staff',
             },
+            type: {
+                ref: 'UserType',
+                defaultValue: 'UserType.PERSON',
+            },
         },
     },
 ];
@@ -118,6 +134,9 @@ export const ENTITIES_ALT: EntityDTO[] = [
         name: 'User',
         properties: {
             username: {
+                type: 'string',
+            },
+            type: {
                 type: 'string',
             },
         },

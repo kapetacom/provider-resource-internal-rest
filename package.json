@@ -2,7 +2,6 @@
     "name": "@kapeta/resource-type-rest",
     "version": "local",
     "description": "Provides REST API and Client resource type to Kapeta",
-    "sideEffects": false,
     "keywords": [
         "kapeta",
         "rest",
@@ -27,7 +26,8 @@
         "build-storybook": "build-storybook",
         "test": "jest",
         "format": "prettier --write .",
-        "lint": "tsc --noEmit && eslint ."
+        "lint:tsc": "tsc --noEmit",
+        "lint:eslint": "eslint ."
     },
     "peerDependencies": {
         "@kapeta/schemas": "<2",
