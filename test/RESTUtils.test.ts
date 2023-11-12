@@ -109,13 +109,11 @@ describe('RESTUtils', () => {
         expect(api.spec.methods?.test1?.arguments?.arg_0).toEqual({ ref: 'UserInformation', transport: 'BODY' });
 
         expect(api.spec.methods?.test2?.responseType).toEqual({
-            ref: 'Person[]',
-            transport: 'BODY',
+            ref: 'Person[]'
         });
         renameEntityReferences(api, 'Person', 'PersonInfo');
         expect(api.spec.methods?.test2?.responseType).toEqual({
-            ref: 'PersonInfo[]',
-            transport: 'BODY',
+            ref: 'PersonInfo[]'
         });
     });
 

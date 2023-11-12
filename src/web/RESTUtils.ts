@@ -19,6 +19,7 @@ import {
 import { DSL_LANGUAGE_ID, DSLConverters, DSLWriter } from '@kapeta/ui-web-components';
 import { isBuiltInType, isList, Resource, TypeLike, typeName } from '@kapeta/schemas';
 
+
 export const getCounterValue = (data: Resource): number => {
     return _.size(data.spec.methods);
 };
