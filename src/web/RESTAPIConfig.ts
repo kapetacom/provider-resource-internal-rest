@@ -21,10 +21,10 @@ export const RESTAPIConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = 
     consumableKind: KIND_REST_CLIENT,
     getCounterValue,
     hasMethod,
+    renameEntityReferences,
     resolveEntities: (resource) => {
         return resolveEntities({ resource: resource as RESTResource, entities: [] });
     },
-    renameEntityReferences,
     validate: (resource, entities) => {
         return validate({ resource: resource as RESTResource, entities });
     },

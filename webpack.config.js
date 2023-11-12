@@ -1,7 +1,6 @@
 const Path = require('path');
 const packageJson = require('./package.json');
 
-
 module.exports = {
     entry: {
         [`kapeta/resource-type-rest-api:${packageJson.version}`]: {
@@ -72,5 +71,5 @@ module.exports = {
         '@kapeta/ui-web-types': 'Kapeta.Types',
         '@kapeta/ui-web-utils': 'Kapeta.Utils',
         '@kapeta/ui-web-context': 'Kapeta.Context',
-    }
+    },
 };

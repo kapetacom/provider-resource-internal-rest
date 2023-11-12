@@ -3,17 +3,23 @@
  */
 
 import { describe, expect, test } from '@jest/globals';
-import { getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate, validateApiName } from '../src/web/RESTUtils';
+import {
+    getCounterValue,
+    hasMethod,
+    renameEntityReferences,
+    resolveEntities,
+    validate,
+    validateApiName,
+} from '../src/web/RESTUtils';
 import { ENTITIES, makeAPI, makeAPIContext, makeMethod } from './helpers';
 
 describe('RESTUtils', () => {
-
     test('can validate api names', () => {
-        expect(() => validateApiName("", "test")).not.toThrowError();
-        expect(() => validateApiName("", "test-")).toThrowError();
-        expect(() => validateApiName("", "-test")).toThrowError();
-        expect(() => validateApiName("", "backend-api")).toThrowError();
-        expect(() => validateApiName("", "backend.api")).toThrowError();
+        expect(() => validateApiName('', 'test')).not.toThrowError();
+        expect(() => validateApiName('', 'test-')).toThrowError();
+        expect(() => validateApiName('', '-test')).toThrowError();
+        expect(() => validateApiName('', 'backend-api')).toThrowError();
+        expect(() => validateApiName('', 'backend.api')).toThrowError();
     });
     test('can get counter value (number of methods in API)', () => {
         expect(getCounterValue(makeAPI({}))).toBe(0);
@@ -68,13 +74,27 @@ describe('RESTUtils', () => {
 
         expect(
             resolveEntities(
-                makeAPIContext({
-                    test1: makeMethod([{ ref: 'User' }, 'string']),
-                    test2: makeMethod([], { ref: 'Person' }),
-                    test3: makeMethod(['string', { ref: 'Staff' }]),
-                })
+                makeAPIContext(
+                    {
+                        test1: makeMethod([{ ref: 'User' }, 'string']),
+                        test2: makeMethod([], { ref: 'Person' }),
+                        test3: makeMethod(['string', { ref: 'Staff' }]),
+                    },
+                    ENTITIES
+                )
             )
         ).toEqual(['User', 'Person', 'Staff']);
+
+        expect(
+            resolveEntities(
+                makeAPIContext(
+                    {
+                        test1: makeMethod([], { ref: 'Person' }),
+                    },
+                    ENTITIES
+                )
+            )
+        ).toEqual(['Person']);
     });
 
     test('can rename reference', () => {
@@ -84,13 +104,19 @@ describe('RESTUtils', () => {
             test3: makeMethod(['string', { ref: 'Staff' }]),
         });
 
-        expect(api.spec.methods?.test1?.arguments?.arg_0?.ref).toBe('User');
+        expect(api.spec.methods?.test1?.arguments?.arg_0).toEqual({ ref: 'User', transport: 'BODY' });
         renameEntityReferences(api, 'User', 'UserInformation');
-        expect(api.spec.methods?.test1?.arguments?.arg_0?.ref).toBe('UserInformation');
+        expect(api.spec.methods?.test1?.arguments?.arg_0).toEqual({ ref: 'UserInformation', transport: 'BODY' });
 
-        expect(api.spec.methods?.test2?.responseType?.ref).toBe('Person[]');
+        expect(api.spec.methods?.test2?.responseType).toEqual({
+            ref: 'Person[]',
+            transport: 'BODY',
+        });
         renameEntityReferences(api, 'Person', 'PersonInfo');
-        expect(api.spec.methods?.test2?.responseType?.ref).toBe('PersonInfo[]');
+        expect(api.spec.methods?.test2?.responseType).toEqual({
+            ref: 'PersonInfo[]',
+            transport: 'BODY',
+        });
     });
 
     describe('validation', () => {
@@ -205,6 +231,5 @@ describe('RESTUtils', () => {
                 )
             ).toEqual([]);
         });
-        
     });
 });

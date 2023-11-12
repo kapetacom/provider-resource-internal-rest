@@ -17,7 +17,7 @@ import {
 } from './types';
 
 import { DSL_LANGUAGE_ID, DSLConverters, DSLWriter } from '@kapeta/ui-web-components';
-import { Entity, isBuiltInType, isDTO, isList, Resource, TypeLike, typeName } from '@kapeta/schemas';
+import { isBuiltInType, isList, Resource, TypeLike, typeName } from '@kapeta/schemas';
 
 export const getCounterValue = (data: Resource): number => {
     return _.size(data.spec.methods);
@@ -94,44 +94,6 @@ export const validate = (context: RESTKindContext): string[] => {
     return errors;
 };
 
-export function resolveEntitiesFromEntity(entity: Entity, entities: Entity[]): Entity[] {
-    if (!isDTO(entity)) {
-        return [];
-    }
-
-    const out: string[] = [];
-
-    Object.values(entity.properties).forEach((property) => {
-        if (typeof property.type === 'string') {
-            return;
-        }
-
-        const name = typeName(property.type);
-        if (entity.name === name) {
-            return;
-        }
-
-        if (out.indexOf(name) > -1) {
-            return;
-        }
-
-        out.push(name);
-
-        const subEntity = entities.find((e) => e.name === name);
-
-        if (subEntity) {
-            const subEntityEntities = resolveEntitiesFromEntity(subEntity, entities);
-            subEntityEntities.forEach((e) => {
-                if (out.indexOf(e.name) === -1) {
-                    out.push(e.name);
-                }
-            });
-        }
-    });
-
-    return out.map((name) => entities.find((e) => e.name === name)).filter((e) => !!e) as Entity[];
-}
-
 export function resolveEntitiesFromMethod(context: RESTMethodContext | RESTMethodEditContext): string[] {
     const out: string[] = [];
 
@@ -141,27 +103,15 @@ export function resolveEntitiesFromMethod(context: RESTMethodContext | RESTMetho
         }
 
         const entityName = typeName(type);
-        if (out.indexOf(entityName) === -1) {
+        if (!out.includes(entityName)) {
             out.push(entityName);
-        }
-
-        const entity = context.entities.find((e) => e.name === entityName);
-        if (entity) {
-            const subEntities = resolveEntitiesFromEntity(entity, context.entities);
-            subEntities.forEach((subEntity) => {
-                if (out.indexOf(subEntity.name) === -1) {
-                    out.push(subEntity.name);
-                }
-            });
         }
     }
 
     maybeAddEntity(context.method.responseType);
 
     if (context.method.arguments) {
-        Object.values(context.method.arguments).forEach((arg) => {
-            maybeAddEntity(arg);
-        });
+        Object.values(context.method.arguments).forEach(maybeAddEntity);
     }
 
     return out;
@@ -227,10 +177,16 @@ export function renameEntityReferences(resource: Resource, from: string, to: str
         }
 
         if (isList(type)) {
-            return { ref: to + '[]' };
+            return {
+                ...type,
+                ref: to + '[]',
+            };
         }
 
-        return { ref: to };
+        return {
+            ...type,
+            ref: to,
+        };
     }
 
     const restSpec = resource.spec as RESTResourceSpec;
@@ -247,10 +203,14 @@ export function renameEntityReferences(resource: Resource, from: string, to: str
             return;
         }
 
-        const methodIds = Object.keys(method.arguments);
+        const argumentMap = method.arguments;
+
+        const methodIds = Object.keys(argumentMap);
 
         methodIds.forEach((methodId) => {
-            method.arguments![methodId] = maybeRenameEntity(method.arguments![methodId]);
+            argumentMap[methodId] = maybeRenameEntity(argumentMap[methodId]);
         });
     });
+
+    restSpec.source = convertRESTToDSLSource(restSpec);
 }
