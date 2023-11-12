@@ -11,17 +11,20 @@ import {
     DSLMethod,
     MethodEditor,
     FormField,
-    useFormContextField,
+    useFormContextField, useIsFormSubmitAttempted,
 } from '@kapeta/ui-web-components';
 import type { ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
 import './RESTEditorComponent.less';
 import { validateApiName } from './RESTUtils';
+import {Alert, Stack} from '@mui/material';
 
 
 export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const methodField = useFormContextField('spec.methods');
     const methodSource = useFormContextField('spec.source');
+    const [methodsError, setMethodsError] = React.useState<string | null>(null);
+    const formSubmitAttempted = useIsFormSubmitAttempted();
 
     const setResult = (code: string, methods: DSLMethod[]) => {
         try {
@@ -43,19 +46,29 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                 help={'Name your REST API. E.g. MyApi'}
             />
 
-            <div className={'editor'}>
+            <Stack direction={'column'} sx={{ height: '100%' }} className={'editor'}>
                 <MethodEditor
                     restMethods={true}
                     validTypes={validTypes}
+                    onError={(err:any) => {
+                        methodSource.invalid();
+                        setMethodsError(err.message);
+                    }}
                     value={{
                         code: methodSource.get({ value: '' }).value,
                         entities: DSLConverters.fromSchemaMethods(methodField.get([])),
                     }}
                     onChange={(result) => {
+                        methodSource.valid();
                         setResult(result.code, result.entities as DSLMethod[]);
                     }}
                 />
-            </div>
+                {methodsError && formSubmitAttempted && (
+                    <Alert sx={{ mt: 1 }} severity={'error'}>
+                        {methodsError}
+                    </Alert>
+                )}
+            </Stack>
         </div>
     );
 };
