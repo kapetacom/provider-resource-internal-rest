@@ -16,7 +16,6 @@ import {
 } from '@kapeta/ui-web-components';
 import type { ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
-import './RESTEditorComponent.less';
 import { validateApiName } from './RESTUtils';
 import { Alert, Stack } from '@mui/material';
 
@@ -38,7 +37,7 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const validTypes = props.block.spec.entities?.types?.map((t) => t.name) ?? [];
 
     return (
-        <div className={'rest-resource-editor'}>
+        <Stack className={'rest-resource-editor'} sx={{ height: '100%' }}>
             <FormField
                 name={'metadata.name'}
                 label={'Name'}
@@ -46,7 +45,15 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                 help={'Name your REST API. E.g. MyApi'}
             />
 
-            <Stack direction={'column'} sx={{ height: '100%' }} className={'editor'}>
+            <Stack
+                sx={{
+                    height: '100%',
+                    '.dsl-editor': {
+                        boxSizing: 'border-box',
+                    },
+                }}
+                className={'editor'}
+            >
                 <MethodEditor
                     restMethods={true}
                     validTypes={validTypes}
@@ -69,6 +76,6 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                     </Alert>
                 )}
             </Stack>
-        </div>
+        </Stack>
     );
 };

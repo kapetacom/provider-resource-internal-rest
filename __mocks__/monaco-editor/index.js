@@ -5,3 +5,10 @@ window.TextEncoder = class TextEncoder {
 }
 
 window.HTMLCanvasElement.prototype.getContext = () => {}
+
+module.exports = {
+    languages: {
+        register: () => {},
+        onLanguage: () => {},
+    }
+}

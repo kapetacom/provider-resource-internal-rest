@@ -327,7 +327,7 @@ export default {
 
 export const Editor = () => (
     <div
-        style={{ padding: '10px', width: '850px', height: '100%', backgroundColor: 'white', border: '1px solid gray' }}
+        style={{ padding: '10px', width: '850px', height: '500px', backgroundColor: 'white', border: '1px solid gray' }}
     >
         <FormContainer initialValue={RESTApiResource} onChange={(data) => console.log('Data changed', data)}>
             <RESTEditorComponent block={block} />
