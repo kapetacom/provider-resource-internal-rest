@@ -89,6 +89,6 @@
         "webpack-cli": "^5.1.4",
         "yaml-loader": "^0.8.0"
     },
-    "bundleDependencies": [],
+    "bundledDependencies": true,
     "prettier": "@kapeta/prettier-config"
 }
