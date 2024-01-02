@@ -17,8 +17,7 @@ import {
 } from './types';
 
 import { DSL_LANGUAGE_ID, DSLConverters, DSLWriter } from '@kapeta/ui-web-components';
-import { isBuiltInType, isList, Resource, TypeLike, typeName } from '@kapeta/schemas';
-
+import { isBuiltInGeneric, isBuiltInType, isList, parseGeneric, Resource, TypeLike, typeName } from '@kapeta/schemas';
 
 export const getCounterValue = (data: Resource): number => {
     return _.size(data.spec.methods);
@@ -100,6 +99,21 @@ export function resolveEntitiesFromMethod(context: RESTMethodContext | RESTMetho
 
     function maybeAddEntity(type?: TypeLike) {
         if (!type || (!type.ref && !type.type) || isBuiltInType(type)) {
+            return;
+        }
+
+        const generic = parseGeneric(type);
+        if (generic) {
+            if (!isBuiltInGeneric(type)) {
+                // Not supported by the DSL but we handle it anyway
+                if (!out.includes(generic.name)) {
+                    out.push(generic.name);
+                }
+            }
+
+            generic.arguments.forEach((arg) => {
+                maybeAddEntity({ type: arg });
+            });
             return;
         }
 
