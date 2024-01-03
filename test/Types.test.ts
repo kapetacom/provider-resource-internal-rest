@@ -19,11 +19,13 @@ describe('Types', () => {
                     id: 'arg_0',
                     type: 'string',
                     transport: 'QUERY',
+                    optional: false,
                 },
                 {
                     id: 'arg_1',
                     ref: 'User',
                     transport: 'BODY',
+                    optional: false,
                 },
             ],
             path: '/',
@@ -42,11 +44,13 @@ describe('Types', () => {
                         id: 'arg_0',
                         type: 'string',
                         transport: 'QUERY',
+                        optional: false,
                     },
                     {
                         id: 'arg_1',
                         ref: 'User',
                         transport: 'BODY',
+                        optional: false,
                     },
                 ],
                 path: '/',
@@ -139,12 +143,31 @@ describe('Types', () => {
         });
 
         test('arguments with same entity name and structure does match', () => {
+            const aMethod = makeEditContext('test1', [{ ref: 'User' }], 'string', ENTITIES)
+            const bMethod = makeEditContext('test2', [{ ref: 'User' }], 'string', ENTITIES);
+
             expect(
-                isCompatibleRESTMethods(
-                    makeEditContext('test1', [{ ref: 'User' }], 'string', ENTITIES),
-                    makeEditContext('test2', [{ ref: 'User' }], 'string', ENTITIES)
-                )
+                isCompatibleRESTMethods( aMethod, bMethod )
             ).toBe(true);
+
+            delete aMethod.method.arguments[0].optional;
+            bMethod.method.arguments[0].optional = false;
+            expect(
+                isCompatibleRESTMethods( aMethod, bMethod )
+            ).toBe(true);
+        });
+
+        test('arguments with same type but not both required does not match', () => {
+            const aMethod = makeEditContext('test1', [{ ref: 'User' }], 'string', ENTITIES)
+            const bMethod = makeEditContext('test2', [{ ref: 'User' }], 'string', ENTITIES);
+            aMethod.method.arguments[0].optional = true;
+            expect(
+                isCompatibleRESTMethods( aMethod, bMethod )
+            ).toBe(false);
+
+            expect(
+                getCompatibleRESTMethodsIssues( aMethod, bMethod )
+            ).toEqual(['Argument 1 is not compatible because one is optional and the other is not']);
         });
 
         test('response type with same entity name but different structure does not match', () => {

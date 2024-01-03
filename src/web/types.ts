@@ -24,6 +24,7 @@ export interface RESTResource extends Resource {
 export interface RESTMethodArgumentEdit extends TypeLike {
     id: string;
     transport?: string;
+    optional?: boolean;
 }
 
 export interface RESTMethodEdit {
@@ -68,7 +69,7 @@ export function convertToEditMethod(id: string, method: RESTMethod): RESTMethodE
     };
 
     forEach(method.arguments, (arg, argId) => {
-        tmp.arguments.push({ ...arg, id: argId });
+        tmp.arguments.push({ ...arg, id: argId, optional: arg.optional });
     });
 
     return tmp;
@@ -88,8 +89,8 @@ export function convertAllToEditMethods(resource: RESTResource): RESTMethodEdit[
 
 export function convertToRestMethod(method: RESTMethodEdit): RESTMethod {
     const args: Record<string, RESTMethodArgument> = {};
-    method.arguments.forEach(({ id, transport, type, ref }) => {
-        args[id] = { transport, type, ref };
+    method.arguments.forEach(({ id, transport, type, ref, optional }) => {
+        args[id] = { transport, type, ref, optional };
     });
 
     return {
@@ -121,6 +122,15 @@ export function getCompatibleRESTMethodsIssues(
 
     for (let i = 0; i < aArgs.length; i++) {
         const issues = getCompatibilityIssuesForTypes(aArgs[i], bArgs[i], aContext.entities, bContext.entities);
+
+        if (aArgs[i] && bArgs[i]) {
+            const aOptional = Boolean(aArgs[i].optional);
+            const bOptional = Boolean(bArgs[i].optional);
+            if (aOptional !== bOptional) {
+                errors.push(`Argument ${i + 1} is not compatible because one is optional and the other is not`);
+            }
+        }
+
         if (bArgs[i] && issues.length > 0) {
             errors.push(`Argument ${i + 1} type is not compatible: ${issues[0]}`);
         }

@@ -42,6 +42,7 @@ export function makeMethod(args: TypeOrString[] = [], responseType?: TypeOrStrin
         const arg: RESTMethodArgument = {
             ...typeLike,
             transport: isStringableType(typeName(typeLike)) ? 'QUERY' : 'BODY',
+            optional: false,
         };
         argMap[`arg_${ix}`] = arg;
     });
