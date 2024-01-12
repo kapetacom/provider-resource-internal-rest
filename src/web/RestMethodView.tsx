@@ -24,10 +24,19 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
             method.arguments = [];
         }
 
+        let methodName = method.id;
+
+        if (method.controllerName) {
+            if (methodName.startsWith(method.controllerName + '_')) {
+                methodName = methodName.substring(method.controllerName.length + 1);
+            }
+            methodName = `${method.controllerName}::${methodName}`;
+        }
+
         return (
             <div className={'rest-method-erasure' + (compact ? ' compact' : '')}>
                 <div className={'method'} title={method.description}>
-                    <span className={'method-name'}>{method.id}</span>
+                    <span className={'method-name'}>{methodName}</span>
                     <span className={'method-definition-start'}>(</span>
                     <span className={'method-arguments'}>
                         {method.arguments.map((argument, ix) => {

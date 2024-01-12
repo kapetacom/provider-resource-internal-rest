@@ -34,6 +34,7 @@ export interface RESTMethodEdit {
     path: string;
     arguments: RESTMethodArgumentEdit[];
     responseType?: TypeLike;
+    controllerName?: string;
 }
 
 export interface RESTMethodEditContext {
@@ -66,6 +67,7 @@ export function convertToEditMethod(id: string, method: RESTMethod): RESTMethodE
         arguments: [],
         path: method.path,
         responseType: method.responseType,
+        controllerName: method.controllerName,
     };
 
     forEach(method.arguments, (arg, argId) => {
@@ -99,6 +101,7 @@ export function convertToRestMethod(method: RESTMethodEdit): RESTMethod {
         path: method.path,
         arguments: args,
         responseType: method.responseType,
+        controllerName: method.controllerName,
     } satisfies RESTMethod;
 }
 

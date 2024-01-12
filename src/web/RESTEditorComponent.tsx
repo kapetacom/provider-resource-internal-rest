@@ -6,14 +6,16 @@
 import React from 'react';
 
 import {
-    DSL_LANGUAGE_ID,
     DSLConverters,
-    DSLMethod,
     MethodEditor,
     FormField,
     useFormContextField,
     useIsFormSubmitAttempted,
+    DSLMethod,
 } from '@kapeta/ui-web-components';
+
+import { KAPLANG_ID } from '@kapeta/kaplang-core';
+
 import type { ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
 import { validateApiName } from './RESTUtils';
@@ -28,13 +30,16 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const setResult = (code: string, methods: DSLMethod[]) => {
         try {
             methodField.set(DSLConverters.toSchemaMethods(methods));
-            methodSource.set({ type: DSL_LANGUAGE_ID, value: code });
+            methodSource.set({ type: KAPLANG_ID, value: code });
         } catch (e) {
             console.error('Failed to trigger change', e);
         }
     };
 
     const validTypes = props.block.spec.entities?.types?.map((t) => t.name) ?? [];
+
+    const source = methodSource.get({ value: '' });
+    const entities = DSLConverters.fromSchemaMethods(methodField.get({}));
 
     return (
         <Stack className={'rest-resource-editor'} sx={{ height: '100%' }}>
@@ -62,10 +67,10 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                         setMethodsError(err.message);
                     }}
                     value={{
-                        code: methodSource.get({ value: '' }).value,
-                        entities: DSLConverters.fromSchemaMethods(methodField.get([])),
+                        code: source.value,
+                        entities,
                     }}
-                    onChange={(result) => {
+                    onChange={(result:any) => {
                         methodSource.valid();
                         setResult(result.code, result.entities as DSLMethod[]);
                     }}

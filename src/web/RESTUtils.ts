@@ -16,8 +16,9 @@ import {
     RESTResourceSpec,
 } from './types';
 
-import { DSL_LANGUAGE_ID, DSLConverters, DSLWriter } from '@kapeta/ui-web-components';
+import { DSLConverters } from '@kapeta/ui-web-components';
 import { isBuiltInGeneric, isBuiltInType, isList, parseGeneric, Resource, TypeLike, typeName } from '@kapeta/schemas';
+import {KAPLANG_ID, KaplangWriter} from "@kapeta/kaplang-core";
 
 export const getCounterValue = (data: Resource): number => {
     return _.size(data.spec.methods);
@@ -151,8 +152,8 @@ export function deleteRESTMethod(spec: RESTResourceSpec, id: string) {
 export function convertRESTToDSLSource(spec: RESTResourceSpec): TypedValue {
     const dslMethods = spec.methods ? DSLConverters.fromSchemaMethods(spec.methods) : [];
     return {
-        type: DSL_LANGUAGE_ID,
-        value: DSLWriter.write(dslMethods),
+        type: KAPLANG_ID,
+        value: KaplangWriter.write(dslMethods),
     };
 }
 

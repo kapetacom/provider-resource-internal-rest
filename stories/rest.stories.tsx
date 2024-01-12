@@ -202,6 +202,25 @@ const RESTApiResource: RESTResource = {
     },
 };
 
+
+const RESTApiResourceController: RESTResource = {
+    kind: API_KIND,
+    metadata: {
+        name: 'MyRESTAPI',
+    },
+    spec: {
+        port: {
+            type: 'rest',
+        },
+        methods: {
+            Tasks_test: {...getTaskMethod, controllerName: 'Tasks'},
+            Tasks_addTask: {...addTaskMethod, controllerName: 'Tasks'},
+            Tasks_addSimpleTask: {...addSimpleTaskMethod, controllerName: 'Tasks'},
+            Tasks_deleteTask: {...deleteTaskMethod, controllerName: 'Tasks'},
+        },
+    },
+};
+
 const RESTClientResource: RESTResource = {
     kind: CLIENT_KIND,
     metadata: {
@@ -329,13 +348,18 @@ export const Editor = () => (
     <div
         style={{ padding: '10px', width: '850px', height: '500px', backgroundColor: 'white', border: '1px solid gray' }}
     >
-        <FormContainer initialValue={RESTApiResource} onChange={(data) => console.log('Data changed', data)}>
+        <FormContainer initialValue={RESTApiResource} onChange={(data:any) => console.log('Data changed', data)}>
             <RESTEditorComponent block={block} />
         </FormContainer>
     </div>
 );
 
 export const MethodView = () => <RestMethodView compact={false} method={convertToEditMethod('test', getTaskMethod)} />;
+
+export const MethodViewController = () => <RestMethodView compact={false} method={convertToEditMethod('test', {
+    ...getTaskMethod,
+    controllerName: 'Tasks',
+})} />;
 
 export const MethodViewCompact = () => (
     <RestMethodView compact={true} method={convertToEditMethod('test', getTaskMethod)} />
@@ -389,6 +413,21 @@ export const APIToClientMapperViewOK = () => (
         <APIToClientMapper
             title={'My Connection'}
             source={RESTApiResource}
+            target={RESTClientResource}
+            onDataChanged={(change) => console.log('Data changed', change)}
+            sourceEntities={API_ENTITIES}
+            targetEntities={API_ENTITIES}
+        />
+    </div>
+);
+
+
+export const APIControllerToClientMapperViewOK = () => (
+    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+        <ToastContainer />
+        <APIToClientMapper
+            title={'My Connection'}
+            source={RESTApiResourceController}
             target={RESTClientResource}
             onDataChanged={(change) => console.log('Data changed', change)}
             sourceEntities={API_ENTITIES}
