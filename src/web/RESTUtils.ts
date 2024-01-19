@@ -3,30 +3,43 @@
  * SPDX-License-Identifier: MIT
  */
 
-import _ from 'lodash';
+import { ResourceWithSpec } from '@kapeta/ui-web-types';
 
-import { RESTMethodArgument, TypedValue } from '@kapeta/ui-web-types';
+import { RESTKindContext, RESTMethodContext, RESTResource, RESTResourceSpec } from './types';
 
 import {
-    convertToRestMethod,
-    RESTKindContext,
-    RESTMethodContext,
-    RESTMethodEdit,
-    RESTMethodEditContext,
-    RESTResourceSpec,
-} from './types';
-
-import { Resource } from '@kapeta/schemas';
-import { DSLConverters, EntityHelpers, KAPLANG_ID, KaplangWriter, TypeLike } from '@kapeta/kaplang-core';
+    DSLAPI,
+    DSLAPIParser,
+    DSLController,
+    DSLConverters,
+    DSLData,
+    DSLEntity,
+    DSLEntityType,
+    DSLMethod,
+    DSLReferenceResolver,
+    DSLTypeHelper,
+    EntityHelpers,
+    HTTP_METHODS,
+    isVoid,
+    KAPLANG_ID,
+    KAPLANG_VERSION,
+    KaplangWriter,
+    REST_ARGUMENT,
+    RESTMethodReader,
+} from '@kapeta/kaplang-core';
+import { createId, DSLControllerMethod } from './mapping/types';
 import isSameType = EntityHelpers.isSameType;
 import toComparisonType = EntityHelpers.toComparisonType;
 
-export const getCounterValue = (data: Resource): number => {
-    return _.size(data.spec.methods);
+export const getCounterValue = (data: ResourceWithSpec<RESTResourceSpec>): number => {
+    if (!data.spec.methods) {
+        return 0;
+    }
+    return Object.keys(data.spec.methods).length;
 };
 
-export const hasMethod = (data: Resource, methodId: string): boolean => {
-    return methodId in data.spec.methods;
+export const hasMethod = (data: ResourceWithSpec<RESTResourceSpec>, methodId: string): boolean => {
+    return Boolean(data.spec.methods && methodId in data.spec.methods);
 };
 
 export function validateApiName(fieldName: string, name: string) {
@@ -38,6 +51,47 @@ export function validateApiName(fieldName: string, name: string) {
         throw new Error('Invalid API name');
     }
 }
+
+const validateMethod = (method: DSLMethod): string[] => {
+    const errors: string[] = [];
+    const reader = new RESTMethodReader(method);
+    if (!reader.name) {
+        errors.push('Method is missing a name. Add a name to solve this issue');
+        return errors;
+    }
+
+    const methodAnnotation = reader.getAnnotation(HTTP_METHODS);
+
+    if (!methodAnnotation) {
+        errors.push(`${reader.name} is missing a HTTP method. Add a HTTP method to solve this issue`);
+        return errors;
+    }
+
+    if (!methodAnnotation.argument) {
+        errors.push(`${reader.name} is missing a path. Add a path to solve this issue`);
+        return errors;
+    }
+
+    reader.parameters.some((parameter) => {
+        if (isVoid(parameter.type)) {
+            errors.push(
+                `${reader.name} is missing a type for the parameter ${parameter.name}. Add a type to solve this issue`
+            );
+            return true;
+        }
+
+        const transportAnnotation = parameter.getAnnotation(REST_ARGUMENT);
+        if (!transportAnnotation) {
+            errors.push(
+                `${reader.name} is missing transport for the parameter ${parameter.name}. Add a transport to solve this issue`
+            );
+            return true;
+        }
+        return false;
+    });
+
+    return errors;
+};
 
 export const validate = (context: RESTKindContext): string[] => {
     const errors: string[] = [];
@@ -59,36 +113,58 @@ export const validate = (context: RESTKindContext): string[] => {
         }
     }
 
-    const restSpec = context.resource.spec as RESTResourceSpec;
+    const restSpec = context.resource.spec;
 
-    _.forEach(restSpec.methods, (method, methodId) => {
-        if (!method.path) {
-            errors.push(`${methodId} is missing path. Add path to solve this issue`);
-        }
+    if (!restSpec.source?.value) {
+        return errors;
+    }
 
-        if (!method.method) {
-            errors.push(`${methodId} is missing HTTP method. Define an HTTP method to solve this issue`);
-        }
+    const result = DSLAPIParser.parse(restSpec.source.value, {
+        rest: true,
+        validTypes: entityNames,
+        ignoreSemantics: true,
+    });
 
-        if (!method.arguments) {
+    result.forEach((entity) => {
+        if (entity.type === DSLEntityType.METHOD) {
+            errors.push(...validateMethod(entity));
             return;
         }
 
-        const invalidArguments = Object.entries(method.arguments)
-            .filter(([, argument]: [string, RESTMethodArgument]) => {
-                if (!argument.type && !argument.ref) {
+        if (entity.type !== DSLEntityType.CONTROLLER) {
+            return;
+        }
+
+        if (!entity.name) {
+            errors.push('Controller is missing a name. Add a name to solve this issue');
+        }
+
+        if (!entity.path) {
+            errors.push('Controller is missing a path. Add a path to solve this issue');
+        }
+
+        if (!entity.methods) {
+            return;
+        }
+
+        const invalidMethodIds = entity.methods
+            .filter((method) => {
+                const methodErrors = validateMethod(method);
+                if (methodErrors.length > 0) {
+                    errors.push(...methodErrors);
                     return true;
                 }
-
-                return !argument.transport;
+                return false;
             })
-            .map(([methodId, argument]) => methodId);
+            .map((method) => createId(entity.name, method.name));
 
-        if (invalidArguments.length > 0) {
+        if (invalidMethodIds.length > 0) {
             errors.push(
-                `${methodId} is missing a type and/or a transport for the following arguments: ${invalidArguments.join(
+                `${
+                    entity.name
+                } is missing a return type and/or a transport for the following methods: ${invalidMethodIds.join(
                     ', '
-                )}. Add type and transport to all arguments to solve this issue.`
+                )}. Add return type and transport to all methods to solve this issue.`
             );
         }
     });
@@ -96,139 +172,183 @@ export const validate = (context: RESTKindContext): string[] => {
     return errors;
 };
 
-export function resolveEntitiesFromMethod(context: RESTMethodContext | RESTMethodEditContext): string[] {
-    const out: string[] = [];
+export function resolveEntitiesFromMethod(context: RESTMethodContext): string[] {
+    return resolveEntityNames([context.method]);
+}
 
-    function maybeAddEntity(type?: TypeLike) {
-        if (!type || (!type.ref && !type.type) || EntityHelpers.isBuiltInType(type)) {
-            return;
-        }
+export class RESTResourceEditor {
+    private resource: RESTResource;
+    private entities: DSLEntity[];
 
-        const generic = EntityHelpers.parseGeneric(type);
-        if (generic) {
-            if (!EntityHelpers.isBuiltInGeneric(type)) {
-                // Not supported by the DSL but we handle it anyway
-                const genericName = EntityHelpers.typeName(type);
-                if (!out.includes(genericName)) {
-                    out.push(genericName);
-                }
-            }
+    constructor(resource: RESTResource) {
+        this.resource = resource;
+        this.entities = [];
 
-            generic.arguments.forEach((arg) => {
-                maybeAddEntity({ type: arg });
+        if (resource.spec?.source?.value) {
+            this.entities = DSLAPIParser.parse(resource.spec.source.value, {
+                rest: true,
+                ignoreSemantics: true,
             });
-            return;
-        }
-
-        const entityName = EntityHelpers.typeName(type);
-        if (!out.includes(entityName)) {
-            out.push(entityName);
         }
     }
 
-    maybeAddEntity(context.method.responseType);
-
-    if (context.method.arguments) {
-        Object.values(context.method.arguments).forEach(maybeAddEntity);
+    private parseId(id: string): [string | null, string] {
+        return id.includes('::') ? (id.split('::') as [string, string]) : [null, id];
     }
 
-    return out;
-}
+    public setMethod(id: string, updatedMethod: DSLMethod) {
+        const [namespace, methodName] = this.parseId(id);
 
-export function setRESTMethod(spec: RESTResourceSpec, id: string, method: RESTMethodEdit) {
-    if (!spec.methods) {
-        spec.methods = {};
-    }
-    spec.methods[id] = convertToRestMethod(method);
-    spec.source = convertRESTToDSLSource(spec);
-}
+        let controller = this.entities.find((controller) => {
+            return controller.type === DSLEntityType.CONTROLLER && controller.name !== namespace;
+        }) as DSLController | undefined;
 
-export function deleteRESTMethod(spec: RESTResourceSpec, id: string) {
-    if (!spec.methods) {
-        spec.methods = {};
-    }
-    delete spec.methods[id];
-    spec.source = convertRESTToDSLSource(spec);
-}
+        let targetList: DSLEntity[] = this.entities;
 
-export function convertRESTToDSLSource(spec: RESTResourceSpec): TypedValue {
-    const dslMethods = spec.methods ? DSLConverters.fromSchemaMethods(spec.methods) : [];
-    return {
-        type: KAPLANG_ID,
-        value: KaplangWriter.write(dslMethods),
-    };
-}
-
-export function resolveEntities(context: RESTKindContext): string[] {
-    const out: string[] = [];
-
-    if (!context.resource.spec.methods) {
-        return out;
-    }
-
-    const restSpec = context.resource.spec as RESTResourceSpec;
-    if (!restSpec.methods) {
-        return out;
-    }
-
-    Object.values(restSpec.methods).forEach((method) => {
-        const usedEntities = resolveEntitiesFromMethod({ method, entities: context.entities });
-
-        usedEntities.forEach((entity) => {
-            if (out.indexOf(entity) === -1) {
-                out.push(entity);
-            }
-        });
-    });
-
-    return out;
-}
-
-export function renameEntityReferences(resource: Resource, from: string, to: string): void {
-    function maybeRenameEntity(type: TypeLike): TypeLike {
-        if (EntityHelpers.isBuiltInType(type)) {
-            return type;
-        }
-
-        if (EntityHelpers.typeName(type) !== from) {
-            return type;
-        }
-
-        if (EntityHelpers.isList(type)) {
-            return {
-                ...type,
-                ref: to + '[]',
+        if (!controller && namespace) {
+            controller = {
+                type: DSLEntityType.CONTROLLER,
+                name: namespace,
+                path: '/',
+                methods: [],
             };
+            this.entities.push(controller);
         }
 
-        return {
-            ...type,
-            ref: to,
+        if (controller) {
+            targetList = controller.methods;
+        }
+
+        const methodIndex = targetList.findIndex((method) => {
+            return method.type === DSLEntityType.METHOD && method.name === methodName;
+        });
+
+        if (methodIndex === -1) {
+            targetList.push(updatedMethod);
+        } else {
+            targetList.splice(methodIndex, 1, updatedMethod);
+        }
+
+        this.write();
+    }
+
+    public deleteMethod(id: string) {
+        const [namespace, methodName] = this.parseId(id);
+
+        const removalFilter = (method: DSLEntity) => {
+            return method.type === DSLEntityType.METHOD && method.name !== methodName;
+        };
+
+        if (namespace) {
+            // Delete method from controller
+            let controller = this.entities.find((controller) => {
+                return controller.type === DSLEntityType.CONTROLLER && controller.name === namespace;
+            }) as DSLController | undefined;
+
+            if (!controller) {
+                return;
+            }
+            controller.methods = controller.methods.filter(removalFilter);
+        } else {
+            // Delete method from top level
+            this.entities = this.entities.filter(removalFilter);
+        }
+
+        this.write();
+    }
+
+    public renameEntity(from: string, to: string) {
+        const resolver = new DSLReferenceResolver();
+        resolver.visitReferences(this.entities, (name) => {
+            if (name === from) {
+                return to;
+            }
+            return name;
+        });
+        this.write();
+    }
+
+    public toData() {
+        return this.resource;
+    }
+
+    private write() {
+        this.resource.spec = {
+            ...this.resource.spec,
+            source: {
+                type: KAPLANG_ID,
+                version: KAPLANG_VERSION,
+                value: KaplangWriter.write(this.entities),
+            },
+            methods: DSLConverters.toSchemaMethods(
+                this.entities.filter((entity) => {
+                    return entity.type === DSLEntityType.METHOD || entity.type === DSLEntityType.CONTROLLER;
+                }) as DSLAPI[]
+            ),
         };
     }
+}
 
-    const restSpec = resource.spec as RESTResourceSpec;
-    if (!restSpec.methods) {
-        return;
+export function parseMethodsFromResource(resource: RESTResource): DSLControllerMethod[] {
+    if (!resource.spec?.source?.value) {
+        return [];
     }
 
-    Object.values(restSpec.methods).forEach((method) => {
-        if (method.responseType) {
-            method.responseType = maybeRenameEntity(method.responseType);
-        }
-
-        if (!method.arguments) {
-            return;
-        }
-
-        const argumentMap = method.arguments;
-
-        const methodIds = Object.keys(argumentMap);
-
-        methodIds.forEach((methodId) => {
-            argumentMap[methodId] = maybeRenameEntity(argumentMap[methodId]);
-        });
+    const entities = DSLAPIParser.parse(resource.spec.source.value, {
+        rest: true,
+        ignoreSemantics: true,
     });
 
-    restSpec.source = convertRESTToDSLSource(restSpec);
+    return entities.flatMap((entity) => {
+        if (entity.type === DSLEntityType.METHOD) {
+            return [entity];
+        }
+
+        if (entity.type !== DSLEntityType.CONTROLLER) {
+            return [];
+        }
+
+        return entity.methods.map((method) => {
+            return {
+                ...method,
+                namespace: entity.name,
+            } satisfies DSLControllerMethod;
+        });
+    });
+}
+
+export function resolveEntityNames(result: DSLEntity[]) {
+    const resolver = new DSLReferenceResolver();
+
+    const dataTypes = resolver.resolveReferences(result);
+
+    return dataTypes.filter((dataType) => {
+        return !DSLTypeHelper.isBuiltInType(dataType);
+    });
+}
+
+export function toTypeNames(types: DSLData[]) {
+    return types.map((dataType) => {
+        return DSLConverters.fromDSLType(dataType);
+    });
+}
+
+export function resolveEntities(context: RESTKindContext) {
+    const restSpec = context.resource.spec;
+    if (!restSpec.source?.value) {
+        return [];
+    }
+
+    const result = DSLAPIParser.parse(restSpec.source.value, {
+        rest: true,
+        validTypes: toTypeNames(context.entities),
+        ignoreSemantics: true,
+    });
+
+    return resolveEntityNames(result);
+}
+
+export function renameEntityReferences(resource: ResourceWithSpec<RESTResourceSpec>, from: string, to: string): void {
+    const editor = new RESTResourceEditor(resource);
+    editor.renameEntity(from, to);
 }

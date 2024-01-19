@@ -1,24 +1,24 @@
-import { HTTPMethod, RESTMethod, RESTMethodArgument, TypeLike } from '@kapeta/ui-web-types';
+import { KIND_REST_API, RESTKindContext, RESTMethodContext, RESTResource } from '../src/web/types';
 import {
-    convertToEditMethod,
-    KIND_REST_API,
-    RESTKindContext,
-    RESTMethodEdit,
-    RESTMethodEditContext,
-    RESTResource,
-} from '../src/web/types';
-import { Entity, EntityDTO, EntityType } from '@kapeta/schemas';
-import {EntityHelpers} from "@kapeta/kaplang-core";
+    DSLConverters,
+    DSLData,
+    DSLDataTypeProperty,
+    DSLEntityType,
+    DSLMethod,
+    DSLParameter,
+    DSLType,
+    DSLTypeHelper,
+    KaplangWriter,
+} from '@kapeta/kaplang-core';
 
-
-export function makeAPIContext(methods: { [key: string]: RESTMethod }, entities?: Entity[]): RESTKindContext {
+export function makeAPIContext(methods: DSLMethod[], entities?: DSLData[]): RESTKindContext {
     return {
         resource: makeAPI(methods),
-        entities: entities ? entities : [],
+        entities: entities ?? [],
     };
 }
 
-export function makeAPI(methods: { [key: string]: RESTMethod }, entities?: Entity[]): RESTResource {
+export function makeAPI(methods: DSLMethod[]): RESTResource {
     return {
         kind: KIND_REST_API,
         metadata: {
@@ -28,74 +28,84 @@ export function makeAPI(methods: { [key: string]: RESTMethod }, entities?: Entit
             port: {
                 type: 'rest',
             },
-            methods,
+            methods: DSLConverters.toSchemaMethods(methods),
+            source: {
+                type: 'kaplang',
+                version: '1.0.0',
+                value: KaplangWriter.write(methods),
+            },
         },
     };
 }
 
-function toTypeLike(type: EntityHelpers.TypeOrString): TypeLike {
-    return typeof type === 'string' ? { type } : type;
-}
-
-export function makeMethod(args: EntityHelpers.TypeOrString[] = [], responseType?: EntityHelpers.TypeOrString): RESTMethod {
-    const argMap: Record<string, RESTMethodArgument> = {};
-    args.forEach((type, ix) => {
-        const typeLike = toTypeLike(type);
-        const arg: RESTMethodArgument = {
-            ...typeLike,
-            transport: EntityHelpers.isStringableType(typeLike) ? 'QUERY' : 'BODY',
-            optional: false,
+export function makeMethod(name: string, args: DSLType[] = [], returnType?: DSLType): DSLMethod {
+    const parameters: DSLParameter[] = args.map((type, ix) => {
+        return {
+            name: `arg_${ix}`,
+            type,
+            annotations: [{ type: DSLTypeHelper.isStringableType(type) ? '@Query' : '@Body' }],
         };
-        argMap[`arg_${ix}`] = arg;
     });
     return {
-        method: HTTPMethod.POST,
+        type: DSLEntityType.METHOD,
+        name,
         description: '',
-        arguments: argMap,
-        path: '/',
-        responseType: responseType ? toTypeLike(toTypeLike(responseType)) : { type: 'void' },
+        parameters,
+        annotations: [
+            {
+                type: '@POST',
+                arguments: ['/test/path'],
+            },
+        ],
+        returnType: returnType ?? 'void',
     };
 }
 
 export function makeEditContext(
     id: string,
-    args: EntityHelpers.TypeOrString[] = [],
-    responseType?: EntityHelpers.TypeOrString,
-    entities?: Entity[]
-): RESTMethodEditContext {
+    args: DSLType[] = [],
+    responseType?: DSLType,
+    entities?: DSLData[]
+): RESTMethodContext {
     return {
-        method: makeEditMethod(id, args, responseType),
+        method: makeMethod(id, args, responseType),
         entities: entities ? entities : [],
     };
 }
 
-export function makeEditMethod(id: string, args: EntityHelpers.TypeOrString[] = [], responseType?: EntityHelpers.TypeOrString): RESTMethodEdit {
-    return convertToEditMethod(id, makeMethod(args, responseType));
-}
+const mapper = ([name, property]: [string, any]): DSLDataTypeProperty => ({
+    name,
+    ...property,
+});
 
-export const ENTITIES: Entity[] = [
+export const ENTITIES: DSLData[] = [
     {
-        type: EntityType.Enum,
+        type: DSLEntityType.ENUM,
         name: 'UserType',
         values: ['PERSON', 'STAFF'],
     },
     {
-        type: EntityType.Dto,
+        type: DSLEntityType.DATATYPE,
         name: 'User',
-        properties: {
-            id: {
+        properties: [
+            {
+                name: 'id',
                 type: 'string',
             },
-            type: {
-                ref: 'UserType',
-                defaultValue: 'UserType.PERSON',
+            {
+                name: 'type',
+                type: 'UserType',
+                defaultValue: {
+                    type: 'enum',
+                    value: 'UserType.PERSON',
+                },
             },
-        },
+        ],
     },
     {
-        type: EntityType.Dto,
+        type: DSLEntityType.DATATYPE,
         name: 'Person',
-        properties: {
+        properties: Object.entries({
             id: {
                 type: 'string',
             },
@@ -103,14 +113,14 @@ export const ENTITIES: Entity[] = [
                 type: 'string',
             },
             staff: {
-                ref: 'Staff',
+                type: 'Staff',
             },
-        },
+        }).map(mapper),
     },
     {
-        type: EntityType.Dto,
+        type: DSLEntityType.DATATYPE,
         name: 'Staff',
-        properties: {
+        properties: Object.entries({
             id: {
                 type: 'string',
             },
@@ -127,39 +137,39 @@ export const ENTITIES: Entity[] = [
                 ref: 'UserType',
                 defaultValue: 'UserType.PERSON',
             },
-        },
+        }).map(mapper),
     },
 ];
 
-export const ENTITIES_ALT: EntityDTO[] = [
+export const ENTITIES_ALT: DSLData[] = [
     {
-        type: EntityType.Dto,
+        type: DSLEntityType.DATATYPE,
         name: 'User',
-        properties: {
+        properties: Object.entries({
             username: {
                 type: 'string',
             },
             type: {
                 type: 'string',
             },
-        },
+        }).map(mapper),
     },
     {
-        type: EntityType.Dto,
+        type: DSLEntityType.DATATYPE,
         name: 'Person',
-        properties: {
+        properties: Object.entries({
             username: {
                 type: 'string',
             },
             fullName: {
                 type: 'string',
             },
-        },
+        }).map(mapper),
     },
     {
-        type: EntityType.Dto,
+        type: DSLEntityType.DATATYPE,
         name: 'Staff',
-        properties: {
+        properties: Object.entries({
             username: {
                 type: 'string',
             },
@@ -172,6 +182,6 @@ export const ENTITIES_ALT: EntityDTO[] = [
             manager: {
                 ref: 'Staff',
             },
-        },
+        }).map(mapper),
     },
 ];

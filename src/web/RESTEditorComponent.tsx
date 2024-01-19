@@ -3,64 +3,69 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React, {useMemo} from 'react';
+import React, { useMemo } from 'react';
 
 import {
-    DATATYPE_CONFIGURATION,
     DSLConverters,
-    DSLEntityType,
     DSLMethod,
-    DSLParser,
+    DSLTypeHelper,
     FormField,
     MethodEditor,
     useFormContextField,
     useIsFormSubmitAttempted,
 } from '@kapeta/ui-web-components';
 
-import {EntityHelpers, KAPLANG_ID} from '@kapeta/kaplang-core';
+import { DSLDataTypeParser, KAPLANG_ID, KAPLANG_VERSION } from '@kapeta/kaplang-core';
 
-import type {ResourceTypeProviderEditorProps} from '@kapeta/ui-web-types';
+import { IncludeContextType, ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
-import {validateApiName} from './RESTUtils';
-import {Alert, Stack} from '@mui/material';
+import { validateApiName } from './RESTUtils';
+import { Alert, Stack } from '@mui/material';
+import { SourceCode } from '@kapeta/schemas';
 
 export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const methodField = useFormContextField('spec.methods');
-    const methodSource = useFormContextField('spec.source');
+    const methodSource = useFormContextField<SourceCode>('spec.source');
     const [methodsError, setMethodsError] = React.useState<string | null>(null);
     const formSubmitAttempted = useIsFormSubmitAttempted();
 
     const setResult = (code: string, methods: DSLMethod[]) => {
         try {
             methodField.set(DSLConverters.toSchemaMethods(methods));
-            methodSource.set({ type: KAPLANG_ID, value: code });
+            methodSource.set({ type: KAPLANG_ID, version: KAPLANG_VERSION, value: code });
         } catch (e) {
             console.error('Failed to trigger change', e);
         }
     };
 
     const validTypes = useMemo(() => {
-        if (props.block.spec.entities?.source?.value) {
-            const types = DSLParser.parse(props.block.spec.entities.source.value, {
-                ...DATATYPE_CONFIGURATION
-            });
-
-            if (types.entities) {
-                return types.entities.map((e) => {
-                    if (e.type === DSLEntityType.ENUM ||
-                        e.type === DSLEntityType.DATATYPE) {
-                        return EntityHelpers.toComparisonType(DSLConverters.fromDSLType(e));
-                    }
-                    return undefined;
-                }).filter((e) => e !== undefined) as string[];
+        let typeCode: string[] = [];
+        if (props.context?.languageProvider && props.context?.languageProvider.getDSLIncludes) {
+            // The language target might provide some additional types
+            const include = props.context?.languageProvider.getDSLIncludes(IncludeContextType.REST);
+            if (include?.source) {
+                typeCode.push(include.source);
             }
         }
+
+        if (props.block.spec.entities?.source?.value) {
+            typeCode.push(props.block.spec.entities.source.value);
+        }
+
+        if (typeCode.length > 0) {
+            const types = DSLDataTypeParser.parse(typeCode.join('\n\n'));
+
+            return types.map((e) => {
+                return DSLTypeHelper.asFullName(e, true);
+            });
+        }
+
         return props.block.spec.entities?.types?.map((t) => t.name) ?? [];
-    }, [props.block.spec.entities?.source]);
+    }, [props.block.spec.entities?.source, props.context?.languageProvider]);
 
     console.log('validTypes', validTypes);
 
-    const source = methodSource.get({ value: '' });
+    const source = methodSource.get({ value: '', type: KAPLANG_ID, version: KAPLANG_VERSION });
     const entities = DSLConverters.fromSchemaMethods(methodField.get({}));
 
     return (

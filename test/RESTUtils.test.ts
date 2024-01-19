@@ -22,91 +22,58 @@ describe('RESTUtils', () => {
         expect(() => validateApiName('', 'backend.api')).toThrowError();
     });
     test('can get counter value (number of methods in API)', () => {
-        expect(getCounterValue(makeAPI({}))).toBe(0);
+        expect(getCounterValue(makeAPI([]))).toBe(0);
 
-        expect(
-            getCounterValue(
-                makeAPI({
-                    test1: makeMethod(),
-                    test2: makeMethod(),
-                    test3: makeMethod(),
-                })
-            )
-        ).toBe(3);
+        expect(getCounterValue(makeAPI([makeMethod('test1'), makeMethod('test2'), makeMethod('test3')]))).toBe(3);
     });
 
     test('can determine if api has method by name', () => {
-        expect(hasMethod(makeAPI({}), 'test')).toBe(false);
+        expect(hasMethod(makeAPI([]), 'test')).toBe(false);
 
-        expect(
-            hasMethod(
-                makeAPI({
-                    test1: makeMethod(),
-                    test2: makeMethod(),
-                    test3: makeMethod(),
-                }),
-                'test'
-            )
-        ).toBe(false);
+        expect(hasMethod(makeAPI([makeMethod('test1'), makeMethod('test2'), makeMethod('test3')]), 'test')).toBe(false);
 
-        expect(
-            hasMethod(
-                makeAPI({
-                    test1: makeMethod(),
-                    test2: makeMethod(),
-                    test3: makeMethod(),
-                }),
-                'test1'
-            )
-        ).toBe(true);
+        expect(hasMethod(makeAPI([makeMethod('test1'), makeMethod('test2'), makeMethod('test3')]), 'test1')).toBe(true);
     });
 
     test('can resolve all entities from methods', () => {
         expect(
-            resolveEntities(
-                makeAPIContext({
-                    test1: makeMethod(),
-                    test2: makeMethod(),
-                    test3: makeMethod(),
-                })
-            )
+            resolveEntities(makeAPIContext([makeMethod('test1'), makeMethod('test2'), makeMethod('test3')]))
         ).toEqual([]);
 
         expect(
             resolveEntities(
                 makeAPIContext(
-                    {
-                        test1: makeMethod([{ ref: 'User' }, 'string']),
-                        test2: makeMethod([], { ref: 'Person' }),
-                        test3: makeMethod(['string', { ref: 'Staff' }]),
-                    },
+                    [
+                        makeMethod('test1', ['User', 'string']),
+                        makeMethod('test2', [], 'Person'),
+                        makeMethod('test3', ['string', 'Staff']),
+                    ],
                     ENTITIES
                 )
             )
         ).toEqual(['User', 'Person', 'Staff']);
 
-        expect(
-            resolveEntities(
-                makeAPIContext(
-                    {
-                        test1: makeMethod([], { ref: 'Person' }),
-                    },
-                    ENTITIES
-                )
-            )
-        ).toEqual(['Person']);
+        expect(resolveEntities(makeAPIContext([makeMethod('test1', [], 'Person')], ENTITIES))).toEqual(['Person']);
     });
 
     test('can rename reference', () => {
-        const api = makeAPI({
-            test1: makeMethod([{ ref: 'User' }, 'string']),
-            test2: makeMethod([], { ref: 'Person[]' }),
-            test3: makeMethod(['string', { ref: 'Staff' }]),
+        const api = makeAPI([
+            makeMethod('test1', ['User', 'string']),
+            makeMethod('test2', [], 'Person[]'),
+            makeMethod('test3', ['string', 'Staff']),
+        ]);
+
+        expect(api.spec.methods?.test1?.arguments?.arg_0).toEqual({
+            argument: 'arg_0',
+            ref: 'User',
+            transport: 'BODY',
+            optional: false,
         });
 
-        expect(api.spec.methods?.test1?.arguments?.arg_0).toEqual({ ref: 'User', transport: 'BODY', optional: false });
         renameEntityReferences(api, 'User', 'UserInformation');
+
         expect(api.spec.methods?.test1?.arguments?.arg_0).toEqual({
+            argument: 'arg_0',
             ref: 'UserInformation',
             transport: 'BODY',
             optional: false,
@@ -123,115 +90,64 @@ describe('RESTUtils', () => {
 
     describe('validation', () => {
         test('fails validation if entity is not found', () => {
-            expect(
-                validate(
-                    makeAPIContext(
-                        {
-                            test: makeMethod([{ ref: 'Company' }], { ref: 'Department' }),
-                        },
-                        ENTITIES
-                    )
-                )
-            ).toEqual([
+            expect(validate(makeAPIContext([makeMethod('test', ['Company'], 'Department')], ENTITIES))).toEqual([
                 'Multiple entities are not defined in this block: Department, Company. Create these entities to solve this issue',
             ]);
         });
 
         test('fails if path is empty', () => {
-            const method = makeMethod();
-            method.path = '';
+            const method = makeMethod('test');
+            if (method.annotations?.[0].arguments) {
+                method.annotations[0].arguments = [''];
+            }
 
-            expect(
-                validate(
-                    makeAPIContext(
-                        {
-                            test: method,
-                        },
-                        ENTITIES
-                    )
-                )
-            ).toEqual(['test is missing path. Add path to solve this issue']);
+            expect(validate(makeAPIContext([method], ENTITIES))).toEqual([
+                'test is missing a path. Add a path to solve this issue',
+            ]);
         });
 
         test('fails if method is empty', () => {
-            const method: any = makeMethod();
-            method.method = null;
+            const method = makeMethod('test');
+            method.annotations = [];
 
-            expect(
-                validate(
-                    makeAPIContext(
-                        {
-                            test: method,
-                        },
-                        ENTITIES
-                    )
-                )
-            ).toEqual(['test is missing HTTP method. Define an HTTP method to solve this issue']);
+            expect(validate(makeAPIContext([method], ENTITIES))).toEqual([
+                'test is missing a HTTP method. Add a HTTP method to solve this issue',
+            ]);
         });
 
         test('fails if argument type is empty', () => {
-            const method: any = makeMethod(['string', 'float']);
-            delete method.arguments.arg_0.type;
-            expect(
-                validate(
-                    makeAPIContext(
-                        {
-                            test: method,
-                        },
-                        ENTITIES
-                    )
-                )
-            ).toEqual([
-                'test is missing a type and/or a transport for the following arguments: arg_0. Add type and transport to all arguments to solve this issue.',
+            const method = makeMethod('test', ['string', 'float']);
+            if (method.parameters?.[0]) {
+                // @ts-ignore
+                method.parameters[0].type = undefined;
+            }
+
+            expect(validate(makeAPIContext([method], ENTITIES))).toEqual([
+                'test is missing a type for the parameter arg_0. Add a type to solve this issue',
             ]);
         });
 
         test('fails if argument transport is empty', () => {
-            const method: any = makeMethod(['string', 'float']);
-            delete method.arguments.arg_0.transport;
-            expect(
-                validate(
-                    makeAPIContext(
-                        {
-                            test: method,
-                        },
-                        ENTITIES
-                    )
-                )
-            ).toEqual([
-                'test is missing a type and/or a transport for the following arguments: arg_0. Add type and transport to all arguments to solve this issue.',
+            const method = makeMethod('test', ['string', 'float']);
+            if (method.parameters?.[0]) {
+                method.parameters[0].annotations = [];
+            }
+            expect(validate(makeAPIContext([method], ENTITIES))).toEqual([
+                'test is missing transport for the parameter arg_0. Add a transport to solve this issue',
             ]);
         });
 
         test('passes if valid method is supplied', () => {
-            const method: any = makeMethod(['string', 'float'], 'void');
+            const method: any = makeMethod('test', ['string', 'float'], 'void');
 
-            expect(
-                validate(
-                    makeAPIContext(
-                        {
-                            test: method,
-                        },
-                        ENTITIES
-                    )
-                )
-            ).toEqual([]);
+            expect(validate(makeAPIContext([method], ENTITIES))).toEqual([]);
         });
 
         test('passes if method has no arguments', () => {
-            const method: any = makeMethod([], 'void');
-            delete method.arguments;
+            const method = makeMethod('test', [], 'void');
+            delete method.parameters;
 
-            expect(
-                validate(
-                    makeAPIContext(
-                        {
-                            test: method,
-                        },
-                        ENTITIES
-                    )
-                )
-            ).toEqual([]);
+            expect(validate(makeAPIContext([method], ENTITIES))).toEqual([]);
         });
     });
 });
