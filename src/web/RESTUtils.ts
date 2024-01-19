@@ -199,9 +199,9 @@ export class RESTResourceEditor {
     public setMethod(id: string, updatedMethod: DSLMethod) {
         const [namespace, methodName] = this.parseId(id);
 
-        let controller = this.entities.find((controller) => {
-            return controller.type === DSLEntityType.CONTROLLER && controller.name !== namespace;
-        }) as DSLController | undefined;
+        let controller = (namespace ? this.entities.find((controller) => {
+            return controller.type === DSLEntityType.CONTROLLER && controller.name.toLowerCase() === namespace.toLowerCase();
+        }) : undefined) as DSLController | undefined;
 
         let targetList: DSLEntity[] = this.entities;
 
@@ -249,6 +249,12 @@ export class RESTResourceEditor {
                 return;
             }
             controller.methods = controller.methods.filter(removalFilter);
+            if (controller.methods.length < 1) {
+                // Delete controller if it has no methods
+                this.entities = this.entities.filter((entity) => {
+                    return entity !== controller
+                });
+            }
         } else {
             // Delete method from top level
             this.entities = this.entities.filter(removalFilter);

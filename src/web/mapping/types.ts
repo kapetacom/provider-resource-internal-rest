@@ -33,7 +33,7 @@ export interface DSLControllerMethod extends DSLMethod {
 }
 
 export function toId(method: DSLControllerMethod): string {
-    return `${method.namespace}::${method.name}`;
+    return method.namespace ? `${method.namespace}::${method.name}` : method.name;
 }
 
 export function createId(namespace: string, name: string): string {
