@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { RESTMethodEdit, RESTResource, RESTResourceSpec } from '../types';
 import type { MappedMethod } from './types';
 import { ItemTypes } from './types';
