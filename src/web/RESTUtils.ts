@@ -16,9 +16,8 @@ import {
     RESTResourceSpec,
 } from './types';
 
-import { DSLConverters } from '@kapeta/ui-web-components';
-import { isBuiltInGeneric, isBuiltInType, isList, parseGeneric, Resource, TypeLike, typeName } from '@kapeta/schemas';
-import {KAPLANG_ID, KaplangWriter} from "@kapeta/kaplang-core";
+import { Resource } from '@kapeta/schemas';
+import { DSLConverters, EntityHelpers, KAPLANG_ID, KaplangWriter, TypeLike } from '@kapeta/kaplang-core';
 
 export const getCounterValue = (data: Resource): number => {
     return _.size(data.spec.methods);
@@ -99,13 +98,13 @@ export function resolveEntitiesFromMethod(context: RESTMethodContext | RESTMetho
     const out: string[] = [];
 
     function maybeAddEntity(type?: TypeLike) {
-        if (!type || (!type.ref && !type.type) || isBuiltInType(type)) {
+        if (!type || (!type.ref && !type.type) || EntityHelpers.isBuiltInType(type)) {
             return;
         }
 
-        const generic = parseGeneric(type);
+        const generic = EntityHelpers.parseGeneric(type);
         if (generic) {
-            if (!isBuiltInGeneric(type)) {
+            if (!EntityHelpers.isBuiltInGeneric(type)) {
                 // Not supported by the DSL but we handle it anyway
                 if (!out.includes(generic.name)) {
                     out.push(generic.name);
@@ -118,7 +117,7 @@ export function resolveEntitiesFromMethod(context: RESTMethodContext | RESTMetho
             return;
         }
 
-        const entityName = typeName(type);
+        const entityName = EntityHelpers.typeName(type);
         if (!out.includes(entityName)) {
             out.push(entityName);
         }
@@ -184,15 +183,15 @@ export function resolveEntities(context: RESTKindContext): string[] {
 
 export function renameEntityReferences(resource: Resource, from: string, to: string): void {
     function maybeRenameEntity(type: TypeLike): TypeLike {
-        if (isBuiltInType(type)) {
+        if (EntityHelpers.isBuiltInType(type)) {
             return type;
         }
 
-        if (typeName(type) !== from) {
+        if (EntityHelpers.typeName(type) !== from) {
             return type;
         }
 
-        if (isList(type)) {
+        if (EntityHelpers.isList(type)) {
             return {
                 ...type,
                 ref: to + '[]',

@@ -70,7 +70,7 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                         code: source.value,
                         entities,
                     }}
-                    onChange={(result:any) => {
+                    onChange={(result: any) => {
                         methodSource.valid();
                         setResult(result.code, result.entities as DSLMethod[]);
                     }}

@@ -5,7 +5,8 @@
 
 import { forEach } from 'lodash';
 import { HTTPMethod, TypedValue, RESTMethod, TypeLike, RESTMethodArgument } from '@kapeta/ui-web-types';
-import { Entity, getCompatibilityIssuesForTypes, isCompatibleTypes, Resource } from '@kapeta/schemas';
+import { Entity, Resource } from '@kapeta/schemas';
+import { EntityHelpers } from '@kapeta/kaplang-core';
 
 export interface RESTResourceSpec {
     port: {
@@ -112,7 +113,7 @@ export function getCompatibleRESTMethodsIssues(
     const errors = [];
     const a = aContext.method;
     const b = bContext.method;
-    if (!isCompatibleTypes(a.responseType, b.responseType, aContext.entities, bContext.entities)) {
+    if (!EntityHelpers.isCompatibleTypes(a.responseType, b.responseType, aContext.entities, bContext.entities)) {
         errors.push('Response types are not compatible');
     }
 
@@ -124,7 +125,12 @@ export function getCompatibleRESTMethodsIssues(
     }
 
     for (let i = 0; i < aArgs.length; i++) {
-        const issues = getCompatibilityIssuesForTypes(aArgs[i], bArgs[i], aContext.entities, bContext.entities);
+        const issues = EntityHelpers.getCompatibilityIssuesForTypes(
+            aArgs[i],
+            bArgs[i],
+            aContext.entities,
+            bContext.entities
+        );
 
         if (aArgs[i] && bArgs[i]) {
             const aOptional = Boolean(aArgs[i].optional);

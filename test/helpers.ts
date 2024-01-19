@@ -7,7 +7,9 @@ import {
     RESTMethodEditContext,
     RESTResource,
 } from '../src/web/types';
-import { Entity, EntityDTO, EntityType, isStringableType, typeName, TypeOrString } from '@kapeta/schemas';
+import { Entity, EntityDTO, EntityType } from '@kapeta/schemas';
+import {EntityHelpers} from "@kapeta/kaplang-core";
+
 
 export function makeAPIContext(methods: { [key: string]: RESTMethod }, entities?: Entity[]): RESTKindContext {
     return {
@@ -31,17 +33,17 @@ export function makeAPI(methods: { [key: string]: RESTMethod }, entities?: Entit
     };
 }
 
-function toTypeLike(type: TypeOrString): TypeLike {
+function toTypeLike(type: EntityHelpers.TypeOrString): TypeLike {
     return typeof type === 'string' ? { type } : type;
 }
 
-export function makeMethod(args: TypeOrString[] = [], responseType?: TypeOrString): RESTMethod {
+export function makeMethod(args: EntityHelpers.TypeOrString[] = [], responseType?: EntityHelpers.TypeOrString): RESTMethod {
     const argMap: Record<string, RESTMethodArgument> = {};
     args.forEach((type, ix) => {
         const typeLike = toTypeLike(type);
         const arg: RESTMethodArgument = {
             ...typeLike,
-            transport: isStringableType(typeName(typeLike)) ? 'QUERY' : 'BODY',
+            transport: EntityHelpers.isStringableType(typeLike) ? 'QUERY' : 'BODY',
             optional: false,
         };
         argMap[`arg_${ix}`] = arg;
@@ -57,8 +59,8 @@ export function makeMethod(args: TypeOrString[] = [], responseType?: TypeOrStrin
 
 export function makeEditContext(
     id: string,
-    args: TypeOrString[] = [],
-    responseType?: TypeOrString,
+    args: EntityHelpers.TypeOrString[] = [],
+    responseType?: EntityHelpers.TypeOrString,
     entities?: Entity[]
 ): RESTMethodEditContext {
     return {
@@ -67,7 +69,7 @@ export function makeEditContext(
     };
 }
 
-export function makeEditMethod(id: string, args: TypeOrString[] = [], responseType?: TypeOrString): RESTMethodEdit {
+export function makeEditMethod(id: string, args: EntityHelpers.TypeOrString[] = [], responseType?: EntityHelpers.TypeOrString): RESTMethodEdit {
     return convertToEditMethod(id, makeMethod(args, responseType));
 }
 

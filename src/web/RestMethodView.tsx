@@ -5,11 +5,10 @@
 
 import React, { Component } from 'react';
 
-import { typeName } from '@kapeta/schemas';
-
 import { RESTMethodEdit } from './types';
 
 import './RestMethodView.less';
+import { EntityHelpers } from '@kapeta/kaplang-core';
 
 interface RestMethodViewProps {
     method: RESTMethodEdit;
@@ -44,7 +43,7 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
                                 <span key={ix} className={'method-argument'}>
                                     <span className={'name'}>{argument.id}</span>
                                     <span className={'type-separator'}>:</span>
-                                    <span className={'type'}>{typeName(argument)}</span>
+                                    <span className={'type'}>{EntityHelpers.typeName(argument)}</span>
                                     <span className={'transport'}>{`(${argument.transport})`}</span>
 
                                     <span className={'separator'}>,</span>
@@ -53,7 +52,7 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
                         })}
                     </span>
                     <span className={'method-definition-end'}>):</span>
-                    <span className={'type return'}>{typeName(method.responseType)}</span>
+                    <span className={'type return'}>{EntityHelpers.typeName(method.responseType)}</span>
                 </div>
                 <div className={'path'}>
                     <span className={'label'}>HTTP:</span>

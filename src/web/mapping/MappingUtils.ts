@@ -14,7 +14,8 @@ import type { RESTKindContext } from '../types';
 
 import { resolveEntities, resolveEntitiesFromMethod } from '../RESTUtils';
 import { MappedMethod, RESTMethodMappingEdit } from './types';
-import { Entity, getSchemaEntityCompatibilityIssues, isSchemaEntityCompatible } from '@kapeta/schemas';
+import { Entity } from '@kapeta/schemas';
+import { EntityHelpers } from '@kapeta/kaplang-core';
 
 /**
  * Determines conflicts between entities of source and target
@@ -39,7 +40,12 @@ export function determineEntityIssues(source: RESTKindContext, target: RESTKindC
             return;
         }
 
-        const issues = getSchemaEntityCompatibilityIssues(sourceEntity, targetEntity, source.entities, target.entities);
+        const issues = EntityHelpers.getEntityCompatibilityIssues(
+            sourceEntity,
+            targetEntity,
+            source.entities,
+            target.entities
+        );
         entityIssues.push(
             ...issues.map((i) => {
                 return `${i} for type: ${sourceEntityName}`;
@@ -64,7 +70,12 @@ export function determineEntityIssues(source: RESTKindContext, target: RESTKindC
             return;
         }
 
-        const issues = getSchemaEntityCompatibilityIssues(sourceEntity, targetEntity, source.entities, target.entities);
+        const issues = EntityHelpers.getEntityCompatibilityIssues(
+            sourceEntity,
+            targetEntity,
+            source.entities,
+            target.entities
+        );
         entityIssues.push(
             ...issues.map((i) => {
                 return `${i} for type: ${targetEntityName}`;
@@ -149,7 +160,7 @@ export function getCompatibleEntitiesForList(entityNames: string[], aEntities: E
                 entitiesToBeAdded.push(aEntity);
             }
         } else if (aEntity) {
-            const entityIssues = getSchemaEntityCompatibilityIssues(aEntity, bEntity, aEntities, bEntities);
+            const entityIssues = EntityHelpers.getEntityCompatibilityIssues(aEntity, bEntity, aEntities, bEntities);
             issues.push(
                 ...entityIssues.map((issue) => {
                     return `${issue} for type: ${entityNAme}`;
@@ -160,7 +171,7 @@ export function getCompatibleEntitiesForList(entityNames: string[], aEntities: E
 
     entitiesToBeAdded = entitiesToBeAdded.filter((newEntity) => {
         // We do this to make sure any sub types are available
-        return isSchemaEntityCompatible(newEntity, newEntity, aEntities, [...bEntities, ...entitiesToBeAdded]);
+        return EntityHelpers.isEntityCompatible(newEntity, newEntity, aEntities, [...bEntities, ...entitiesToBeAdded]);
     });
 
     return { issues, entitiesToBeAdded };
