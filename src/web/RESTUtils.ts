@@ -18,6 +18,8 @@ import {
 
 import { Resource } from '@kapeta/schemas';
 import { DSLConverters, EntityHelpers, KAPLANG_ID, KaplangWriter, TypeLike } from '@kapeta/kaplang-core';
+import isSameType = EntityHelpers.isSameType;
+import toComparisonType = EntityHelpers.toComparisonType;
 
 export const getCounterValue = (data: Resource): number => {
     return _.size(data.spec.methods);
@@ -42,7 +44,7 @@ export const validate = (context: RESTKindContext): string[] => {
     const entityNames = resolveEntities(context);
 
     const missingEntities = entityNames.filter((entityName) => {
-        return !context.entities.some((entity) => entity.name === entityName);
+        return !context.entities.some((entity) => isSameType(entityName, toComparisonType(entity.name)));
     });
 
     if (missingEntities.length > 0) {
@@ -106,8 +108,9 @@ export function resolveEntitiesFromMethod(context: RESTMethodContext | RESTMetho
         if (generic) {
             if (!EntityHelpers.isBuiltInGeneric(type)) {
                 // Not supported by the DSL but we handle it anyway
-                if (!out.includes(generic.name)) {
-                    out.push(generic.name);
+                const genericName = EntityHelpers.typeName(type);
+                if (!out.includes(genericName)) {
+                    out.push(genericName);
                 }
             }
 

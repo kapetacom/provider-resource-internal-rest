@@ -3,23 +3,26 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React from 'react';
+import React, {useMemo} from 'react';
 
 import {
+    DATATYPE_CONFIGURATION,
     DSLConverters,
-    MethodEditor,
+    DSLEntityType,
+    DSLMethod,
+    DSLParser,
     FormField,
+    MethodEditor,
     useFormContextField,
     useIsFormSubmitAttempted,
-    DSLMethod,
 } from '@kapeta/ui-web-components';
 
-import { KAPLANG_ID } from '@kapeta/kaplang-core';
+import {EntityHelpers, KAPLANG_ID} from '@kapeta/kaplang-core';
 
-import type { ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
+import type {ResourceTypeProviderEditorProps} from '@kapeta/ui-web-types';
 
-import { validateApiName } from './RESTUtils';
-import { Alert, Stack } from '@mui/material';
+import {validateApiName} from './RESTUtils';
+import {Alert, Stack} from '@mui/material';
 
 export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const methodField = useFormContextField('spec.methods');
@@ -36,7 +39,26 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
         }
     };
 
-    const validTypes = props.block.spec.entities?.types?.map((t) => t.name) ?? [];
+    const validTypes = useMemo(() => {
+        if (props.block.spec.entities?.source?.value) {
+            const types = DSLParser.parse(props.block.spec.entities.source.value, {
+                ...DATATYPE_CONFIGURATION
+            });
+
+            if (types.entities) {
+                return types.entities.map((e) => {
+                    if (e.type === DSLEntityType.ENUM ||
+                        e.type === DSLEntityType.DATATYPE) {
+                        return EntityHelpers.toComparisonType(DSLConverters.fromDSLType(e));
+                    }
+                    return undefined;
+                }).filter((e) => e !== undefined) as string[];
+            }
+        }
+        return props.block.spec.entities?.types?.map((t) => t.name) ?? [];
+    }, [props.block.spec.entities?.source]);
+
+    console.log('validTypes', validTypes);
 
     const source = methodSource.get({ value: '' });
     const entities = DSLConverters.fromSchemaMethods(methodField.get({}));
