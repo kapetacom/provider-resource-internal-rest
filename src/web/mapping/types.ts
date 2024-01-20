@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { Entity } from '@kapeta/schemas';
-import { RESTMethodEdit, RESTResource } from '../types';
+import { RESTResource } from '../types';
 import { ConnectionMethodMappingType, ConnectionMethodsMapping } from '@kapeta/ui-web-types';
+import { DSLData, DSLMethod } from '@kapeta/kaplang-core';
 
 export enum ItemTypes {
     API_METHOD = 'API_METHOD',
@@ -28,17 +28,29 @@ export interface TypeMapping {
     fields?: FieldMapping[];
 }
 
+export interface DSLControllerMethod extends DSLMethod {
+    namespace?: string;
+}
+
+export function toId(method: DSLControllerMethod): string {
+    return method.namespace ? `${method.namespace}::${method.name}` : method.name;
+}
+
+export function createId(namespace: string, name: string): string {
+    return `${namespace}::${name}`;
+}
+
 export interface MappedMethod {
     sourceId?: string;
-    source?: RESTMethodMappingEdit;
+    source?: MappedMethodInfo;
     targetId?: string;
-    target?: RESTMethodMappingEdit;
+    target?: MappedMethodInfo;
     mapped: boolean;
     mapping?: Mapping[];
 }
 
-export interface RESTMethodMappingEdit extends RESTMethodEdit {
-    copyOf?: RESTMethodEdit;
+export interface MappedMethodInfo extends DSLControllerMethod {
+    copyOf?: DSLControllerMethod;
 }
 
 export interface MappingHandlerContext {
@@ -52,37 +64,34 @@ export interface MappingHandlerContext {
 
 export type MappingHandlerData = {
     source: RESTResource;
-    sourceEntities: Entity[];
+    sourceEntities: DSLData[];
     target: RESTResource;
-    targetEntities: Entity[];
+    targetEntities: DSLData[];
     data: ConnectionMethodsMapping;
 };
 
-export function createEqualMapping(
-    sourceMethod: RESTMethodMappingEdit,
-    targetMethod: RESTMethodMappingEdit
-): MappedMethod {
+export function createEqualMapping(sourceMethod: MappedMethodInfo, targetMethod: MappedMethodInfo): MappedMethod {
     return {
-        sourceId: sourceMethod.id,
+        sourceId: toId(sourceMethod),
         source: sourceMethod,
-        targetId: targetMethod.id,
+        targetId: toId(targetMethod),
         target: targetMethod,
         mapped: true,
     };
 }
 
-export function createTargetOnlyMapping(method: RESTMethodEdit): MappedMethod {
+export function createTargetOnlyMapping(method: DSLControllerMethod): MappedMethod {
     return {
-        targetId: method.id,
+        targetId: toId(method),
         target: method,
         mapped: false,
         mapping: [],
     };
 }
 
-export function createSourceOnlyMapping(method: RESTMethodEdit) {
+export function createSourceOnlyMapping(method: DSLControllerMethod) {
     return {
-        sourceId: method.id,
+        sourceId: toId(method),
         source: method,
         mapped: false,
         mapping: [],

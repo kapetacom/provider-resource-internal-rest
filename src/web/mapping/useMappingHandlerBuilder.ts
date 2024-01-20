@@ -5,15 +5,17 @@
 
 import { useEffect, useReducer } from 'react';
 import { useMappingHandler } from './useMappingHandler';
-import { RESTKindContext, RESTMethodEdit, convertAllToEditMethods, isCompatibleRESTMethods } from '../types';
+import { RESTKindContext, isCompatibleRESTMethods } from '../types';
 import {
     MappedMethod,
     MappingHandlerContext,
     MappingHandlerData,
-    RESTMethodMappingEdit,
+    MappedMethodInfo,
     createEqualMapping,
     createSourceOnlyMapping,
     createTargetOnlyMapping,
+    toId,
+    DSLControllerMethod,
 } from './types';
 import { cloneDeep, isEmpty } from 'lodash';
 import { ConnectionMethodMappingType, ConnectionMethodsMapping } from '@kapeta/ui-web-types';
@@ -23,15 +25,15 @@ import {
     getEntitiesToBeAddedForCopy,
     mappedMethodSorter,
 } from './MappingUtils';
-import { setRESTMethod } from '../RESTUtils';
+import { parseMethodsFromResource, RESTResourceEditor } from '../RESTUtils';
 
 type MappingBuilderState = {
     sourceContext: RESTKindContext;
-    sourceMethods: RESTMethodEdit[];
-    mappedSources: RESTMethodEdit[];
+    sourceMethods: DSLControllerMethod[];
+    mappedSources: DSLControllerMethod[];
     targetContext: RESTKindContext;
-    targetMethods: RESTMethodMappingEdit[];
-    mappedTargets: RESTMethodEdit[];
+    targetMethods: MappedMethodInfo[];
+    mappedTargets: DSLControllerMethod[];
     mappedMethods: MappedMethod[];
     handlerContext: MappingHandlerContext;
     didAutoMap: boolean;
@@ -51,7 +53,8 @@ const isValueValid = (value?: ConnectionMethodsMapping): value is ConnectionMeth
     return Boolean(value && !isEmpty(value));
 };
 
-const compareToMethod = (sourceMethod: RESTMethodEdit) => (mS: RESTMethodEdit) => mS.id === sourceMethod.id;
+const compareToMethod = (sourceMethod: DSLControllerMethod) => (mS: DSLControllerMethod) =>
+    toId(mS) === toId(sourceMethod);
 
 function reducer(state: MappingBuilderState, action: ActionType): MappingBuilderState {
     switch (action.type) {
@@ -77,8 +80,8 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
         case 'convertToEditMethods': {
             return {
                 ...state,
-                sourceMethods: convertAllToEditMethods(state.sourceContext.resource),
-                targetMethods: convertAllToEditMethods(state.targetContext.resource),
+                sourceMethods: parseMethodsFromResource(state.sourceContext.resource),
+                targetMethods: parseMethodsFromResource(state.targetContext.resource),
             };
         }
 
@@ -173,9 +176,10 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
 
                 if (compatibleMethods.length > 0) {
                     targetContextClone.entities.push(...compatibleEntities);
+                    const editor = new RESTResourceEditor(targetContextClone.resource);
                     targetMethodsClone.push(...compatibleMethods);
                     compatibleMethods.forEach((method) => {
-                        setRESTMethod(targetContextClone.resource.spec, method.id, method);
+                        editor.setMethod(toId(method), method);
                     });
                     handlerContextClone.targetName = handlerContextClone.sourceName;
                     handlerContextClone.clientWasEmpty = true;
@@ -191,9 +195,10 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                 if (compatibleMethods.length > 0) {
                     sourceContextClone.entities.push(...compatibleEntities);
                     sourceMethodsClone.push(...compatibleMethods);
+                    const editor = new RESTResourceEditor(sourceContextClone.resource);
                     // Also add to the spec
                     compatibleMethods.forEach((method) => {
-                        setRESTMethod(sourceContextClone.resource.spec, method.id, method);
+                        editor.setMethod(toId(method), method);
                     });
                     handlerContextClone.sourceName = handlerContextClone.targetName;
                     handlerContextClone.serverWasEmpty = true;
@@ -230,19 +235,19 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                 sourceName: state.sourceContext.resource.metadata.name,
                 targetName: state.targetContext.resource.metadata.name,
             };
-            const mappedSources: RESTMethodEdit[] = [];
-            const mappedTargets: RESTMethodEdit[] = [];
+            const mappedSources: MappedMethodInfo[] = [];
+            const mappedTargets: MappedMethodInfo[] = [];
             const mappedMethods: MappedMethod[] = [];
 
             Object.entries(value).forEach(([sourceMethodId, mapping]) => {
-                const sourceMethod = state.sourceMethods.find((m) => m.id === sourceMethodId);
+                const sourceMethod = state.sourceMethods.find((m) => toId(m) === sourceMethodId);
 
                 if (!sourceMethod) {
                     handlerContextClone.warnings.push(`Mapped method ${sourceMethodId} did not exist and was removed.`);
                     return;
                 }
 
-                const targetMethod = state.targetMethods.find((m) => m.id === mapping.targetId);
+                const targetMethod = state.targetMethods.find((m) => toId(m) === mapping.targetId);
                 if (!targetMethod) {
                     handlerContextClone.warnings.push(
                         `Mapped method ${mapping.targetId} did not exist and was removed.`

@@ -7,10 +7,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { cloneDeep, find, pull } from 'lodash';
 import { ToastType, showToasty } from '@kapeta/ui-web-components';
 import { ConnectionMethodMappingType, ConnectionMethodsMapping } from '@kapeta/ui-web-types';
-import { RESTKindContext, RESTMethodEdit, RESTResourceSpec, getCompatibleRESTMethodsIssues } from '../types';
-import { MappedMethod, MappingHandlerData, createEqualMapping, createSourceOnlyMapping } from './types';
+import { RESTKindContext, getCompatibleRESTMethodsIssues } from '../types';
+import {
+    MappedMethod,
+    MappingHandlerData,
+    createEqualMapping,
+    createSourceOnlyMapping,
+    toId,
+    DSLControllerMethod,
+} from './types';
 import { getEntitiesToBeAddedForCopy } from './MappingUtils';
-import { deleteRESTMethod, setRESTMethod } from '../RESTUtils';
+import { RESTResourceEditor } from '../RESTUtils';
 
 const toMappingData = (methods: MappedMethod[]): ConnectionMethodsMapping => {
     const map: ConnectionMethodsMapping = {};
@@ -19,8 +26,8 @@ const toMappingData = (methods: MappedMethod[]): ConnectionMethodsMapping => {
             return;
         }
 
-        map[method.source.id] = {
-            targetId: method.target.id,
+        map[toId(method.source)] = {
+            targetId: toId(method.target),
             type: ConnectionMethodMappingType.EXACT, // We only support exact at the moment
         };
     });
@@ -46,12 +53,12 @@ const canAddToTarget = (methods: MappedMethod[], ix: number): boolean => {
         return false;
     }
 
-    return !find(methods, (method) => {
+    return !methods.some((method) => {
         if (method.source === source) {
             return false;
         }
 
-        return method.target && method.target.id === source.id;
+        return method.target && toId(method.target) === toId(source);
     });
 };
 const canDropOnTarget = (methods: MappedMethod[], ix: number): boolean => !!methods[ix].target;
@@ -121,8 +128,7 @@ export const useMappingHandler = (
 
             target.entities.push(...entitiesToBeAdded);
 
-            // First add the method to the target resource
-            setRESTMethod(targetClone.resource.spec, currentSource.id, newTarget);
+            new RESTResourceEditor(targetClone.resource).setMethod(toId(currentSource), newTarget);
 
             // Then add mapping for it
             methodsClone.splice(ix, 1, createEqualMapping(currentSource, newTarget));
@@ -162,8 +168,7 @@ export const useMappingHandler = (
 
             sourceClone.entities.push(...entitiesToBeAdded);
 
-            // First add the method to the source resource
-            setRESTMethod(sourceClone.resource.spec, currentTarget.id, newSource);
+            new RESTResourceEditor(sourceClone.resource).setMethod(toId(currentTarget), newSource);
 
             // Then add mapping for it
             methodsClone.splice(ix, 1, createEqualMapping(newSource, currentTarget));
@@ -186,7 +191,7 @@ export const useMappingHandler = (
             }
 
             // First remove the method from the target block
-            deleteRESTMethod(targetClone.resource.spec, currentTarget.id);
+            new RESTResourceEditor(targetClone.resource).deleteMethod(toId(currentTarget));
 
             // Then remove mapping for it
             const sourceMethod = methodsClone[ix].source;
@@ -223,7 +228,7 @@ export const useMappingHandler = (
                 // If the target is a copy
 
                 // First remove the method from the source resource
-                deleteRESTMethod(sourceClone.resource.spec as RESTResourceSpec, currentSource.id);
+                new RESTResourceEditor(sourceClone.resource).deleteMethod(toId(currentSource));
                 setSource(sourceClone);
                 // And remove the entire line
                 pull(methodsClone, currentMethod);
@@ -240,7 +245,7 @@ export const useMappingHandler = (
     );
 
     const addMappingForTarget = useCallback(
-        (ix: number, sourceMethod: RESTMethodEdit) => {
+        (ix: number, sourceMethod: DSLControllerMethod) => {
             const methodsClone = cloneDeep(methods);
 
             const currentTarget = methodsClone[ix].target;
@@ -263,7 +268,7 @@ export const useMappingHandler = (
             }
 
             methodsClone[ix].source = sourceMethod;
-            methodsClone[ix].sourceId = sourceMethod.id;
+            methodsClone[ix].sourceId = toId(sourceMethod);
             methodsClone[ix].mapped = true;
 
             const existing = find(methodsClone, { source: sourceMethod, mapped: false });

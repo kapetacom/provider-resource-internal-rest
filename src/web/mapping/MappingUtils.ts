@@ -3,18 +3,13 @@
  * SPDX-License-Identifier: MIT
  */
 
-import {
-    getCompatibleRESTMethodsIssues,
-    isCompatibleRESTMethods,
-    RESTMethodEdit,
-    RESTMethodEditContext,
-} from '../types';
+import { getCompatibleRESTMethodsIssues, isCompatibleRESTMethods, RESTMethodContext } from '../types';
 
 import type { RESTKindContext } from '../types';
 
 import { resolveEntities, resolveEntitiesFromMethod } from '../RESTUtils';
-import { MappedMethod, RESTMethodMappingEdit } from './types';
-import { Entity, getSchemaEntityCompatibilityIssues, isSchemaEntityCompatible } from '@kapeta/schemas';
+import { DSLControllerMethod, MappedMethod, MappedMethodInfo } from './types';
+import { DSLData, DSLCompatibilityHelper } from '@kapeta/kaplang-core';
 
 /**
  * Determines conflicts between entities of source and target
@@ -39,7 +34,12 @@ export function determineEntityIssues(source: RESTKindContext, target: RESTKindC
             return;
         }
 
-        const issues = getSchemaEntityCompatibilityIssues(sourceEntity, targetEntity, source.entities, target.entities);
+        const issues = DSLCompatibilityHelper.getIssuesForData(
+            sourceEntity,
+            targetEntity,
+            source.entities,
+            target.entities
+        );
         entityIssues.push(
             ...issues.map((i) => {
                 return `${i} for type: ${sourceEntityName}`;
@@ -64,7 +64,12 @@ export function determineEntityIssues(source: RESTKindContext, target: RESTKindC
             return;
         }
 
-        const issues = getSchemaEntityCompatibilityIssues(sourceEntity, targetEntity, source.entities, target.entities);
+        const issues = DSLCompatibilityHelper.getIssuesForData(
+            sourceEntity,
+            targetEntity,
+            source.entities,
+            target.entities
+        );
         entityIssues.push(
             ...issues.map((i) => {
                 return `${i} for type: ${targetEntityName}`;
@@ -96,12 +101,12 @@ export const mappedMethodSorter = (a: MappedMethod, b: MappedMethod) => {
 };
 
 export function getCompatibleMethodsAndEntities(
-    methods: RESTMethodEdit[],
+    methods: DSLControllerMethod[],
     aContext: RESTKindContext,
     bContext: RESTKindContext
 ) {
     const compatibleEntities = getCompatibleEntities(aContext, bContext);
-    const compatibleMethods: RESTMethodMappingEdit[] = [];
+    const compatibleMethods: MappedMethodInfo[] = [];
 
     methods.forEach((sourceMethod) => {
         const sourceMethodContext = { method: sourceMethod, entities: aContext.entities };
@@ -121,14 +126,14 @@ export function getCompatibleMethodsAndEntities(
     };
 }
 
-export function getCompatibleEntities(aContext: RESTKindContext, bContext: RESTKindContext): Entity[] {
+export function getCompatibleEntities(aContext: RESTKindContext, bContext: RESTKindContext): DSLData[] {
     const entityList = resolveEntities(aContext);
     const { entitiesToBeAdded } = getCompatibleEntitiesForList(entityList, aContext.entities, bContext.entities);
 
     return entitiesToBeAdded;
 }
 
-export function copyMethods(methods: RESTMethodEdit[]): RESTMethodMappingEdit[] {
+export function copyMethods(methods: DSLControllerMethod[]): MappedMethodInfo[] {
     return methods.map((sourceMethod) => {
         return { ...sourceMethod, copyOf: sourceMethod };
     });
@@ -138,9 +143,9 @@ export function copyMethods(methods: RESTMethodEdit[]): RESTMethodMappingEdit[] 
  * Gets all entities that can and should be added from one entity list
  * (aEntities) to another (bEntities)
  */
-export function getCompatibleEntitiesForList(entityNames: string[], aEntities: Entity[], bEntities: Entity[]) {
+export function getCompatibleEntitiesForList(entityNames: string[], aEntities: DSLData[], bEntities: DSLData[]) {
     const issues: string[] = [];
-    let entitiesToBeAdded: Entity[] = [];
+    let entitiesToBeAdded: DSLData[] = [];
     entityNames.forEach((entityNAme) => {
         const bEntity = bEntities.find((e) => e.name === entityNAme);
         const aEntity = aEntities.find((e) => e.name === entityNAme);
@@ -149,7 +154,7 @@ export function getCompatibleEntitiesForList(entityNames: string[], aEntities: E
                 entitiesToBeAdded.push(aEntity);
             }
         } else if (aEntity) {
-            const entityIssues = getSchemaEntityCompatibilityIssues(aEntity, bEntity, aEntities, bEntities);
+            const entityIssues = DSLCompatibilityHelper.getIssuesForData(aEntity, bEntity, aEntities, bEntities);
             issues.push(
                 ...entityIssues.map((issue) => {
                     return `${issue} for type: ${entityNAme}`;
@@ -160,7 +165,10 @@ export function getCompatibleEntitiesForList(entityNames: string[], aEntities: E
 
     entitiesToBeAdded = entitiesToBeAdded.filter((newEntity) => {
         // We do this to make sure any sub types are available
-        return isSchemaEntityCompatible(newEntity, newEntity, aEntities, [...bEntities, ...entitiesToBeAdded]);
+        return DSLCompatibilityHelper.isDataCompatible(newEntity, newEntity, aEntities, [
+            ...bEntities,
+            ...entitiesToBeAdded,
+        ]);
     });
 
     return { issues, entitiesToBeAdded };
@@ -170,7 +178,7 @@ export function getCompatibleEntitiesForList(entityNames: string[], aEntities: E
  * Gets all the entities in use by a method that needs to be added to the
  * bEntities to be able to copy method
  */
-export function getEntitiesToBeAddedForCopy(aContext: RESTMethodEditContext, bContext: RESTMethodEditContext) {
+export function getEntitiesToBeAddedForCopy(aContext: RESTMethodContext, bContext: RESTMethodContext) {
     const usedEntityNames = resolveEntitiesFromMethod(aContext);
 
     const { issues, entitiesToBeAdded } = getCompatibleEntitiesForList(

@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import type { RESTMethodEdit, RESTResource, RESTResourceSpec } from '../types';
-import type { MappedMethod } from './types';
+import type { RESTResource, RESTResourceSpec } from '../types';
+import type { DSLControllerMethod, MappedMethod } from './types';
 import { ItemTypes } from './types';
 import { ConnectionMethodsMapping, ResourceTypeProviderMappingProps } from '@kapeta/ui-web-types';
 import { DnDContainer, DnDDrag, DnDDrop, FormReadyHandler } from '@kapeta/ui-web-components';
@@ -14,6 +14,7 @@ import { toRESTKindContext } from '../types';
 import { useMappingHandlerBuilder } from './useMappingHandlerBuilder';
 
 import './APIToClientMapper.less';
+import { DSLData } from '@kapeta/kaplang-core';
 
 const DangerIcon: React.FC = () => (
     <svg width="42" height="42" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -24,7 +25,7 @@ const DangerIcon: React.FC = () => (
 );
 
 interface RestResourceToClientMapperProps
-    extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping> {}
+    extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping, DSLData> {}
 
 const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     title,
@@ -104,7 +105,9 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                 <DnDDrop
                     type={ItemTypes.API_METHOD}
                     droppable={() => mappingHandler.canDropOnTarget(ix)}
-                    onDrop={(type, source: RESTMethodEdit) => mappingHandler.addMappingForTarget(ix, source)}
+                    onDrop={(type: string, source: DSLControllerMethod) =>
+                        mappingHandler.addMappingForTarget(ix, source)
+                    }
                 >
                     {renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}
                 </DnDDrop>

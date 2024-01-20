@@ -64,7 +64,7 @@ export default class InspectConnectionContent extends Component<
         return (
             <StackContainer
                 currentPageId={this.state.currentPageId}
-                onPageRequest={(pageId) => this.onPageRequest(pageId)}
+                onPageRequest={(pageId: string) => this.onPageRequest(pageId)}
             >
                 <StackPage id={'methods'} title={'Overview'}>
                     <InspectConnectionMethods

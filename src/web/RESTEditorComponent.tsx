@@ -3,38 +3,77 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
-    DSL_LANGUAGE_ID,
     DSLConverters,
     DSLMethod,
-    MethodEditor,
+    DSLTypeHelper,
     FormField,
+    MethodEditor,
     useFormContextField,
     useIsFormSubmitAttempted,
 } from '@kapeta/ui-web-components';
-import type { ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
+
+import {DSLData, DSLDataTypeParser, KAPLANG_ID, KAPLANG_VERSION} from '@kapeta/kaplang-core';
+
+import { IncludeContextType, ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
 import { validateApiName } from './RESTUtils';
 import { Alert, Stack } from '@mui/material';
+import { SourceCode } from '@kapeta/schemas';
+
+const typeNameMapper = (e:DSLData) => {
+    return DSLTypeHelper.asFullName(e, true);
+};
 
 export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const methodField = useFormContextField('spec.methods');
-    const methodSource = useFormContextField('spec.source');
+    const methodSource = useFormContextField<SourceCode>('spec.source');
     const [methodsError, setMethodsError] = React.useState<string | null>(null);
     const formSubmitAttempted = useIsFormSubmitAttempted();
 
     const setResult = (code: string, methods: DSLMethod[]) => {
         try {
             methodField.set(DSLConverters.toSchemaMethods(methods));
-            methodSource.set({ type: DSL_LANGUAGE_ID, value: code });
+            methodSource.set({ type: KAPLANG_ID, version: KAPLANG_VERSION, value: code });
         } catch (e) {
             console.error('Failed to trigger change', e);
         }
     };
 
-    const validTypes = props.block.spec.entities?.types?.map((t) => t.name) ?? [];
+    const validTypes = useMemo(() => {
+        let includeTypes:string[] = [];
+        if (props.context?.languageProvider && props.context?.languageProvider.getDSLIncludes) {
+            // The language target might provide some additional types
+            const include = props.context.languageProvider.getDSLIncludes(IncludeContextType.REST);
+            if (include?.source) {
+                try {
+                    includeTypes = DSLDataTypeParser.parse(include?.source).map(typeNameMapper);
+                } catch (e) {
+                    console.error('Failed to parse include types', e);
+                }
+            }
+        }
+
+        if (props.block?.spec?.entities?.source?.value) {
+            let types:DSLData[] = [];
+            try {
+                types = DSLDataTypeParser.parse(props.block.spec.entities.source.value, {
+                    validTypes: includeTypes,
+                });
+            } catch (e) {
+                console.error('Failed to parse types', e);
+            }
+
+            return Array.from(new Set<string>(types.map(typeNameMapper).concat(includeTypes)));
+        }
+
+        return props.block.spec.entities?.types?.map((t) => t.name) ?? [];
+    }, [props.block.spec.entities?.source, props.context?.languageProvider]);
+
+    const source = methodSource.get({ value: '', type: KAPLANG_ID, version: KAPLANG_VERSION });
+    const entities = DSLConverters.fromSchemaMethods(methodField.get({}));
 
     return (
         <Stack className={'rest-resource-editor'} sx={{ height: '100%' }}>
@@ -62,10 +101,10 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                         setMethodsError(err.message);
                     }}
                     value={{
-                        code: methodSource.get({ value: '' }).value,
-                        entities: DSLConverters.fromSchemaMethods(methodField.get([])),
+                        code: source.value,
+                        entities,
                     }}
-                    onChange={(result) => {
+                    onChange={(result: any) => {
                         methodSource.valid();
                         setResult(result.code, result.entities as DSLMethod[]);
                     }}

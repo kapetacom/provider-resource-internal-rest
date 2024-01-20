@@ -4,14 +4,7 @@
  */
 
 import _, { cloneDeep } from 'lodash';
-import {
-    convertToEditMethod,
-    isCompatibleRESTMethods,
-    KIND_REST_API,
-    KIND_REST_CLIENT,
-    RESTResource,
-    RESTResourceSpec,
-} from './types';
+import { isCompatibleRESTMethods, KIND_REST_API, KIND_REST_CLIENT, RESTResourceSpec } from './types';
 
 import {
     ConnectionMethodMappingType,
@@ -21,15 +14,24 @@ import {
     ResourceProviderType,
 } from '@kapeta/ui-web-types';
 
-import { Connection, Entity, Metadata, Resource } from '@kapeta/schemas';
+import { Metadata } from '@kapeta/schemas';
 
-import { getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate } from './RESTUtils';
+import {
+    getCounterValue,
+    hasMethod,
+    parseMethodsFromResource,
+    renameEntityReferences,
+    resolveEntities,
+    validate,
+} from './RESTUtils';
 import { RESTEditorComponent } from './RESTEditorComponent';
 import APIToClientMapper from './mapping/APIToClientMapper';
 import InspectConnectionContent from './inspectors/InspectConnectionContent';
+import { DSLConverters, DSLData } from '@kapeta/kaplang-core';
+import { toId } from './mapping/types';
 const packageJson = require('../../package.json');
 
-const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
+const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec, DSLData> = {
     kind: KIND_REST_CLIENT,
     version: packageJson.version,
     title: 'REST Client',
@@ -41,11 +43,11 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
             fromKind: KIND_REST_API,
             mappingComponentType: APIToClientMapper,
             inspectComponentType: InspectConnectionContent,
-            createFrom: (data: Resource) => {
+            createFrom: (data) => {
                 if (!data.kind?.startsWith(KIND_REST_CLIENT)) {
                     throw new Error(`Invalid resource kind: ${data.kind}. Expected ${KIND_REST_CLIENT}`);
                 }
-                const copy = cloneDeep(data) as RESTResource;
+                const copy = cloneDeep(data);
                 if (!copy.spec) {
                     copy.spec = {
                         port: {
@@ -60,13 +62,7 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
 
                 return copy;
             },
-            validateMapping: (
-                connection: Connection,
-                provider: Resource,
-                consumer: Resource,
-                fromEntities: Entity[],
-                toEntities: Entity[]
-            ): string[] => {
+            validateMapping: (connection, provider, consumer, fromEntities, toEntities): string[] => {
                 const errors: string[] = [];
 
                 if (!_.isObject(connection.mapping)) {
@@ -74,28 +70,24 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 }
 
                 const connectionMapping = connection.mapping as ConnectionMethodsMapping;
-                const consumerSpec = consumer.spec as RESTResourceSpec;
-                const providerSpec = provider.spec as RESTResourceSpec;
+                const sourceMethods = parseMethodsFromResource(provider);
+                let targetMethods = parseMethodsFromResource(consumer);
 
-                const targetMethods = consumerSpec.methods ? Object.keys(consumerSpec.methods) : [];
-
-                const oldMapping = connectionMapping;
-                _.forEach(oldMapping, (mapping, sourceMethodId) => {
-                    if (!providerSpec.methods || !providerSpec.methods[sourceMethodId]) {
+                Object.entries(connectionMapping).forEach(([sourceMethodId, mapping]) => {
+                    const fromMethod = sourceMethods.find((method) => toId(method) === sourceMethodId);
+                    const toMethod = targetMethods.find((method) => toId(method) === mapping.targetId);
+                    if (!fromMethod) {
                         // Some methods are gone - ignore and remove
                         errors.push('Missing source method');
                         return;
                     }
 
-                    if (!consumerSpec.methods || !consumerSpec.methods[mapping.targetId]) {
+                    if (!toMethod) {
                         errors.push('Missing target method');
                         return;
                     }
 
-                    _.pull(targetMethods, mapping.targetId);
-
-                    const fromMethod = convertToEditMethod(sourceMethodId, providerSpec.methods[sourceMethodId]);
-                    const toMethod = convertToEditMethod(mapping.targetId, consumerSpec.methods[mapping.targetId]);
+                    targetMethods = targetMethods.filter((m) => toId(m) !== mapping.targetId);
 
                     if (
                         mapping.type === ConnectionMethodMappingType.EXACT &&
@@ -117,28 +109,24 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
 
                 return errors;
             },
-            createMapping: (
-                from: Resource,
-                to: Resource,
-                fromEntities: Entity[],
-                toEntities: Entity[]
-            ): ConnectionMethodsMapping => {
+            createMapping: (from, to, fromEntities, toEntities): ConnectionMethodsMapping => {
                 const newMapping: ConnectionMethodsMapping = {};
-                if (!to.spec.methods || !from.spec.methods) {
+                const sourceMethods = parseMethodsFromResource(from);
+                const targetMethods = parseMethodsFromResource(to);
+                if (!targetMethods || !sourceMethods) {
                     return newMapping;
                 }
 
-                Object.keys(from.spec.methods).forEach((sourceMethodId) => {
-                    if (!to.spec.methods[sourceMethodId]) {
+                sourceMethods.forEach((sourceMethod) => {
+                    const sourceMethodId = toId(sourceMethod);
+                    const toMethod = targetMethods.find((method) => toId(method) === sourceMethodId);
+                    if (!toMethod) {
                         return;
                     }
 
-                    const fromMethod = convertToEditMethod(sourceMethodId, from.spec.methods[sourceMethodId]);
-                    const toMethod = convertToEditMethod(sourceMethodId, to.spec.methods[sourceMethodId]);
-
                     const wasCompatible = isCompatibleRESTMethods(
                         {
-                            method: fromMethod,
+                            method: sourceMethod,
                             entities: fromEntities,
                         },
                         {
@@ -158,24 +146,23 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 });
                 return newMapping;
             },
-            updateMapping: (
-                connection: Connection,
-                provider: Resource,
-                consumer: Resource
-            ): ConnectionMethodsMapping => {
+            updateMapping: (connection, provider, consumer): ConnectionMethodsMapping => {
                 const newMapping: ConnectionMethodsMapping = {};
-                const consumerSpec = consumer.spec as RESTResourceSpec;
-                const providerSpec = provider.spec as RESTResourceSpec;
 
-                if (!_.isObject(connection.mapping) || !providerSpec?.methods || !consumerSpec?.methods) {
+                if (!_.isObject(connection.mapping)) {
                     return newMapping;
                 }
 
+                const sourceMethods = parseMethodsFromResource(provider);
+                const targetMethods = parseMethodsFromResource(consumer);
+
                 const connectionMapping = connection.mapping as ConnectionMethodsMapping;
 
-                const oldMapping = connectionMapping;
-                _.forEach(oldMapping, (mapping, sourceMethodId) => {
-                    if (!providerSpec.methods?.[sourceMethodId] || !consumerSpec.methods?.[mapping.targetId]) {
+                Object.entries(connectionMapping).forEach(([sourceMethodId, mapping]) => {
+                    const sourceMethod = sourceMethods.find((method) => toId(method) === sourceMethodId);
+                    const targetMethod = targetMethods.find((method) => toId(method) === mapping.targetId);
+
+                    if (!sourceMethod || !targetMethod) {
                         // Some methods are gone - ignore and remove
                         return;
                     }
@@ -191,10 +178,10 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
     hasMethod,
     renameEntityReferences,
     resolveEntities: (resource) => {
-        return resolveEntities({ resource: resource as RESTResource, entities: [] });
+        return resolveEntities({ resource, entities: [] }).map((entity) => DSLConverters.fromDSLType(entity));
     },
     validate: (resource, entities) => {
-        return validate({ resource: resource as RESTResource, entities });
+        return validate({ resource, entities });
     },
     definition: {
         kind: 'core/resource-type-internal',
@@ -211,6 +198,9 @@ const RestClientConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
                 },
             ],
         },
+    },
+    capabilities: {
+        directDSL: true,
     },
 };
 

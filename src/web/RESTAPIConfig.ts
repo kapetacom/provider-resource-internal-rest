@@ -8,10 +8,11 @@ import { KIND_REST_API, KIND_REST_CLIENT, RESTResource, RESTResourceSpec } from 
 import { getCounterValue, hasMethod, renameEntityReferences, resolveEntities, validate } from './RESTUtils';
 import { IResourceTypeProvider, ResourceRole, ResourceProviderType } from '@kapeta/ui-web-types';
 import { Metadata } from '@kapeta/schemas';
+import { DSLConverters, DSLData } from '@kapeta/kaplang-core';
 
 const packageJson = require('../../package.json');
 
-export const RESTAPIConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = {
+export const RESTAPIConfig: IResourceTypeProvider<Metadata, RESTResourceSpec, DSLData> = {
     kind: KIND_REST_API,
     version: packageJson.version,
     title: 'REST API',
@@ -23,10 +24,12 @@ export const RESTAPIConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = 
     hasMethod,
     renameEntityReferences,
     resolveEntities: (resource) => {
-        return resolveEntities({ resource: resource as RESTResource, entities: [] });
+        return resolveEntities({ resource: resource as RESTResource, entities: [] }).map((entity) =>
+            DSLConverters.fromDSLType(entity)
+        );
     },
     validate: (resource, entities) => {
-        return validate({ resource: resource as RESTResource, entities });
+        return validate({ resource: resource, entities });
     },
     definition: {
         kind: 'core/resource-type-internal',
@@ -43,6 +46,9 @@ export const RESTAPIConfig: IResourceTypeProvider<Metadata, RESTResourceSpec> = 
                 },
             ],
         },
+    },
+    capabilities: {
+        directDSL: true,
     },
 };
 

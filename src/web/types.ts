@@ -3,125 +3,71 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { forEach } from 'lodash';
-import { HTTPMethod, TypedValue, RESTMethod, TypeLike, RESTMethodArgument } from '@kapeta/ui-web-types';
-import { Entity, getCompatibilityIssuesForTypes, isCompatibleTypes, Resource } from '@kapeta/schemas';
+import { RESTMethod, ResourceWithSpec } from '@kapeta/ui-web-types';
+import { SourceCode } from '@kapeta/schemas';
+import { DSLData, DSLCompatibilityHelper, DSLMethod } from '@kapeta/kaplang-core';
 
 export interface RESTResourceSpec {
     port: {
         type: string;
     };
-    source?: TypedValue;
+    source?: SourceCode;
     methods?: {
         [key: string]: RESTMethod;
     };
 }
 
-export interface RESTResource extends Resource {
-    spec: RESTResourceSpec;
-}
-
-export interface RESTMethodArgumentEdit extends TypeLike {
-    id: string;
-    transport?: string;
-    optional?: boolean;
-}
-
-export interface RESTMethodEdit {
-    id: string;
-    description: string;
-    method: HTTPMethod;
-    path: string;
-    arguments: RESTMethodArgumentEdit[];
-    responseType?: TypeLike;
-}
-
-export interface RESTMethodEditContext {
-    method: RESTMethodEdit;
-    entities: Entity[];
-}
+export interface RESTResource extends ResourceWithSpec<RESTResourceSpec> {}
 
 export interface RESTMethodContext {
-    method: RESTMethod;
-    entities: Entity[];
+    method: DSLMethod;
+    entities: DSLData[];
 }
 
 export interface RESTKindContext {
     resource: RESTResource;
-    entities: Entity[];
+    entities: DSLData[];
 }
 
-export function toRESTKindContext(resource: RESTResource, entities: Entity[]): RESTKindContext {
+export function toRESTKindContext(resource: RESTResource, entities: DSLData[]): RESTKindContext {
     return {
         resource,
         entities,
     };
 }
 
-export function convertToEditMethod(id: string, method: RESTMethod): RESTMethodEdit {
-    const tmp: RESTMethodEdit = {
-        id,
-        description: method.description || '',
-        method: method.method,
-        arguments: [],
-        path: method.path,
-        responseType: method.responseType,
-    };
-
-    forEach(method.arguments, (arg, argId) => {
-        tmp.arguments.push({ ...arg, id: argId, optional: arg.optional });
-    });
-
-    return tmp;
-}
-
-export function convertAllToEditMethods(resource: RESTResource): RESTMethodEdit[] {
-    const out: RESTMethodEdit[] = [];
-    if (!resource.spec.methods) {
-        return out;
-    }
-    forEach(resource.spec.methods, (method, methodId) => {
-        out.push(convertToEditMethod(methodId, method));
-    });
-
-    return out;
-}
-
-export function convertToRestMethod(method: RESTMethodEdit): RESTMethod {
-    const args: Record<string, RESTMethodArgument> = {};
-    method.arguments.forEach(({ id, transport, type, ref, optional }) => {
-        args[id] = { transport, type, ref, optional };
-    });
-
-    return {
-        description: method.description,
-        method: method.method,
-        path: method.path,
-        arguments: args,
-        responseType: method.responseType,
-    } satisfies RESTMethod;
-}
-
-export function getCompatibleRESTMethodsIssues(
-    aContext: RESTMethodEditContext,
-    bContext: RESTMethodEditContext
-): string[] {
+export function getCompatibleRESTMethodsIssues(aContext: RESTMethodContext, bContext: RESTMethodContext): string[] {
     const errors = [];
     const a = aContext.method;
     const b = bContext.method;
-    if (!isCompatibleTypes(a.responseType, b.responseType, aContext.entities, bContext.entities)) {
+    if (!DSLCompatibilityHelper.isCompatible(a.returnType, b.returnType, aContext.entities, bContext.entities)) {
         errors.push('Response types are not compatible');
     }
 
-    const aArgs = a.arguments;
-    const bArgs = b.arguments;
+    const aArgs = a.parameters;
+    const bArgs = b.parameters;
+
+    if (!aArgs && !bArgs) {
+        return errors;
+    }
+
+    if (!aArgs || !bArgs) {
+        errors.push('Argument counts is not compatible');
+        return errors;
+    }
 
     if (aArgs.length !== bArgs.length) {
         errors.push('Argument counts is not compatible');
+        return errors;
     }
 
     for (let i = 0; i < aArgs.length; i++) {
-        const issues = getCompatibilityIssuesForTypes(aArgs[i], bArgs[i], aContext.entities, bContext.entities);
+        const issues = DSLCompatibilityHelper.getIssuesForTypes(
+            aArgs[i].type,
+            bArgs[i].type,
+            aContext.entities,
+            bContext.entities
+        );
 
         if (aArgs[i] && bArgs[i]) {
             const aOptional = Boolean(aArgs[i].optional);
@@ -139,7 +85,7 @@ export function getCompatibleRESTMethodsIssues(
     return errors;
 }
 
-export function isCompatibleRESTMethods(a: RESTMethodEditContext, b: RESTMethodEditContext): boolean {
+export function isCompatibleRESTMethods(a: RESTMethodContext, b: RESTMethodContext): boolean {
     return getCompatibleRESTMethodsIssues(a, b).length === 0;
 }
 
