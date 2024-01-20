@@ -266,8 +266,10 @@ export class RESTResourceEditor {
     public renameEntity(from: string, to: string) {
         const resolver = new DSLReferenceResolver();
         resolver.visitReferences(this.entities, (name) => {
-            if (name === from) {
-                return to;
+            const type = DSLTypeHelper.asType(name);
+            if (type.name === from) {
+                type.name = to;
+                return type;
             }
             return name;
         });

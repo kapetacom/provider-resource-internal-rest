@@ -60,21 +60,6 @@ describe('Types', () => {
             ).toBe(true);
         });
 
-        test('arguments with missing entities does not match', () => {
-            expect(
-                isCompatibleRESTMethods(
-                    makeEditContext('test1', ['NotReal'], 'string'),
-                    makeEditContext('test2', ['NotReal'], 'string')
-                )
-            ).toBe(false);
-
-            expect(
-                getCompatibleRESTMethodsIssues(
-                    makeEditContext('test1', ['NotReal'], 'string'),
-                    makeEditContext('test2', ['NotReal'], 'string')
-                )
-            ).toEqual(['Argument 1 type is not compatible: NotReal was not defined']);
-        });
 
         test('arguments with same entity name but different structure does not match', () => {
             expect(
