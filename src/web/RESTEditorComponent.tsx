@@ -15,13 +15,17 @@ import {
     useIsFormSubmitAttempted,
 } from '@kapeta/ui-web-components';
 
-import { DSLDataTypeParser, KAPLANG_ID, KAPLANG_VERSION } from '@kapeta/kaplang-core';
+import {DSLData, DSLDataTypeParser, KAPLANG_ID, KAPLANG_VERSION} from '@kapeta/kaplang-core';
 
 import { IncludeContextType, ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
 import { validateApiName } from './RESTUtils';
 import { Alert, Stack } from '@mui/material';
 import { SourceCode } from '@kapeta/schemas';
+
+const typeNameMapper = (e:DSLData) => {
+    return DSLTypeHelper.asFullName(e, true);
+};
 
 export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const methodField = useFormContextField('spec.methods');
@@ -39,31 +43,34 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     };
 
     const validTypes = useMemo(() => {
-        let typeCode: string[] = [];
+        let includeTypes:string[] = [];
         if (props.context?.languageProvider && props.context?.languageProvider.getDSLIncludes) {
             // The language target might provide some additional types
-            const include = props.context?.languageProvider.getDSLIncludes(IncludeContextType.REST);
+            const include = props.context.languageProvider.getDSLIncludes(IncludeContextType.REST);
             if (include?.source) {
-                typeCode.push(include.source);
+                try {
+                    includeTypes = DSLDataTypeParser.parse(include?.source).map(typeNameMapper);
+                } catch (e) {
+                    console.error('Failed to parse include types', e);
+                }
             }
         }
 
-        if (props.block.spec.entities?.source?.value) {
-            typeCode.push(props.block.spec.entities.source.value);
-        }
+        if (props.block?.spec?.entities?.source?.value) {
+            let types:DSLData[] = [];
+            try {
+                types = DSLDataTypeParser.parse(props.block.spec.entities.source.value, {
+                    validTypes: includeTypes,
+                });
+            } catch (e) {
+                console.error('Failed to parse types', e);
+            }
 
-        if (typeCode.length > 0) {
-            const types = DSLDataTypeParser.parse(typeCode.join('\n\n'));
-
-            return types.map((e) => {
-                return DSLTypeHelper.asFullName(e, true);
-            });
+            return Array.from(new Set<string>(types.map(typeNameMapper).concat(includeTypes)));
         }
 
         return props.block.spec.entities?.types?.map((t) => t.name) ?? [];
     }, [props.block.spec.entities?.source, props.context?.languageProvider]);
-
-    console.log('validTypes', validTypes);
 
     const source = methodSource.get({ value: '', type: KAPLANG_ID, version: KAPLANG_VERSION });
     const entities = DSLConverters.fromSchemaMethods(methodField.get({}));
