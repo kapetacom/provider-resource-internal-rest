@@ -66,7 +66,11 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                 console.error('Failed to parse types', e);
             }
 
-            return Array.from(new Set<string>(types.map(typeNameMapper).concat(includeTypes)));
+            includeTypes = Array.from(new Set<string>(types.map(typeNameMapper).concat(includeTypes)));
+        }
+
+        if (includeTypes.length > 0) {
+            return includeTypes;
         }
 
         return props.block.spec.entities?.types?.map((t) => t.name) ?? [];
