@@ -80,7 +80,7 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     const entities = DSLConverters.fromSchemaMethods(methodField.get({}));
 
     return (
-        <Stack className={'rest-resource-editor'} sx={{ height: '100%' }}>
+        <Stack sx={{ height: '100%' }}>
             <FormField
                 name={'metadata.name'}
                 label={'Name'}
