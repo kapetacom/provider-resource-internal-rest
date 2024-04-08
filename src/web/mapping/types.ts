@@ -47,6 +47,7 @@ export interface MappedMethod {
     target?: MappedMethodInfo;
     mapped: boolean;
     mapping?: Mapping[];
+    errors?: string[];
 }
 
 export interface MappedMethodInfo extends DSLControllerMethod {
@@ -70,30 +71,37 @@ export type MappingHandlerData = {
     data: ConnectionMethodsMapping;
 };
 
-export function createEqualMapping(sourceMethod: MappedMethodInfo, targetMethod: MappedMethodInfo): MappedMethod {
+export function createEqualMapping(
+    sourceMethod: MappedMethodInfo,
+    targetMethod: MappedMethodInfo,
+    errors?: string[]
+): MappedMethod {
     return {
         sourceId: toId(sourceMethod),
         source: sourceMethod,
         targetId: toId(targetMethod),
         target: targetMethod,
         mapped: true,
+        errors,
     };
 }
 
-export function createTargetOnlyMapping(method: DSLControllerMethod): MappedMethod {
+export function createTargetOnlyMapping(method: DSLControllerMethod, errors?: string[]): MappedMethod {
     return {
         targetId: toId(method),
         target: method,
         mapped: false,
         mapping: [],
+        errors,
     };
 }
 
-export function createSourceOnlyMapping(method: DSLControllerMethod) {
+export function createSourceOnlyMapping(method: DSLControllerMethod, errors?: string[]) {
     return {
         sourceId: toId(method),
         source: method,
         mapped: false,
         mapping: [],
+        errors,
     };
 }
