@@ -8,7 +8,7 @@ import type { RESTResource, RESTResourceSpec } from '../types';
 import type { DSLControllerMethod, MappedMethod } from './types';
 import { ItemTypes } from './types';
 import { ConnectionMethodsMapping, ResourceTypeProviderMappingProps } from '@kapeta/ui-web-types';
-import { DnDContainer, DnDDrag, DnDDrop, FormReadyHandler } from '@kapeta/ui-web-components';
+import { DnDContainer, DnDDrag, DnDDrop, FormReadyHandler, Tooltip } from '@kapeta/ui-web-components';
 import RestMethodView from '../RestMethodView';
 import { toRESTKindContext } from '../types';
 import { useMappingHandlerBuilder } from './useMappingHandlerBuilder';
@@ -186,7 +186,25 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                                         )}
 
                                         {!method.source && method.target && (
-                                            <i title={'Missing mapping'} className={'fas fa-exclamation-triangle'} />
+                                            <Tooltip
+                                                title={
+                                                    method.errors ? (
+                                                        <>
+                                                            <p>Mapping errors found:</p>
+                                                            <ul style={{ marginLeft: 0, paddingLeft: '1em' }}>
+                                                                {method.errors.map((m) => (
+                                                                    <p key={m}>{m}</p>
+                                                                ))}
+                                                            </ul>
+                                                        </>
+                                                    ) : null
+                                                }
+                                            >
+                                                <i
+                                                    title={'Missing mapping'}
+                                                    className={'fas fa-exclamation-triangle'}
+                                                />
+                                            </Tooltip>
                                         )}
                                     </div>
                                     <div className={'target'}>

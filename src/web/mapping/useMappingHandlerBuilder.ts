@@ -5,7 +5,7 @@
 
 import { useEffect, useReducer } from 'react';
 import { useMappingHandler } from './useMappingHandler';
-import { RESTKindContext, isCompatibleRESTMethods } from '../types';
+import { RESTKindContext, getCompatibleRESTMethodsIssues } from '../types';
 import {
     MappedMethod,
     MappingHandlerContext,
@@ -258,10 +258,11 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                 mappedTargets.push(targetMethod);
                 mappedSources.push(sourceMethod);
 
-                const isCompatible = isCompatibleRESTMethods(
+                const issues = getCompatibleRESTMethodsIssues(
                     { method: sourceMethod, entities: state.sourceContext.entities },
                     { method: targetMethod, entities: state.targetContext.entities }
                 );
+                const isCompatible = issues.length === 0;
 
                 if (!isCompatible) {
                     // Something changed and methods are no longer compatible
@@ -269,7 +270,10 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                         `Mapping for ${handlerContextClone.sourceName}.${sourceMethodId} and ${handlerContextClone.targetName}.${mapping.targetId} was invalid and was removed.`
                     );
 
-                    mappedMethods.push(createSourceOnlyMapping(sourceMethod), createTargetOnlyMapping(targetMethod));
+                    mappedMethods.push(
+                        createSourceOnlyMapping(sourceMethod, issues),
+                        createTargetOnlyMapping(targetMethod, issues)
+                    );
                     return;
                 }
 

@@ -40,8 +40,15 @@ export function getCompatibleRESTMethodsIssues(aContext: RESTMethodContext, bCon
     const errors = [];
     const a = aContext.method;
     const b = bContext.method;
-    if (!DSLCompatibilityHelper.isCompatible(a.returnType, b.returnType, aContext.entities, bContext.entities)) {
+    const returnTypeIssues = DSLCompatibilityHelper.getIssuesForTypes(
+        a.returnType,
+        b.returnType,
+        aContext.entities,
+        bContext.entities
+    );
+    if (returnTypeIssues.length > 0) {
         errors.push('Response types are not compatible');
+        errors.push(...returnTypeIssues);
     }
 
     const aArgs = a.parameters;
@@ -52,12 +59,12 @@ export function getCompatibleRESTMethodsIssues(aContext: RESTMethodContext, bCon
     }
 
     if (!aArgs || !bArgs) {
-        errors.push('Argument counts is not compatible');
+        errors.push('Argument counts must be equal');
         return errors;
     }
 
     if (aArgs.length !== bArgs.length) {
-        errors.push('Argument counts is not compatible');
+        errors.push('Argument counts must be equal');
         return errors;
     }
 
