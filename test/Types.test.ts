@@ -38,14 +38,7 @@ describe('Types', () => {
                     makeEditContext('test1', [], 'void'),
                     makeEditContext('test2', [], 'string')
                 )
-            ).toEqual(['Response types are not compatible']);
-
-            expect(
-                getCompatibleRESTMethodsIssues(
-                    makeEditContext('test1', [], 'void'),
-                    makeEditContext('test2', [], 'string')
-                )
-            ).toEqual(['Response types are not compatible']);
+            ).toEqual(['Response types are not compatible', 'Types are not both void']);
 
             expect(isCompatibleRESTMethods(makeEditContext('test1', [], 'string'), makeEditContext('test2', []))).toBe(
                 false
@@ -59,7 +52,6 @@ describe('Types', () => {
                 isCompatibleRESTMethods(makeEditContext('test1', [], 'string'), makeEditContext('test2', [], 'string'))
             ).toBe(true);
         });
-
 
         test('arguments with same entity name but different structure does not match', () => {
             expect(
@@ -119,7 +111,7 @@ describe('Types', () => {
                     makeEditContext('test1', [], 'User', ENTITIES),
                     makeEditContext('test2', [], 'User', ENTITIES_ALT)
                 )
-            ).toEqual(['Response types are not compatible']);
+            ).toEqual(['Response types are not compatible', 'Property not found: id']);
         });
 
         test('response type with same entity name and structure does match', () => {

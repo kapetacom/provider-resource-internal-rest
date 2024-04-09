@@ -59,12 +59,12 @@ export function getCompatibleRESTMethodsIssues(aContext: RESTMethodContext, bCon
     }
 
     if (!aArgs || !bArgs) {
-        errors.push('Argument counts is not compatible');
+        errors.push('Argument counts must be equal');
         return errors;
     }
 
     if (aArgs.length !== bArgs.length) {
-        errors.push('Argument counts is not compatible');
+        errors.push('Argument counts must be equal');
         return errors;
     }
 

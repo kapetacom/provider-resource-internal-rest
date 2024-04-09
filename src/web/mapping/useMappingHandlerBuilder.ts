@@ -5,7 +5,7 @@
 
 import { useEffect, useReducer } from 'react';
 import { useMappingHandler } from './useMappingHandler';
-import { RESTKindContext, getCompatibleRESTMethodsIssues, isCompatibleRESTMethods } from '../types';
+import { RESTKindContext, getCompatibleRESTMethodsIssues } from '../types';
 import {
     MappedMethod,
     MappingHandlerContext,
