@@ -9,7 +9,7 @@ import {
     DSLConverters,
     DSLMethod,
     DSLTypeHelper,
-    FormField,
+    FormField, InfoBox,
     MethodEditor,
     useFormContextField,
     useIsFormSubmitAttempted,
@@ -97,6 +97,11 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                 }}
                 className={'editor'}
             >
+                <InfoBox readMoreLink={'https://docs.kapeta.com/docs/rest-api-clients'}>
+                    The REST API is a collection of methods that can be called from the outside world. Each method
+                    represents a single endpoint that can be called with a specific HTTP verb. The API is defined using
+                    Kapeta's Domain Specific Language (DSL).
+                </InfoBox>
                 <MethodEditor
                     restMethods={true}
                     validTypes={validTypes}
