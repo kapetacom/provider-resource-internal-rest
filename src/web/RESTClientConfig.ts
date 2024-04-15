@@ -26,7 +26,7 @@ import {
 } from './RESTUtils';
 import { RESTEditorComponent } from './RESTEditorComponent';
 import APIToClientMapper from './mapping/APIToClientMapper';
-import InspectConnectionContent from './inspectors/InspectConnectionContent';
+import { InspectConnectionContent } from './inspectors/InspectConnectionContent';
 import { DSLConverters, DSLData } from '@kapeta/kaplang-core';
 import { toId } from './mapping/types';
 const packageJson = require('../../package.json');

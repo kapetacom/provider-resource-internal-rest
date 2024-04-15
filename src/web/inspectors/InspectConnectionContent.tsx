@@ -3,99 +3,69 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React, { Component } from 'react';
-
-import { observer } from 'mobx-react';
-
+import React, { useState, useCallback } from 'react';
 import { StackContainer, StackPage } from '@kapeta/ui-web-components';
-
-import InspectConnectionMethods from './InspectConnectionMethods';
-import InspectConnectionTraffic from './InspectConnectionTraffic';
-import InspectConnectionPayload from './InspectConnectionPayload';
+import { InspectConnectionMethods } from './InspectConnectionMethods';
+import { InspectConnectionTraffic } from './InspectConnectionTraffic';
+import { InspectConnectionPayload } from './InspectConnectionPayload';
 import type { ResourceTypeProviderInspectorProps, Traffic } from '@kapeta/ui-web-types';
 
-interface InspectConnectionContentState {
-    currentPageId: string;
-    selectedMethod?: string;
-    selectedPayload?: Traffic;
-}
+type StackPageId = 'methods' | 'traffic' | 'payload';
 
-@observer
-export default class InspectConnectionContent extends Component<
-    ResourceTypeProviderInspectorProps,
-    InspectConnectionContentState
-> {
-    constructor(props: ResourceTypeProviderInspectorProps) {
-        super(props);
-        this.state = {
-            currentPageId: 'methods',
-        };
-    }
+export const InspectConnectionContent = (props: ResourceTypeProviderInspectorProps) => {
+    const { mapping, trafficLines } = props;
 
-    private showTraffic(method: string) {
-        this.setState({ selectedMethod: method, currentPageId: 'traffic' });
-    }
+    const [selectedPageId, setSelectedPageId] = useState<StackPageId>('methods');
+    const [selectedMethod, setSelectedMethod] = useState<string | undefined>(undefined);
+    const [selectedPayload, setSelectedPayload] = useState<Traffic | undefined>(undefined);
 
-    private showPayload(traffic: Traffic) {
-        this.setState({ selectedPayload: traffic, currentPageId: 'payload' });
-    }
+    const showTraffic = useCallback((method: string) => {
+        setSelectedMethod(method);
+        setSelectedPageId('traffic');
+    }, []);
 
-    private onPageRequest(pageId: string) {
+    const showPayload = useCallback((traffic: Traffic) => {
+        setSelectedPayload(traffic);
+        setSelectedPageId('payload');
+    }, []);
+
+    const onPageRequest = useCallback((pageId: string) => {
         switch (pageId) {
             case 'methods':
-                this.setState({
-                    currentPageId: pageId,
-                    selectedPayload: undefined,
-                    selectedMethod: undefined,
-                });
+                setSelectedPageId(pageId);
+                setSelectedPayload(undefined);
+                setSelectedMethod(undefined);
                 break;
             case 'traffic':
-                this.setState({
-                    currentPageId: pageId,
-                    selectedPayload: undefined,
-                });
+                setSelectedPageId(pageId);
+                setSelectedPayload(undefined);
                 break;
-            case 'payloads':
+            case 'payload':
                 break;
         }
-    }
+    }, []);
 
-    render() {
-        return (
-            <StackContainer
-                currentPageId={this.state.currentPageId}
-                onPageRequest={(pageId: string) => this.onPageRequest(pageId)}
-            >
-                <StackPage id={'methods'} title={'Overview'}>
-                    <InspectConnectionMethods
-                        onMethodClick={(method: string) => {
-                            this.showTraffic(method);
-                        }}
-                        mapping={this.props.mapping}
-                        trafficLines={this.props.trafficLines}
+    return (
+        <StackContainer currentPageId={selectedPageId} onPageRequest={onPageRequest}>
+            <StackPage id={'methods'} title={'Overview'}>
+                <InspectConnectionMethods onMethodClick={showTraffic} mapping={mapping} trafficLines={trafficLines} />
+            </StackPage>
+
+            {selectedMethod && (
+                <StackPage id={'traffic'} title={'Traffic'}>
+                    <InspectConnectionTraffic
+                        trafficLines={trafficLines.filter((traffic) => traffic.providerMethodId === selectedMethod)}
+                        providerMethod={selectedMethod}
+                        onTrafficClick={showPayload}
                     />
                 </StackPage>
+            )}
 
-                {this.state.selectedMethod && (
-                    <StackPage id={'traffic'} title={'Traffic'}>
-                        <InspectConnectionTraffic
-                            trafficLines={this.props.trafficLines.filter(
-                                (traffic) => traffic.providerMethodId === this.state.selectedMethod
-                            )}
-                            providerMethod={this.state.selectedMethod}
-                            onTrafficClick={(traffic: Traffic) => {
-                                this.showPayload(traffic);
-                            }}
-                        />
-                    </StackPage>
-                )}
-
-                {this.state.selectedPayload && (
-                    <StackPage id={'payload'} title={'Payload'}>
-                        <InspectConnectionPayload traffic={this.state.selectedPayload} />
-                    </StackPage>
-                )}
-            </StackContainer>
-        );
-    }
-}
+            {selectedPayload && (
+                <StackPage id={'payload'} title={'Payload'}>
+                    <InspectConnectionPayload traffic={selectedPayload} />
+                </StackPage>
+            )}
+        </StackContainer>
+    );
+};
