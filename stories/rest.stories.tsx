@@ -4,24 +4,20 @@
  */
 
 import React from 'react';
-import {
-    ConnectionMethodMappingType,
-    ConnectionMethodsMapping,
-    Traffic,
-} from '@kapeta/ui-web-types';
+import { ConnectionMethodMappingType, ConnectionMethodsMapping, Traffic } from '@kapeta/ui-web-types';
 
-import {BlockDefinition, EntityType} from '@kapeta/schemas';
+import { BlockDefinition, EntityType } from '@kapeta/schemas';
 
-import {RESTEditorComponent} from '../src/web/RESTEditorComponent';
-import {RESTResource} from '../src/web/types';
+import { RESTEditorComponent } from '../src/web/RESTEditorComponent';
+import { RESTResource } from '../src/web/types';
 import RestMethodView from '../src/web/RestMethodView';
 import APIToClientMapper from '../src/web/mapping/APIToClientMapper';
-import InspectConnectionContent from '../src/web/inspectors/InspectConnectionContent';
-import {FormContainer, ToastContainer} from '@kapeta/ui-web-components';
+import { InspectConnectionContent } from '../src/web/inspectors/InspectConnectionContent';
+import { FormContainer, ToastContainer } from '@kapeta/ui-web-components';
 import '@kapeta/ui-web-components/styles/index.less';
 import './stories.less';
-import {DSLControllerMethod} from "../src/web/mapping/types";
-import {DSLConverters, DSLData, DSLDataTypeProperty, DSLEntityType, KaplangWriter} from "@kapeta/kaplang-core";
+import { DSLControllerMethod } from '../src/web/mapping/types';
+import { DSLConverters, DSLData, DSLDataTypeProperty, DSLEntityType, KaplangWriter } from '@kapeta/kaplang-core';
 
 const API_KIND = 'kapeta/resource-type-rest-api';
 const CLIENT_KIND = 'kapeta/resource-type-rest-client';
@@ -80,7 +76,7 @@ const API_ENTITIES: DSLData[] = [
     {
         type: DSLEntityType.DATATYPE,
         name: 'SimpleTask',
-        properties:Object.entries( {
+        properties: Object.entries({
             id: {
                 type: 'string',
             },
@@ -119,96 +115,116 @@ const CLIENT_ENTITIES: DSLData[] = [
 const getTaskMethod: DSLControllerMethod = {
     type: DSLEntityType.METHOD,
     name: 'getTaskMethod',
-    annotations: [{
-        type: '@GET',
-        arguments: ['/tasks/{id}']
-    }],
+    annotations: [
+        {
+            type: '@GET',
+            arguments: ['/tasks/{id}'],
+        },
+    ],
     description: 'Get a task by id',
     returnType: 'Task',
     parameters: [
         {
             name: 'id',
-            annotations: [{
-                type: '@Path',
-            }],
+            annotations: [
+                {
+                    type: '@Path',
+                },
+            ],
             type: 'string',
-        }
-    ]
+        },
+    ],
 };
 
 const addTaskMethod: DSLControllerMethod = {
     type: DSLEntityType.METHOD,
     name: 'addTaskMethod',
-    annotations: [{
-        type: '@POST',
-        arguments: ['/tasks/{id}']
-    }],
+    annotations: [
+        {
+            type: '@POST',
+            arguments: ['/tasks/{id}'],
+        },
+    ],
     description: 'Adds a task to the system',
     returnType: 'void',
     parameters: [
         {
             name: 'id',
-            annotations: [{
-                type: '@Path',
-            }],
+            annotations: [
+                {
+                    type: '@Path',
+                },
+            ],
             type: 'string',
         },
         {
             name: 'task',
-            annotations: [{
-                type: '@Body',
-            }],
+            annotations: [
+                {
+                    type: '@Body',
+                },
+            ],
             type: 'Task',
-        }
-    ]
+        },
+    ],
 };
 
 const addSimpleTaskMethod: DSLControllerMethod = {
     type: DSLEntityType.METHOD,
     name: 'addSimpleTaskMethod',
-    annotations: [{
-        type: '@POST',
-        arguments: ['/tasks/{id}/simple']
-    }],
+    annotations: [
+        {
+            type: '@POST',
+            arguments: ['/tasks/{id}/simple'],
+        },
+    ],
 
     description: 'Adds a simple task to the system',
     returnType: 'void',
     parameters: [
         {
             name: 'id',
-            annotations: [{
-                type: '@Path',
-            }],
+            annotations: [
+                {
+                    type: '@Path',
+                },
+            ],
             type: 'string',
         },
         {
             name: 'task',
-            annotations: [{
-                type: '@Body',
-            }],
+            annotations: [
+                {
+                    type: '@Body',
+                },
+            ],
             type: 'SimpleTask',
-        }
-    ]
+        },
+    ],
 };
 
 const deleteTaskMethod: DSLControllerMethod = {
     type: DSLEntityType.METHOD,
     name: 'deleteTaskMethod',
-    annotations: [{
-        type: '@DELETE',
-        arguments: ['/tasks/{id}']
-    }],
+    annotations: [
+        {
+            type: '@DELETE',
+            arguments: ['/tasks/{id}'],
+        },
+    ],
     returnType: 'void',
     description: 'Deletes a task from the system',
     parameters: [
         {
             name: 'id',
-            annotations: [{
-                type: '@Path',
-            }],
+            annotations: [
+                {
+                    type: '@Path',
+                },
+            ],
             type: 'string',
-        }
-    ]
+        },
+    ],
 };
 
 const RESTApiResourceEmpty: RESTResource = {
@@ -233,21 +249,11 @@ const RESTApiResource: RESTResource = {
         port: {
             type: 'rest',
         },
-        methods: DSLConverters.toSchemaMethods([
-            getTaskMethod,
-            addTaskMethod,
-            addSimpleTaskMethod,
-            deleteTaskMethod,
-        ]),
+        methods: DSLConverters.toSchemaMethods([getTaskMethod, addTaskMethod, addSimpleTaskMethod, deleteTaskMethod]),
         source: {
             type: 'kaplang',
             version: '1.0.0',
-            value: KaplangWriter.write([
-                getTaskMethod,
-                addTaskMethod,
-                addSimpleTaskMethod,
-                deleteTaskMethod,
-            ])
+            value: KaplangWriter.write([getTaskMethod, addTaskMethod, addSimpleTaskMethod, deleteTaskMethod]),
         },
     },
 };
@@ -265,15 +271,10 @@ const RESTApiResourceController: RESTResource = {
             {
                 type: DSLEntityType.CONTROLLER,
                 name: 'Tasks',
-                methods: [
-                    getTaskMethod,
-                    addTaskMethod,
-                    addSimpleTaskMethod,
-                    deleteTaskMethod,
-                ],
+                methods: [getTaskMethod, addTaskMethod, addSimpleTaskMethod, deleteTaskMethod],
                 path: '/tasks',
                 namespace: 'Tasks',
-            }
+            },
         ]),
         source: {
             type: 'kaplang',
@@ -282,17 +283,12 @@ const RESTApiResourceController: RESTResource = {
                 {
                     type: DSLEntityType.CONTROLLER,
                     name: 'Tasks',
-                    methods: [
-                        getTaskMethod,
-                        addTaskMethod,
-                        addSimpleTaskMethod,
-                        deleteTaskMethod,
-                    ],
+                    methods: [getTaskMethod, addTaskMethod, addSimpleTaskMethod, deleteTaskMethod],
                     path: '/tasks',
                     namespace: 'Tasks',
-                }
-            ])
-        }
+                },
+            ]),
+        },
     },
 };
 
@@ -305,17 +301,11 @@ const RESTClientResource: RESTResource = {
         port: {
             type: 'rest',
         },
-        methods: DSLConverters.toSchemaMethods([
-            addTaskMethod,
-            deleteTaskMethod,
-        ]),
+        methods: DSLConverters.toSchemaMethods([addTaskMethod, deleteTaskMethod]),
         source: {
             type: 'kaplang',
             version: '1.0.0',
-            value: KaplangWriter.write([
-                addTaskMethod,
-                deleteTaskMethod,
-            ])
+            value: KaplangWriter.write([addTaskMethod, deleteTaskMethod]),
         },
     },
 };
@@ -361,7 +351,10 @@ const trafficLines: Traffic[] = [
         },
         response: {
             code: 200,
-            headers: {},
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: '{"id": "1", "description": "A task", "state": "PENDING"}',
         },
     },
     {
@@ -449,9 +442,7 @@ export const MethodViewController = () => (
     />
 );
 
-export const MethodViewCompact = () => (
-    <RestMethodView compact={true} method={getTaskMethod} />
-);
+export const MethodViewCompact = () => <RestMethodView compact={true} method={getTaskMethod} />;
 
 export const APIToClientMapperViewProblem = () => (
     <div style={{ padding: '25px', width: '750px', height: '100%' }}>
