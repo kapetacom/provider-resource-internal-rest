@@ -4,7 +4,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { Traffic } from '@kapeta/ui-web-types';
+import { HTTPRequest, Traffic } from '@kapeta/ui-web-types';
 import byteSize from 'byte-size';
 import prettyMilliseconds from 'pretty-ms';
 import { Palette, Typography } from '@mui/material';
@@ -44,15 +44,15 @@ export const asByte = (traffic: Traffic, fallback: ReactNode = <NoValue />): Rea
 };
 
 /**
- * This function extracts the content-type header from the traffic object.
- * @example asType({ response: { headers: { 'content-type': 'application/json' } }) // application/json
+ * This function extracts the content-type header from a headers object.
+ * @example getContentType({ 'content-type': 'application/json; charset=utf-8' }) // application/json
  */
-export const asType = (traffic: Traffic, fallback: ReactNode = <NoValue text="Unknown" />): ReactNode => {
-    if (traffic.response && traffic.response.headers && traffic.response.headers['content-type']) {
-        return traffic.response.headers['content-type'];
+export const getContentType = (headers: HTTPRequest['headers']): string | undefined => {
+    const contentType = headers['content-type'] || headers['Content-Type'];
+    if (contentType) {
+        return contentType.split(';')[0]; // Split and return the first element (MIME type)
     }
-
-    return fallback;
+    return undefined; // Return undefined if the content-type header is not present
 };
 
 /**

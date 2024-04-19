@@ -5,10 +5,10 @@
 
 import React from 'react';
 import { httpStatusPhrase } from '@kapeta/ui-web-utils';
-import { HTTPRequest, Traffic } from '@kapeta/ui-web-types';
+import { Traffic } from '@kapeta/ui-web-types';
 import { Box, Divider, Stack, Typography } from '@mui/material';
 import { PayloadPreview } from './PayloadPreview';
-import { asByte } from '../helpers';
+import { asByte, getContentType } from '../helpers';
 import { useUserAgent } from '@kapeta/ui-web-components';
 import { PayloadKeyValueList } from './PayloadKeyValueList';
 import { PayloadAccordion } from './PayloadAccordion';
@@ -18,14 +18,6 @@ import { PayloadCopyButton } from './PayloadCopyButton';
 interface InspectTrafficPayloadProps {
     traffic: Traffic;
 }
-
-const getContentType = (headers: HTTPRequest['headers']): string | undefined => {
-    const contentType = headers['content-type'] || headers['Content-Type'];
-    if (contentType) {
-        return contentType.split(';')[0]; // Split and return the first element (MIME type)
-    }
-    return undefined; // Return undefined if the content-type header is not present
-};
 
 export const InspectConnectionPayload = (props: InspectTrafficPayloadProps) => {
     const { traffic } = props;
