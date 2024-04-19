@@ -47,13 +47,25 @@ export const InspectConnectionBreadcrumbs = (props: InspectConnectionBreadcrumbs
                 return (
                     <Box
                         key={index}
-                        component={'span'}
                         sx={{
+                            display: 'inline-block',
                             fontSize: '0.875rem',
                             textDecoration: 'none',
+                            '&:focus': {
+                                color: 'primary.main',
+                            },
                             ...hoverStyle,
                         }}
                         onClick={onClick}
+                        // Accessibility
+                        role="button"
+                        tabIndex={isLast ? undefined : 0}
+                        onKeyUp={(event) => {
+                            if ((event.key === 'Enter' || event.key === ' ') && onClick) {
+                                onClick();
+                            }
+                        }}
+                        aria-current={isLast ? 'page' : undefined}
                     >
                         {breadcrumb.name}
                     </Box>
