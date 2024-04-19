@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 export type InspectConnectionPageType = 'methods' | 'requests' | 'payload';
 
 export interface ConnectionMethod {
