@@ -14,7 +14,6 @@ import RestMethodView from '../src/web/RestMethodView';
 import APIToClientMapper from '../src/web/mapping/APIToClientMapper';
 import { InspectConnectionContent } from '../src/web/inspectors/InspectConnectionContent';
 import { FormContainer, ToastContainer } from '@kapeta/ui-web-components';
-import '@kapeta/ui-web-components/styles/index.less';
 import './stories.less';
 import { DSLControllerMethod } from '../src/web/mapping/types';
 import { DSLConverters, DSLData, DSLDataTypeProperty, DSLEntityType, KaplangWriter } from '@kapeta/kaplang-core';
