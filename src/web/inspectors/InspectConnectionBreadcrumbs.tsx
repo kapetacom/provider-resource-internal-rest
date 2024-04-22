@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Box, Stack, SxProps } from '@mui/material';
+import { Stack, SxProps, Typography } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 export type Breadcrumb = {
@@ -45,12 +45,12 @@ export const InspectConnectionBreadcrumbs = (props: InspectConnectionBreadcrumbs
                       };
 
                 return (
-                    <Box
+                    <Typography
                         key={index}
+                        variant="body2"
                         sx={{
                             display: 'inline-block',
                             fontSize: '0.875rem',
-                            textDecoration: 'none',
                             '&:focus': {
                                 color: 'primary.main',
                             },
@@ -68,7 +68,7 @@ export const InspectConnectionBreadcrumbs = (props: InspectConnectionBreadcrumbs
                         aria-current={isLast ? 'page' : undefined}
                     >
                         {breadcrumb.name}
-                    </Box>
+                    </Typography>
                 );
             })}
         </Stack>
