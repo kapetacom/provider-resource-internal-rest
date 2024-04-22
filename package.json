@@ -1,6 +1,6 @@
 {
     "name": "@kapeta/resource-type-rest",
-    "version": "0.0.0-local",
+    "version": "local",
     "description": "Provides REST API and Client resource type to Kapeta",
     "keywords": [
         "kapeta",
