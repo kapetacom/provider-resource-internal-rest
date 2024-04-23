@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { HTTPRequest, Traffic } from '@kapeta/ui-web-types';
 
 type CreateTrafficOptions = {

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import React from 'react';
 import { ConnectionMethodsMapping, ConnectionMethodMappingType, Traffic } from '@kapeta/ui-web-types';
 import { InspectConnectionContent } from '../src/web/inspectors/InspectConnectionContent';

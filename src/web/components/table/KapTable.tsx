@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import React, { useMemo, useState } from 'react';
 import { Order, KapTableBodyRow, KapTableColDef } from './types';
 import { Table as MuiTable, TableContainer, TableHead as MuiTableHead, TableBody as MuiTableBody } from '@mui/material';

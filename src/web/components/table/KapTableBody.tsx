@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import React from 'react';
 import { TableBody, TableCell, TableRow } from '@mui/material';
 import { KapTableBodyRow, KapTableColDef } from './types';

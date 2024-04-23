@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { RowComparator, KapTableBodyRow, KapTableColDef, Order } from './types';
 
 const createRowDataComparator =

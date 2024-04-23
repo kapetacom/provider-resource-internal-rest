@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import { ReactNode } from 'react';
 
 export type Order = 'asc' | 'desc';
