@@ -57,16 +57,6 @@ export const KapTable = <Data extends { id: string }>(props: KapTableProps<Data>
                     <KapTableBody colDefs={colDefs} rows={kapTableRows} onRowClick={onRowClick} {...tableBodyProps} />
                 )}
             </MuiTable>
-            <pre>
-                {JSON.stringify(
-                    {
-                        order,
-                        orderBy,
-                    },
-                    null,
-                    2
-                )}
-            </pre>
         </TableContainer>
     );
 };
