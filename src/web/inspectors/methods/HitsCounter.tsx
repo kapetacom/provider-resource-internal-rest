@@ -78,6 +78,7 @@ export const HitsCounter = (props: HitsCounterProps) => {
                         borderRadius: '50%',
                         backgroundColor: getHttpStatusCodeColor(statusCode, theme.palette),
                         animation: `${animationRipple} 1s ease-out forwards`,
+                        pointerEvents: 'none',
                     })}
                     onAnimationEnd={() => handleAnimationEnd(number)}
                 />

@@ -35,7 +35,11 @@ export interface KapTableColDef<Data> {
      * Optional comparator function used when sorting the rows based on this column. If not
      * provided, a default comparator will be used.
      */
-    comparator: RowComparator<Data>; // | false | 'date' | 'number' | 'string';
+    comparator: RowComparator<Data>;
+    /**
+     * Whether the column is sorted as default and the order of the sort.
+     */
+    sort?: Order;
 }
 
 export interface KapTableBodyCell {

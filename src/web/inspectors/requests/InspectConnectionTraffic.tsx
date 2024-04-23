@@ -59,6 +59,7 @@ export const InspectConnectionTraffic = (props: InspectMethodTrafficProps) => {
                 comparator: (a, b) => {
                     return a.created - b.created;
                 },
+                sort: 'desc',
             },
             {
                 id: 'created',
@@ -84,7 +85,6 @@ export const InspectConnectionTraffic = (props: InspectMethodTrafficProps) => {
                 stickyHeader: true,
                 'aria-label': `Requests for the ${providerMethod} method`,
             }}
-            defaultOrderBy="timestamp"
             onRowClick={(traffic, index) => onTrafficClick(traffic, index + 1)}
         />
     );

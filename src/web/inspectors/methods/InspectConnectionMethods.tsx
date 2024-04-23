@@ -30,6 +30,7 @@ export const InspectConnectionMethods = (props: InspectConnectionProps) => {
                 numeric: false,
                 valueRenderer: (method) => method.providerName,
                 comparator: (a, b) => a.providerName.localeCompare(b.providerName),
+                sort: 'asc',
             },
             {
                 id: 'consumerName',
@@ -86,7 +87,6 @@ export const InspectConnectionMethods = (props: InspectConnectionProps) => {
                 stickyHeader: true,
                 'aria-label': 'Methods on the connection',
             }}
-            defaultOrderBy="timestamp"
             onRowClick={(method) => onMethodClick(method.providerName)}
         />
     );

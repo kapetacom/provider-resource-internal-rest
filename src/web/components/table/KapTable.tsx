@@ -14,7 +14,6 @@ export interface KapTableProps<Data> {
     colDefs: KapTableColDef<Data>[];
     rows: Data[];
     onRowClick?: (rowData: Data, rowIndex: number) => void;
-    defaultOrderBy: string;
     tableContainerProps?: React.ComponentProps<typeof TableContainer>;
     tableProps?: React.ComponentProps<typeof MuiTable>;
     tableHeadProps?: React.ComponentProps<typeof MuiTableHead>;
@@ -22,19 +21,12 @@ export interface KapTableProps<Data> {
 }
 
 export const KapTable = <Data extends { id: string }>(props: KapTableProps<Data>) => {
-    const {
-        colDefs,
-        rows,
-        onRowClick,
-        defaultOrderBy,
-        tableContainerProps,
-        tableProps,
-        tableHeadProps,
-        tableBodyProps,
-    } = props;
+    const { colDefs, rows, onRowClick, tableContainerProps, tableProps, tableHeadProps, tableBodyProps } = props;
 
-    const [order, setOrder] = useState<Order>('asc');
-    const [orderBy, setOrderBy] = useState<string>(defaultOrderBy);
+    const colDefDefaultSort = colDefs.find((colDef) => colDef.sort);
+
+    const [orderBy, setOrderBy] = useState<string>(colDefDefaultSort?.id ?? colDefs[0].id); // Default to the first column
+    const [order, setOrder] = useState<Order>(colDefDefaultSort?.sort ?? 'asc'); // Default to ascending order
 
     const handleRequestSort = (_event: React.MouseEvent<unknown>, property: string) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -49,7 +41,7 @@ export const KapTable = <Data extends { id: string }>(props: KapTableProps<Data>
     }, [rows, comparator]);
 
     return (
-        <TableContainer {...tableContainerProps}>
+        <TableContainer {...tableContainerProps} sx={{ ...tableContainerProps?.sx, overflow: 'visible' }}>
             <MuiTable {...tableProps}>
                 <KapTableHead
                     {...tableHeadProps}
