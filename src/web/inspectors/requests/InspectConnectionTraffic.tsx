@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Traffic } from '@kapeta/ui-web-types';
 import { asByte, asDuration } from '../helpers';
-import { Table, TableBody, TableHead, TableCell, TableRow } from '@mui/material';
 import { RequestStatusCode } from './RequestStatusCode';
 import { DateDisplay } from '@kapeta/ui-web-components';
+import { KapTable } from '../../components/table/KapTable';
+import { KapTableColDef } from '../../components/table/types';
 
 interface InspectMethodTrafficProps {
     trafficLines: Traffic[];
@@ -19,43 +20,72 @@ interface InspectMethodTrafficProps {
 export const InspectConnectionTraffic = (props: InspectMethodTrafficProps) => {
     const { trafficLines, providerMethod, onTrafficClick } = props;
 
+    const colDefs: KapTableColDef<Traffic>[] = useMemo(
+        () => [
+            {
+                id: 'responseCode',
+                label: 'Status',
+                numeric: false,
+                valueRenderer: (traffic) => <RequestStatusCode code={traffic.response?.code} />,
+                comparator: (a, b) => {
+                    const aCode = a.response?.code || 0;
+                    const bCode = b.response?.code || 0;
+                    return aCode - bCode;
+                },
+            },
+            {
+                id: 'contentLength',
+                label: 'Size',
+                numeric: true,
+                valueRenderer: (traffic) => asByte(traffic),
+                comparator: (a, b) => {
+                    const aSize = a.response?.headers['content-length'] || '0';
+                    const bSize = b.response?.headers['content-length'] || '0';
+                    return parseInt(aSize) - parseInt(bSize);
+                },
+            },
+            {
+                id: 'duration',
+                label: 'Timestamp',
+                numeric: true,
+                valueRenderer: (traffic) => (
+                    <DateDisplay
+                        key={traffic.created}
+                        date={traffic.created}
+                        allowRelative={false}
+                        format={{ timeStyle: 'medium' }}
+                    />
+                ),
+                comparator: (a, b) => {
+                    return a.created - b.created;
+                },
+                sort: 'desc',
+            },
+            {
+                id: 'created',
+                label: 'Time',
+                numeric: true,
+                valueRenderer: (traffic) => asDuration(traffic),
+                comparator: (a, b) => {
+                    const aDuration = a.ended - a.created;
+                    const bDuration = b.ended - b.created;
+                    return aDuration - bDuration;
+                },
+            },
+        ],
+        []
+    );
+
     return (
-        <Table size="small" aria-label={`Requests for the ${providerMethod} method}`}>
-            <TableHead sx={{ '.MuiTableCell-head': { fontWeight: 500 } }}>
-                <TableRow>
-                    <TableCell>Status</TableCell>
-                    <TableCell align="right">Size</TableCell>
-                    <TableCell align="right">Timestamp</TableCell>
-                    <TableCell align="right">Time</TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {trafficLines.map((traffic, index) => {
-                    return (
-                        <TableRow
-                            key={index}
-                            onClick={() => onTrafficClick(traffic, index + 1)}
-                            sx={{
-                                cursor: 'pointer',
-                                '&:hover': {
-                                    backgroundColor: '#f5f5f5',
-                                },
-                            }}
-                        >
-                            <TableCell>{<RequestStatusCode code={traffic.response?.code} />}</TableCell>
-                            <TableCell align="right">{asByte(traffic)}</TableCell>
-                            <TableCell align="right">
-                                <DateDisplay
-                                    date={traffic.created}
-                                    allowRelative={false}
-                                    format={{ timeStyle: 'short' }}
-                                />
-                            </TableCell>
-                            <TableCell align="right">{asDuration(traffic)}</TableCell>
-                        </TableRow>
-                    );
-                })}
-            </TableBody>
-        </Table>
+        <KapTable
+            colDefs={colDefs}
+            rows={trafficLines}
+            tableProps={{
+                size: 'small',
+                stickyHeader: true,
+                'aria-label': `Requests for the ${providerMethod} method`,
+            }}
+            onRowClick={(traffic, index) => onTrafficClick(traffic, index + 1)}
+        />
     );
 };
