@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
 import React, { useCallback, useId, useRef, useState } from 'react';
 import { KapTableColDef } from './types';
 import FilterListIcon from '@mui/icons-material/FilterList';

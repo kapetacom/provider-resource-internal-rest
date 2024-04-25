@@ -1,5 +1,10 @@
-import { List, ListItem, ListItemIcon, Checkbox, ListItemText, ListItemButton } from '@mui/material';
-import React, { ReactNode, useMemo } from 'react';
+/**
+ * Copyright 2024 Kapeta Inc.
+ * SPDX-License-Identifier: MIT
+ */
+
+import { List, ListItem, Checkbox, ListItemText, ListItemButton } from '@mui/material';
+import React, { useMemo } from 'react';
 
 export const statusCodeRegExpMap = {
     '2xx': /^2\d\d$/,
