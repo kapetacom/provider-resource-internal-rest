@@ -9,6 +9,8 @@ export type Order = 'asc' | 'desc';
 
 export type RowComparator<Data> = (a: Data, b: Data) => number;
 
+export type RowFilter<Data> = (data: Data, filterValue: unknown) => boolean;
+
 export interface KapTableColDef<Data> {
     /**
      * Unique identifier for the column.
@@ -32,14 +34,23 @@ export interface KapTableColDef<Data> {
      */
     valueRenderer: (value: Data) => ReactNode;
     /**
-     * Optional comparator function used when sorting the rows based on this column. If not
-     * provided, a default comparator will be used.
+     * Comparator function used when sorting the rows based on this column.
      */
     comparator: RowComparator<Data>;
     /**
-     * Whether the column is sorted as default and the order of the sort.
+     * Whether the column is sorted as default and the order of the sort. Only one column should have
+     * this property set.
      */
     sort?: Order;
+    /**
+     * Optional filter function used when filtering the rows based on this column.
+     */
+    filter?: RowFilter<Data>;
+    /**
+     * Optional filter renderer function used to render the filter UI for this column. If filter is
+     * provided, filterRenderer must also be provided.
+     */
+    filterRenderer?: (onFilterChange: (filterBy: string, value: unknown) => void, filterValue: unknown) => ReactNode;
 }
 
 export interface KapTableBodyCell {

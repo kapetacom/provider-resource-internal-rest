@@ -10,6 +10,7 @@ import { RequestStatusCode } from './RequestStatusCode';
 import { DateDisplay } from '@kapeta/ui-web-components';
 import { KapTable } from '../../components/table/KapTable';
 import { KapTableColDef } from '../../components/table/types';
+import { StatusCode, StatusCodeFilter, statusCodeRegExpMap } from './StatusCodeFilter';
 
 interface InspectMethodTrafficProps {
     trafficLines: Traffic[];
@@ -32,7 +33,38 @@ export const InspectConnectionTraffic = (props: InspectMethodTrafficProps) => {
                     const bCode = b.response?.code || 0;
                     return aCode - bCode;
                 },
-            },
+                filter: (traffic, filterValue) => {
+                    if (Array.isArray(filterValue)) {
+                        if (filterValue.length === 0) {
+                            // No filter value means that all status codes are accepted
+                            return true;
+                        }
+                        const responseCode = traffic.response?.code;
+                        if (responseCode) {
+                            // Check if the response code matches any of the filter values
+                            return filterValue.some((filterCode) => {
+                                const regExp = statusCodeRegExpMap[filterCode as StatusCode];
+                                return regExp.test(responseCode.toString());
+                            });
+                        }
+                        return false;
+                    } else {
+                        console.warn(
+                            'Invalid filter value:',
+                            filterValue,
+                            ". Expected an array of status codes, like e.g. ['4xx','5xx']."
+                        );
+                    }
+                    return false;
+                },
+                filterRenderer: (onFilterChange, filterValue) => (
+                    <StatusCodeFilter
+                        filterBy="responseCode"
+                        filterValue={filterValue as StatusCode[]}
+                        onFilterChange={onFilterChange}
+                    />
+                ),
+            } satisfies KapTableColDef<Traffic>,
             {
                 id: 'contentLength',
                 label: 'Size',
@@ -43,7 +75,7 @@ export const InspectConnectionTraffic = (props: InspectMethodTrafficProps) => {
                     const bSize = b.response?.headers['content-length'] || '0';
                     return parseInt(aSize) - parseInt(bSize);
                 },
-            },
+            } satisfies KapTableColDef<Traffic>,
             {
                 id: 'duration',
                 label: 'Timestamp',
@@ -60,7 +92,7 @@ export const InspectConnectionTraffic = (props: InspectMethodTrafficProps) => {
                     return a.created - b.created;
                 },
                 sort: 'desc',
-            },
+            } satisfies KapTableColDef<Traffic>,
             {
                 id: 'created',
                 label: 'Time',
@@ -71,7 +103,7 @@ export const InspectConnectionTraffic = (props: InspectMethodTrafficProps) => {
                     const bDuration = b.ended - b.created;
                     return aDuration - bDuration;
                 },
-            },
+            } satisfies KapTableColDef<Traffic>,
         ],
         []
     );
