@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Order, KapTableBodyRow, KapTableColDef } from './types';
 import { Table as MuiTable, TableContainer, TableHead as MuiTableHead, TableBody as MuiTableBody } from '@mui/material';
 import { KapTableHead } from './KapTableHead';
@@ -35,10 +35,10 @@ export const KapTable = <Data extends { id: string }>(props: KapTableProps<Data>
 
     const [filterBy, setFilterBy] = useState<string | undefined>();
     const [filterValue, setFilterValue] = useState<unknown>();
-    const onFilter = (property: string, value: unknown) => {
+    const onFilter = useCallback((property: string, value: unknown) => {
         setFilterBy(property);
         setFilterValue(value);
-    };
+    }, []);
 
     const comparator = useMemo(() => getComparator(colDefs, order, orderBy), [colDefs, order, orderBy]);
 
