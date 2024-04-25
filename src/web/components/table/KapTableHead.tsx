@@ -52,7 +52,14 @@ export const KapTableHead = <Data,>(props: KapTableHeadProps<Data>) => {
                                 },
                             }}
                         >
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    flexDirection: colDef.numeric ? 'row-reverse' : 'row',
+                                }}
+                            >
                                 <MuiTableSortLabel
                                     active={orderBy === colDef.id}
                                     direction={orderBy === colDef.id ? order : 'asc'}
