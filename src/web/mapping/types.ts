@@ -57,7 +57,7 @@ export interface MappedMethodInfo extends DSLControllerMethod {
 export interface MappingHandlerContext {
     clientWasEmpty: boolean;
     serverWasEmpty: boolean;
-    issues: string[];
+    entityIssues: string[];
     warnings: string[];
     targetName: string;
     sourceName: string;

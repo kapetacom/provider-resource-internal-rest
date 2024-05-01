@@ -62,7 +62,7 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
             const handlerContextClone = cloneDeep(state.handlerContext);
             handlerContextClone.sourceName = state.sourceContext.resource.metadata.name;
             handlerContextClone.targetName = state.targetContext.resource.metadata.name;
-            handlerContextClone.issues = determineEntityIssues(state.sourceContext, state.targetContext);
+            handlerContextClone.entityIssues = determineEntityIssues(state.sourceContext, state.targetContext);
             return {
                 value: state.value,
                 sourceContext: state.sourceContext,
@@ -228,7 +228,7 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
             const { value } = action.payload;
 
             const handlerContextClone: MappingHandlerContext = {
-                issues: [],
+                entityIssues: [],
                 warnings: [],
                 clientWasEmpty: false,
                 serverWasEmpty: false,
@@ -326,7 +326,7 @@ export const useMappingHandlerBuilder = (
             serverWasEmpty: false,
             sourceName: '',
             targetName: '',
-            issues: [],
+            entityIssues: [],
             warnings: [],
         },
         value,

@@ -4,44 +4,10 @@
 .rest-resource-to-client-mapper {
     .no-select();
 
-    .source,
-    .target {
-        line-height: 32px;
-        display: flex;
-        min-width: 80px;
-        padding: 0 5px;
-        flex: 1;
-        border: 1px solid #efefef;
-        background-color: white;
-        height: 32px;
-        box-sizing: border-box;
-
-        .rest-method-erasure {
-            flex: 1;
-        }
-
-        > .actions {
-            max-width: 30px;
-            min-width: 30px;
-        }
-    }
-
     .method-mapping,
     .header {
         display: flex;
-        line-height: 32px;
         margin: 5px 0;
-
-        > .mapping-seperator {
-            max-width: 22px;
-            min-width: 22px;
-            text-align: center;
-
-            i {
-                font-size: 14px;
-                color: @blue-dark;
-            }
-        }
     }
 
     .method-mapping {
@@ -86,15 +52,8 @@
         }
     }
 
-    .header {
-        line-height: 44px;
-        font-size: 16px;
-        font-weight: 600;
-    }
-
     .draggable {
         cursor: move;
-        flex: 1;
         font-size: 14px;
 
         &.dragging-source {
@@ -105,8 +64,7 @@
             }
         }
 
-        &.dragging-handle,
-        &:hover {
+        &.dragging-handle{
             background-color: @gray-light;
         }
 
@@ -126,14 +84,6 @@
     }
 
     .button {
-        &.friendly {
-            color: @green-dark;
-
-            &:hover {
-                color: lighten(@green-dark, 20%);
-            }
-        }
-
         &.danger {
             color: @red;
             &:hover {

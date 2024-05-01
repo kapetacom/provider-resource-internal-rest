@@ -8,6 +8,8 @@ import React, { Component } from 'react';
 import './RestMethodView.less';
 import { DSLTypeHelper, RESTMethodReader } from '@kapeta/kaplang-core';
 import { DSLControllerMethod, toId } from './mapping/types';
+import { Tooltip } from '@kapeta/ui-web-components';
+import { Box } from '@mui/material';
 
 interface RestMethodViewProps {
     method: DSLControllerMethod;
@@ -21,10 +23,9 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
         let methodName = toId(method);
 
         const reader = new RESTMethodReader(method);
-
-        return (
+        const body = (
             <div className={'rest-method-erasure' + (compact ? ' compact' : '')}>
-                <div className={'method'} title={method.description}>
+                <div className={'method'}>
                     <span className={'method-name'}>{methodName}</span>
                     <span className={'method-definition-start'}>(</span>
                     <span className={'method-arguments'}>
@@ -50,6 +51,42 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
                     <span className={'http-path'}>{reader.path}</span>
                 </div>
             </div>
+        );
+
+        return (
+            <Tooltip
+                arrow={false}
+                title={
+                    <>
+                        {method.description ? (
+                            <Box sx={{ fontSize: '12px', whiteSpace: 'pre', pl: 2, pb: 1, opacity: 0.6 }}>
+                                {'/**\n'}
+                                {method.description
+                                    .split('\n')
+                                    .map((s) => ' * ' + s)
+                                    .join('\n')}
+                                {'\n */'}
+                            </Box>
+                        ) : null}
+                        {body}
+                    </>
+                }
+                enterDelay={1000}
+                enterNextDelay={300}
+                placement="bottom-start"
+                PopperProps={{
+                    disablePortal: true,
+                }}
+                sx={{
+                    '& .MuiTooltip-tooltip': { overflow: 'visible', maxWidth: 'none', font: 'inherit', px: 0, pb: 2 },
+                    '& .method': {
+                        overflowX: 'auto !important',
+                        width: 'auto !important',
+                    },
+                }}
+            >
+                {body}
+            </Tooltip>
         );
     }
 }

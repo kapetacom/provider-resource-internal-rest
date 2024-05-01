@@ -109,7 +109,7 @@ export const useMappingHandler = (
                 const targetClone = cloneDeep(target);
                 const methodsClone = cloneDeep(methods);
 
-                const currentSource = methods[ix].source;
+                const currentSource = methods[ix]?.source;
                 if (!currentSource) {
                     return prevState;
                 }
@@ -236,7 +236,7 @@ export const useMappingHandler = (
                 const methodsClone = cloneDeep(methods);
                 const sourceClone = cloneDeep(source);
                 const currentMethod = methodsClone[ix];
-                const currentSource = currentMethod.source;
+                const currentSource = currentMethod?.source;
                 if (!currentSource) {
                     return prevState;
                 }
