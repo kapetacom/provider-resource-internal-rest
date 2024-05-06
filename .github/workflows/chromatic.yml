@@ -27,6 +27,7 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - run: npm ci
+      - run: npm version --no-git-tag-version 0.0.0
       - name: Publish to Chromatic
         uses: chromaui/action@v1
         with:
