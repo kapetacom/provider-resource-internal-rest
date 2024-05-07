@@ -37,6 +37,7 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
         const reader = new RESTMethodReader(method);
         const body = (
             <Box
+                className={'rest-method'}
                 sx={{
                     fontSize: '12px',
                     overflow: 'hidden',

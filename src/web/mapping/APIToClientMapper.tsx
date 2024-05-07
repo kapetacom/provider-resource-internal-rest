@@ -13,7 +13,6 @@ import RestMethodView from '../RestMethodView';
 import { toRESTKindContext } from '../types';
 import { useMappingHandlerBuilder } from './useMappingHandlerBuilder';
 
-import './APIToClientMapper.less';
 import { DSLData } from '@kapeta/kaplang-core';
 import { Alert, AlertTitle, Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -22,6 +21,10 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import AddIcon from '@mui/icons-material/Add';
 import ClearIcon from '@mui/icons-material/Clear';
+
+const colorGrayXLight = '#fafafa';
+const colorGrayLight = '#efefef';
+const colorGreenDark = '#2d8e2b';
 
 interface RestResourceToClientMapperProps
     extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping, DSLData> {}
@@ -129,7 +132,58 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
         }
 
         return (
-            <MethodColumn className={sourceClassNames.join(' ')}>
+            <MethodColumn
+                className={sourceClassNames.join(' ')}
+                sx={{
+                    opacity: mappedMethod.source ? 1 : 0.3,
+                    border: '1px solid',
+                    borderColor: mappedMethod.source ? 'transparent' : '#f28f8c',
+
+                    cursor: draggable ? 'move' : 'pointer',
+
+                    '&.dnd-zone-dragging': {
+                        backgroundColor: colorGrayXLight,
+                        borderColor: colorGreenDark,
+                    },
+                    '&.dnd-zone-hovering': {
+                        opacity: 0.6,
+                        backgroundColor: colorGreenDark,
+                        color: 'white !important',
+
+                        '& span': {
+                            color: 'white !important',
+                        },
+                    },
+                    // Show light gray outline in place of original item
+                    '&.dragging-source': {
+                        backgroundColor: colorGrayXLight,
+                        '& .actions, & .rest-method': {
+                            visibility: 'hidden',
+                        },
+                    },
+                    // Add background to make the item visible when dragging
+                    '&.dragging-handle': {
+                        backgroundColor: colorGrayLight,
+                        boxShadow: '1px 1px 3px 0px rgba(0, 0, 0, 0.15)',
+
+                        // Attempt animate when dragging
+                        animation: '0.2s rot forwards',
+                        '@keyframes rot': {
+                            '0%': {
+                                transform: 'rotate(0deg)',
+                            },
+                            '100%': {
+                                transform: 'rotate(1deg)',
+                            },
+                        },
+
+                        '& .actions': {
+                            pointerEvents: 'none',
+                            opacity: 0.2,
+                        },
+                    },
+                }}
+            >
                 {mappedMethod.source && <RestMethodView compact={true} method={mappedMethod.source} />}
 
                 {!mappedMethod.source && mappedMethod.target && (
@@ -181,12 +235,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     };
 
     const renderMethod = (method: MappedMethod, ix: number) => {
-        const methodMappingClassName = [
-            'method-mapping',
-            method.mapped ? 'mapped' : 'unmapped',
-            !method.source && method.target ? 'unmapped-source' : '',
-            !method.target && method.source ? 'unmapped-target' : '',
-        ].filter(Boolean);
+        const methodMappingClassName = ['method-mapping', method.mapped ? 'mapped' : 'unmapped'].filter(Boolean);
 
         return (
             <Stack
@@ -194,7 +243,9 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                 direction={'row'}
                 className={methodMappingClassName.join(' ')}
                 sx={{
+                    fontSize: '14px',
                     height: '40px',
+                    userSelect: 'none',
                     '&:hover': {
                         backgroundColor: '#f5f5f5',
                     },
@@ -327,12 +378,12 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                 <DnDContainer>
                     <Stack>
                         <Stack
-                            className="header"
                             direction="row"
                             justifyContent={'space-between'}
                             sx={{
                                 borderBottom: '1px solid #e5e5e5',
                                 pb: 1,
+                                my: 1,
                             }}
                         >
                             <MethodColumn className="source">{mappingHandlerContext.sourceName}: REST API</MethodColumn>
