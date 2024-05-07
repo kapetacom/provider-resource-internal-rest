@@ -246,6 +246,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                     fontSize: '14px',
                     height: '40px',
                     userSelect: 'none',
+                    margin: '5px 0',
                     '&:hover': {
                         backgroundColor: '#f5f5f5',
                     },
