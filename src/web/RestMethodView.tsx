@@ -3,54 +3,176 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React, { Component } from 'react';
+import React, { Component, ComponentProps, PropsWithChildren } from 'react';
 
-import './RestMethodView.less';
 import { DSLTypeHelper, RESTMethodReader } from '@kapeta/kaplang-core';
 import { DSLControllerMethod, toId } from './mapping/types';
 import { Tooltip } from '@kapeta/ui-web-components';
-import { Box } from '@mui/material';
+import { Box, SxProps } from '@mui/material';
 
 interface RestMethodViewProps {
     method: DSLControllerMethod;
     compact?: boolean;
 }
 
+type BoxProps = ComponentProps<typeof Box>;
+const Span = (props: PropsWithChildren<BoxProps>) => <Box component={'span'} {...props} />;
+
+const ellipsisStyle: SxProps = {
+    overflowX: 'hidden',
+    textOverflow: 'ellipsis',
+    width: '100%',
+};
+
+const colorGreen = '#39b537';
+const colorBlue = '#1d2b91';
+const colorGrayXDark = '#544b49';
+
 export default class RestMethodView extends Component<RestMethodViewProps, any> {
     render() {
         const method = this.props.method;
         const compact = !!this.props.compact;
-        let methodName = toId(method);
+        const methodName = toId(method);
 
         const reader = new RESTMethodReader(method);
         const body = (
-            <div className={'rest-method-erasure' + (compact ? ' compact' : '')}>
-                <div className={'method'}>
-                    <span className={'method-name'}>{methodName}</span>
-                    <span className={'method-definition-start'}>(</span>
-                    <span className={'method-arguments'}>
-                        {reader.parameters.map((argument, ix) => {
+            <Box
+                sx={{
+                    fontSize: '12px',
+                    overflow: 'hidden',
+                    padding: '0 50px 0 15px',
+                }}
+            >
+                <Box
+                    sx={{
+                        ...ellipsisStyle,
+                        fontFamily: 'monospace',
+                        whiteSpace: 'nowrap',
+                    }}
+                >
+                    <Span
+                        sx={{
+                            color: '#544b49',
+                        }}
+                        aria-label="method name"
+                    >
+                        {methodName}
+                    </Span>
+                    <Span
+                        sx={{
+                            color: '#666',
+                        }}
+                        aria-label={'method-definition-start'}
+                    >
+                        (
+                    </Span>
+                    <Span aria-label={'method-arguments'}>
+                        {reader.parameters.map((argument, ix, xs) => {
                             return (
-                                <span key={ix} className={'method-argument'}>
-                                    <span className={'name'}>{argument.name}</span>
-                                    <span className={'type-separator'}>:</span>
-                                    <span className={'type'}>{DSLTypeHelper.asFullName(argument.type)}</span>
-                                    <span className={'transport'}>{`(${argument.transport})`}</span>
+                                <Span
+                                    key={ix}
+                                    aria-label={'method-argument'}
+                                    sx={{
+                                        '& > *': {
+                                            marginLeft: '2px',
+                                        },
+                                        '& .separator': {
+                                            marginLeft: 0,
+                                        },
+                                    }}
+                                >
+                                    {compact ? null : (
+                                        <Span
+                                            sx={{
+                                                color: colorGreen,
+                                            }}
+                                            aria-label={'name'}
+                                        >
+                                            {argument.name}
+                                        </Span>
+                                    )}
+                                    {compact ? null : (
+                                        <span aria-hidden className={'separator'}>
+                                            :
+                                        </span>
+                                    )}
 
-                                    <span className={'separator'}>,</span>
-                                </span>
+                                    <Span
+                                        sx={{
+                                            color: compact ? colorGreen : colorBlue,
+                                        }}
+                                        aria-label={'type'}
+                                    >
+                                        {DSLTypeHelper.asFullName(argument.type)}
+                                    </Span>
+
+                                    {compact ? null : (
+                                        <Span
+                                            sx={{
+                                                color: '#999',
+                                            }}
+                                            aria-label={'transport'}
+                                        >{`(${argument.transport})`}</Span>
+                                    )}
+
+                                    {ix < xs.length - 1 ? (
+                                        <span aria-hidden className={'separator'}>
+                                            ,
+                                        </span>
+                                    ) : null}
+                                </Span>
                             );
                         })}
-                    </span>
-                    <span className={'method-definition-end'}>):</span>
-                    <span className={'type return'}>{DSLTypeHelper.asFullName(reader.returnType)}</span>
-                </div>
-                <div className={'path'}>
-                    <span className={'label'}>HTTP:</span>
-                    <span className={'http-method'}>{reader.method}</span>
-                    <span className={'http-path'}>{reader.path}</span>
-                </div>
-            </div>
+                    </Span>
+                    <Span
+                        sx={{
+                            color: '#666',
+                        }}
+                        aria-label={'method-definition-end'}
+                    >
+                        ):
+                    </Span>
+                    <Span
+                        sx={{
+                            color: colorBlue,
+                        }}
+                        aria-label={'return-type'}
+                    >
+                        {DSLTypeHelper.asFullName(reader.returnType)}
+                    </Span>
+                </Box>
+                {compact ? null : (
+                    <Box sx={{ ...ellipsisStyle, fontFamily: 'monospace' }}>
+                        <Span
+                            sx={{
+                                fontWeight: 600,
+                                color: colorGrayXDark,
+                            }}
+                            aria-label={'procotol'}
+                        >
+                            HTTP:
+                        </Span>
+                        <Span
+                            sx={{
+                                marginLeft: '5px',
+                                color: colorBlue,
+                            }}
+                            aria-label={'http-method'}
+                        >
+                            {reader.method}
+                        </Span>
+                        <Span
+                            sx={{
+                                marginLeft: '5px',
+                                color: colorGreen,
+                            }}
+                            aria-label={'http-path'}
+                        >
+                            {reader.path}
+                        </Span>
+                    </Box>
+                )}
+            </Box>
         );
 
         return (
@@ -74,9 +196,6 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
                 enterDelay={1000}
                 enterNextDelay={300}
                 placement="bottom-start"
-                PopperProps={{
-                    disablePortal: true,
-                }}
                 sx={{
                     '& .MuiTooltip-tooltip': { overflow: 'visible', maxWidth: 'none', font: 'inherit', px: 0, pb: 2 },
                     '& .method': {
