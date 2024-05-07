@@ -73,11 +73,9 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
                                     key={ix}
                                     aria-label={'method-argument'}
                                     sx={{
-                                        '& > *': {
-                                            marginLeft: '2px',
-                                        },
-                                        '& .separator': {
-                                            marginLeft: 0,
+                                        mx: '2px',
+                                        '& > *:not(.separator)': {
+                                            mx: '2px',
                                         },
                                     }}
                                 >
@@ -135,6 +133,7 @@ export default class RestMethodView extends Component<RestMethodViewProps, any> 
                     <Span
                         sx={{
                             color: colorBlue,
+                            mx: '2px',
                         }}
                         aria-label={'return-type'}
                     >
