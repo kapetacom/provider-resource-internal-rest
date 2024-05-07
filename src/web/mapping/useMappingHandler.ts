@@ -81,19 +81,21 @@ export const useMappingHandler = (
     didAutoMap: boolean,
     onDataChanged?: (data: MappingHandlerData) => void
 ) => {
-    const [methods, setMethods] = useState(initialMethods);
-    const [source, setSource] = useState(initialSource);
-    const [target, setTarget] = useState(initialTarget);
+    const [state, setState] = useState({
+        methods: initialMethods,
+        source: initialSource,
+        target: initialTarget,
+    });
 
     // Update state when props change
     useEffect(() => {
-        setMethods(initialMethods);
+        setState((stateX) => ({ ...stateX, methods: initialMethods }));
     }, [initialMethods]);
     useEffect(() => {
-        setSource(initialSource);
+        setState((stateX) => ({ ...stateX, source: initialSource }));
     }, [initialSource]);
     useEffect(() => {
-        setTarget(initialTarget);
+        setState((stateX) => ({ ...stateX, target: initialTarget }));
     }, [initialTarget]);
 
     const onStateChange = (source: RESTKindContext, target: RESTKindContext, methods: MappedMethod[]): void => {
@@ -102,183 +104,211 @@ export const useMappingHandler = (
 
     const addToTarget = useCallback(
         (ix: number): void => {
-            const targetClone = cloneDeep(target);
-            const methodsClone = cloneDeep(methods);
+            setState((prevState) => {
+                const { target, methods, source } = prevState;
+                const targetClone = cloneDeep(target);
+                const methodsClone = cloneDeep(methods);
 
-            const currentSource = methods[ix].source;
-            if (!currentSource) {
-                return;
-            }
+                const currentSource = methods[ix]?.source;
+                if (!currentSource) {
+                    return prevState;
+                }
 
-            const newTarget = { ...currentSource, copyOf: currentSource };
+                const newTarget = { ...currentSource, copyOf: currentSource };
 
-            const { issues, entitiesToBeAdded } = getEntitiesToBeAddedForCopy(
-                { method: currentSource, entities: source.entities },
-                { method: newTarget, entities: target.entities }
-            );
+                const { issues, entitiesToBeAdded } = getEntitiesToBeAddedForCopy(
+                    { method: currentSource, entities: source.entities },
+                    { method: newTarget, entities: target.entities }
+                );
 
-            if (issues.length > 0) {
-                showToasty({
-                    title: 'Could not add method',
-                    type: ToastType.ALERT,
-                    message: issues[0],
-                });
-                return;
-            }
+                if (issues.length > 0) {
+                    showToasty({
+                        title: 'Could not add method',
+                        type: ToastType.ALERT,
+                        message: issues[0],
+                    });
+                    return prevState;
+                }
 
-            target.entities.push(...entitiesToBeAdded);
+                target.entities.push(...entitiesToBeAdded);
 
-            new RESTResourceEditor(targetClone.resource).setMethod(toId(currentSource), newTarget);
+                new RESTResourceEditor(targetClone.resource).setMethod(toId(currentSource), newTarget);
 
-            // Then add mapping for it
-            methodsClone.splice(ix, 1, createEqualMapping(currentSource, newTarget));
+                // Then add mapping for it
+                methodsClone.splice(ix, 1, createEqualMapping(currentSource, newTarget));
 
-            setTarget(targetClone);
-            setMethods(methodsClone);
-            onStateChange(source, targetClone, methodsClone);
+                onStateChange(source, targetClone, methodsClone);
+                return {
+                    ...prevState,
+                    target: targetClone,
+                    methods: methodsClone,
+                };
+            });
         },
-        [methods, source.entities, target]
+        [setState, onStateChange]
     );
 
     const addToSource = useCallback(
         (ix: number): void => {
-            const sourceClone = cloneDeep(source);
-            const methodsClone = cloneDeep(methods);
+            setState((prevState) => {
+                const { source, methods, target } = prevState;
+                const sourceClone = cloneDeep(source);
+                const methodsClone = cloneDeep(methods);
 
-            const currentTarget = methodsClone[ix].target;
-            if (!currentTarget) {
-                return;
-            }
+                const currentTarget = methodsClone[ix].target;
+                if (!currentTarget) {
+                    return prevState;
+                }
 
-            const newSource = { ...currentTarget, copyOf: currentTarget };
+                const newSource = { ...currentTarget, copyOf: currentTarget };
 
-            const { issues, entitiesToBeAdded } = getEntitiesToBeAddedForCopy(
-                { method: currentTarget, entities: target.entities },
-                { method: newSource, entities: source.entities }
-            );
+                const { issues, entitiesToBeAdded } = getEntitiesToBeAddedForCopy(
+                    { method: currentTarget, entities: target.entities },
+                    { method: newSource, entities: source.entities }
+                );
 
-            if (issues.length > 0) {
-                showToasty({
-                    title: 'Could not add method',
-                    type: ToastType.ALERT,
-                    message: issues[0],
-                });
-                return;
-            }
+                if (issues.length > 0) {
+                    showToasty({
+                        title: 'Could not add method',
+                        type: ToastType.ALERT,
+                        message: issues[0],
+                    });
+                    return prevState;
+                }
 
-            sourceClone.entities.push(...entitiesToBeAdded);
+                sourceClone.entities.push(...entitiesToBeAdded);
 
-            new RESTResourceEditor(sourceClone.resource).setMethod(toId(currentTarget), newSource);
+                new RESTResourceEditor(sourceClone.resource).setMethod(toId(currentTarget), newSource);
 
-            // Then add mapping for it
-            methodsClone.splice(ix, 1, createEqualMapping(newSource, currentTarget));
+                // Then add mapping for it
+                methodsClone.splice(ix, 1, createEqualMapping(newSource, currentTarget));
 
-            setSource(sourceClone);
-            setMethods(methodsClone);
-            onStateChange(sourceClone, target, methodsClone);
+                onStateChange(sourceClone, target, methodsClone);
+                return {
+                    ...prevState,
+                    source: sourceClone,
+                    methods: methodsClone,
+                };
+            });
         },
-        [methods, source, target.entities]
+        [setState, onStateChange]
     );
 
     const removeTarget = useCallback(
         (ix: number): void => {
-            const targetClone = cloneDeep(target);
-            const methodsClone = cloneDeep(methods);
+            setState((prevState) => {
+                const { target, methods, source } = prevState;
+                const targetClone = cloneDeep(target);
+                const methodsClone = cloneDeep(methods);
 
-            const currentTarget = methodsClone[ix].target;
-            if (!currentTarget) {
-                return;
-            }
+                const currentTarget = methodsClone[ix].target;
+                if (!currentTarget) {
+                    return prevState;
+                }
 
-            // First remove the method from the target block
-            new RESTResourceEditor(targetClone.resource).deleteMethod(toId(currentTarget));
+                // First remove the method from the target block
+                new RESTResourceEditor(targetClone.resource).deleteMethod(toId(currentTarget));
 
-            // Then remove mapping for it
-            const sourceMethod = methodsClone[ix].source;
-            if (sourceMethod) {
-                methodsClone.splice(ix, 1, createSourceOnlyMapping(sourceMethod));
-            } else {
-                methodsClone.splice(ix, 1);
-            }
+                // Then remove mapping for it
+                const sourceMethod = methodsClone[ix].source;
+                if (sourceMethod) {
+                    methodsClone.splice(ix, 1, createSourceOnlyMapping(sourceMethod));
+                } else {
+                    methodsClone.splice(ix, 1);
+                }
 
-            setTarget(targetClone);
-            setMethods(methodsClone);
+                onStateChange(source, targetClone, methodsClone);
 
-            onStateChange(source, targetClone, methodsClone);
+                return {
+                    ...prevState,
+                    target: targetClone,
+                    methods: methodsClone,
+                };
+            });
         },
-        [methods, target]
+        [setState, onStateChange]
     );
 
     const removeSource = useCallback(
         (ix: number): void => {
-            const methodsClone = cloneDeep(methods);
-            const sourceClone = cloneDeep(source);
-            const currentMethod = methodsClone[ix];
-            const currentSource = currentMethod.source;
-            if (!currentSource) {
-                return;
-            }
+            setState((prevState) => {
+                const { source, methods, target } = prevState;
+                const methodsClone = cloneDeep(methods);
+                const sourceClone = cloneDeep(source);
+                const currentMethod = methodsClone[ix];
+                const currentSource = currentMethod?.source;
+                if (!currentSource) {
+                    return prevState;
+                }
 
-            if (!currentSource.copyOf) {
-                // If source is not a copy from target
-                methodsClone.push(createSourceOnlyMapping(currentSource));
-            }
+                if (!currentSource.copyOf) {
+                    // If source is not a copy from target
+                    methodsClone.push(createSourceOnlyMapping(currentSource));
+                }
 
-            if (currentMethod.target && currentMethod.target.copyOf) {
-                // If the target is a copy
+                if (currentMethod.target && currentMethod.target.copyOf) {
+                    // If the target is a copy
+                    // First remove the method from the source resource
+                    new RESTResourceEditor(sourceClone.resource).deleteMethod(toId(currentSource));
+                    // And remove the entire line
+                    pull(methodsClone, currentMethod);
+                } else {
+                    methodsClone[ix].source = undefined;
+                    methodsClone[ix].sourceId = undefined;
+                    methodsClone[ix].mapped = false;
+                }
+                onStateChange(sourceClone, target, methodsClone);
 
-                // First remove the method from the source resource
-                new RESTResourceEditor(sourceClone.resource).deleteMethod(toId(currentSource));
-                setSource(sourceClone);
-                // And remove the entire line
-                pull(methodsClone, currentMethod);
-            } else {
-                methodsClone[ix].source = undefined;
-                methodsClone[ix].sourceId = undefined;
-                methodsClone[ix].mapped = false;
-            }
-
-            setMethods(methodsClone);
-            onStateChange(sourceClone, target, methodsClone);
+                return {
+                    ...prevState,
+                    source: sourceClone,
+                    methods: methodsClone,
+                };
+            });
         },
-        [methods, source]
+        [setState, onStateChange]
     );
 
     const addMappingForTarget = useCallback(
         (ix: number, sourceMethod: DSLControllerMethod) => {
-            const methodsClone = cloneDeep(methods);
+            setState((prevState) => {
+                const { methods, source, target } = prevState;
+                const methodsClone = cloneDeep(methods);
 
-            const currentTarget = methodsClone[ix].target;
-            if (!currentTarget) {
-                return;
-            }
+                const currentTarget = methodsClone[ix].target;
+                if (!currentTarget) {
+                    return prevState;
+                }
 
-            const errors = getCompatibleRESTMethodsIssues(
-                { method: currentTarget, entities: target.entities },
-                { method: sourceMethod, entities: source.entities }
-            );
+                const errors = getCompatibleRESTMethodsIssues(
+                    { method: currentTarget, entities: target.entities },
+                    { method: sourceMethod, entities: source.entities }
+                );
 
-            if (errors.length > 0) {
-                showToasty({
-                    title: 'Methods did not match',
-                    type: ToastType.ALERT,
-                    message: errors[0],
-                });
-                return;
-            }
+                if (errors.length > 0) {
+                    showToasty({
+                        title: 'Methods did not match',
+                        type: ToastType.ALERT,
+                        message: errors[0],
+                    });
+                    return prevState;
+                }
 
-            methodsClone[ix].source = sourceMethod;
-            methodsClone[ix].sourceId = toId(sourceMethod);
-            methodsClone[ix].mapped = true;
+                methodsClone[ix].source = sourceMethod;
+                methodsClone[ix].sourceId = toId(sourceMethod);
+                methodsClone[ix].mapped = true;
 
-            const existing = find(methodsClone, { source: sourceMethod, mapped: false });
-            pull(methodsClone, existing);
+                const existing = find(methodsClone, { source: sourceMethod, mapped: false });
+                pull(methodsClone, existing);
 
-            setMethods(methodsClone);
-
-            onStateChange(source, target, methodsClone);
+                onStateChange(source, target, methodsClone);
+                return {
+                    ...prevState,
+                    methods: methodsClone,
+                };
+            });
         },
-        [methods, source.entities, target.entities]
+        [setState, onStateChange]
     );
 
     // If we did auto map, we notify the parent component that the data has changed
@@ -290,10 +320,10 @@ export const useMappingHandler = (
     }, [didAutoMap]);
 
     return {
-        isValid: () => isValid(methods),
-        canAddToTarget: (ix: number) => canAddToTarget(methods, ix),
-        canDropOnTarget: (ix: number) => canDropOnTarget(methods, ix),
-        methods,
+        isValid: () => isValid(state.methods),
+        canAddToTarget: (ix: number) => canAddToTarget(state.methods, ix),
+        canDropOnTarget: (ix: number) => canDropOnTarget(state.methods, ix),
+        methods: state.methods,
         addToTarget,
         addToSource,
         removeTarget,
