@@ -317,7 +317,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     const hasIssues = mappingHandlerContext.entityIssues.length > 0 || mappingHandlerContext.warnings.length > 0;
 
     return (
-        <div className={'rest-resource-to-client-mapper'}>
+        <div className={'rest-resource-to-client-mapper-ui'}>
             <FormReadyHandler name={title} ready={isValid()}>
                 {hasIssues && (
                     <Alert
