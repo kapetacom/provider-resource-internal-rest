@@ -139,7 +139,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                     border: '1px solid',
                     borderColor: mappedMethod.source ? 'transparent' : '#f28f8c',
 
-                    cursor: draggable ? 'move' : 'pointer',
+                    cursor: draggable ? 'move' : 'auto',
 
                     '&.dnd-zone-dragging': {
                         backgroundColor: colorGrayXLight,
