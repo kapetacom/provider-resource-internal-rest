@@ -132,13 +132,13 @@ function reducer(state: MappingBuilderState, action: ActionType): MappingBuilder
                             { method: targetMethod, entities: state.targetContext.entities }
                         );
 
-                        if (issues.length === 0) {
-                            mappedTargetsClone.push(targetMethod);
-                            targetContextClone.entities.push(...entitiesToBeAdded);
-                            mappedMethodsClone.push(createEqualMapping(sourceMethod, targetMethod));
-                            didAutoMap = true;
-                            return;
-                        }
+                        // if (issues.length === 0) {
+                        mappedTargetsClone.push(targetMethod);
+                        targetContextClone.entities.push(...entitiesToBeAdded);
+                        mappedMethodsClone.push(createEqualMapping(sourceMethod, targetMethod, issues));
+                        // didAutoMap = true;
+                        return;
+                        // }
                     }
                 }
 
