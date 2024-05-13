@@ -30,7 +30,7 @@
         "lint:eslint": "eslint ."
     },
     "peerDependencies": {
-        "@kapeta/ui-web-components": "^3.5.2",
+        "@kapeta/ui-web-components": "file:../../../Downloads/a.tgz",
         "@kapeta/ui-web-context": "^1.2.4",
         "@kapeta/ui-web-types": "^1.3.1",
         "@kapeta/ui-web-utils": "^0.0.29"
@@ -54,7 +54,7 @@
         "@kapeta/prettier-config": "^0.6.2",
         "@kapeta/schemas": "^3.6.0",
         "@kapeta/style": "^0.94.0",
-        "@kapeta/ui-web-components": "^3.5.2",
+        "@kapeta/ui-web-components": "0.0.0-ff54755",
         "@kapeta/ui-web-context": "^1.2.4",
         "@kapeta/ui-web-types": "^1.3.1",
         "@kapeta/ui-web-utils": "^0.0.29",

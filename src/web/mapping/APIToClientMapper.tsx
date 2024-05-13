@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React, { PropsWithChildren, forwardRef } from 'react';
+import React, { PropsWithChildren, forwardRef, useState } from 'react';
 import type { RESTResource, RESTResourceSpec } from '../types';
 import type { DSLControllerMethod, MappedMethod } from './types';
 import { ItemTypes } from './types';
 import { ConnectionMethodsMapping, ResourceTypeProviderMappingProps } from '@kapeta/ui-web-types';
-import { DnDContainer, DnDDrag, DnDDrop, FormReadyHandler, Tooltip } from '@kapeta/ui-web-components';
+import { DSLDiffEditor, DnDContainer, DnDDrag, DnDDrop, FormReadyHandler, Tooltip } from '@kapeta/ui-web-components';
 import RestMethodView from '../RestMethodView';
 import { toRESTKindContext } from '../types';
 import { useMappingHandlerBuilder } from './useMappingHandlerBuilder';
@@ -21,6 +21,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import AddIcon from '@mui/icons-material/Add';
 import ClearIcon from '@mui/icons-material/Clear';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 const colorGrayXLight = '#fafafa';
 const colorGrayLight = '#efefef';
@@ -29,8 +31,9 @@ const colorGreenDark = '#2d8e2b';
 interface RestResourceToClientMapperProps
     extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping, DSLData> {}
 
-const MappingSeparator = (props: PropsWithChildren) => (
+const MappingSeparator = (props: React.ComponentProps<typeof Stack>) => (
     <Stack
+        {...props}
         direction="row"
         className={'mapping-seperator'}
         sx={{
@@ -42,10 +45,9 @@ const MappingSeparator = (props: PropsWithChildren) => (
                 aspectRatio: '1',
                 p: 0,
             },
+            ...props.sx,
         }}
-    >
-        {props.children}
-    </Stack>
+    />
 );
 
 const ActionButton = (props: React.ComponentProps<typeof IconButton>) => (
@@ -85,44 +87,17 @@ const MethodColumnBare = (props: React.ComponentProps<typeof Box>, ref: React.Re
 );
 const MethodColumn = forwardRef(MethodColumnBare);
 
-const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
-    title,
-    source,
-    sourceEntities,
-    target,
-    targetEntities,
-    value,
-    onDataChanged,
+const MethodRow = (props: {
+    method: MappedMethod;
+    methodId: number;
+    mappingHandler: ReturnType<typeof useMappingHandlerBuilder>['mappingHandler'];
+    canAddToSource: boolean;
 }) => {
-    const { mappingHandler, ...mappingHandlerContext } = useMappingHandlerBuilder(
-        toRESTKindContext(source as RESTResource, sourceEntities),
-        toRESTKindContext(target as RESTResource, targetEntities),
-        value,
-        onDataChanged
-    );
+    const { method, methodId, mappingHandler } = props;
+    const methodMappingClassName = ['method-mapping', method.mapped ? 'mapped' : 'unmapped'].filter(Boolean);
+    const [showDiffEditor, setShowDiffEditor] = useState(true);
 
-    const isValid = () => mappingHandlerContext.entityIssues.length === 0 && mappingHandler.isValid();
-
-    const syncToClient = () => {
-        // Delete all target methods and copy all source methods to target
-        mappingHandler.methods.forEach((method, ix) => {
-            if (method.target && !method.mapped) {
-                mappingHandler.removeTarget(ix);
-            }
-        });
-        mappingHandler.methods.forEach((method, ix) => {
-            if (method.source && !method.target) {
-                mappingHandler.addToTarget(ix);
-            }
-        });
-    };
-
-    const renderInnerSourceColumn = (
-        ix: number,
-        mappedMethod: MappedMethod,
-        draggable: boolean,
-        droppable: boolean
-    ) => {
+    const renderInnerSourceColumn = (mappedMethod: MappedMethod, draggable: boolean, droppable: boolean) => {
         const sourceClassNames = ['source'];
 
         if (draggable) {
@@ -195,7 +170,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                         <ActionButton
                             type={'button'}
                             title={'Disconnect'}
-                            onClick={() => mappingHandler.removeSource(ix)}
+                            onClick={() => mappingHandler.removeSource(methodId)}
                         >
                             <ClearIcon />
                         </ActionButton>
@@ -205,7 +180,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
         );
     };
 
-    const renderSourceColumn = (ix: number, mappedMethod: MappedMethod) => {
+    const renderSourceColumn = (mappedMethod: MappedMethod) => {
         const draggable: boolean = !!mappedMethod.source && !mappedMethod.mapped;
         const dropZone: boolean = !mappedMethod.source && !!mappedMethod.target;
 
@@ -213,12 +188,12 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
             return (
                 <DnDDrop
                     type={ItemTypes.API_METHOD}
-                    droppable={() => mappingHandler.canDropOnTarget(ix)}
+                    droppable={() => mappingHandler.canDropOnTarget(methodId)}
                     onDrop={(type: string, source: DSLControllerMethod) =>
-                        mappingHandler.addMappingForTarget(ix, source)
+                        mappingHandler.addMappingForTarget(methodId, source)
                     }
                 >
-                    {renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}
+                    {renderInnerSourceColumn(mappedMethod, draggable, dropZone)}
                 </DnDDrop>
             );
         }
@@ -226,37 +201,39 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
         if (draggable) {
             return (
                 <DnDDrag type={ItemTypes.API_METHOD} value={mappedMethod.source} horizontal={false}>
-                    {renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}
+                    {renderInnerSourceColumn(mappedMethod, draggable, dropZone)}
                 </DnDDrag>
             );
         }
 
-        return <>{renderInnerSourceColumn(ix, mappedMethod, draggable, dropZone)}</>;
+        return <>{renderInnerSourceColumn(mappedMethod, draggable, dropZone)}</>;
     };
 
-    const renderMethod = (method: MappedMethod, ix: number) => {
-        const methodMappingClassName = ['method-mapping', method.mapped ? 'mapped' : 'unmapped'].filter(Boolean);
-
-        return (
+    return (
+        <>
             <Stack
-                key={ix}
+                key={methodId}
                 direction={'row'}
+                flexWrap={'wrap'}
                 className={methodMappingClassName.join(' ')}
                 sx={{
                     fontSize: '14px',
-                    height: '40px',
+                    minHeight: '40px',
                     userSelect: 'none',
-                    margin: '5px 0',
+                    margin: '5px 0 5px -15px',
                     '&:hover': {
                         backgroundColor: '#f5f5f5',
                     },
+                    position: 'relative',
                 }}
             >
-                {renderSourceColumn(ix, method)}
+                {renderSourceColumn(method)}
 
                 <MappingSeparator>
-                    {method.mapped && <CheckCircleIcon color="success" />}
-                    {!method.source && method.target && (
+                    {method.mapped && (!method.errors || method.errors.length === 0) ? (
+                        <CheckCircleIcon color="success" />
+                    ) : null}
+                    {method.errors && method.errors.length ? (
                         <Tooltip
                             title={
                                 method.errors ? (
@@ -273,10 +250,10 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                         >
                             <ErrorIcon color="error" />
                         </Tooltip>
-                    )}
+                    ) : null}
 
-                    {!method.mapped && mappingHandler.canAddToTarget(ix) && (
-                        <ActionButton title={'Add'} onClick={() => mappingHandler.addToTarget(ix)}>
+                    {!method.mapped && mappingHandler.canAddToTarget(methodId) && (
+                        <ActionButton title={'Add'} onClick={() => mappingHandler.addToTarget(methodId)}>
                             <AddIcon />
                         </ActionButton>
                     )}
@@ -290,15 +267,15 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                                     <ActionButton
                                         type={'button'}
                                         title={'Remove method'}
-                                        onClick={() => mappingHandler.removeTarget(ix)}
+                                        onClick={() => mappingHandler.removeTarget(methodId)}
                                     >
                                         <ClearIcon />
                                     </ActionButton>
                                 </div>
                             )}
-                            {!method.source && !method.target.copyOf && mappingHandlerContext.serverWasEmpty && (
+                            {!method.source && !method.target.copyOf && props.canAddToSource && (
                                 <div className={'actions'}>
-                                    <ActionButton title={'Add'} onClick={() => mappingHandler.addToSource(ix)}>
+                                    <ActionButton title={'Add'} onClick={() => mappingHandler.addToSource(methodId)}>
                                         <AddIcon />
                                     </ActionButton>
                                 </div>
@@ -306,8 +283,56 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                         </>
                     )}
                 </MethodColumn>
+                {method.errors?.length ? (
+                    <MappingSeparator
+                        sx={{ position: 'absolute', right: '-8px', top: '50%', transform: 'translate(100%, -50%)' }}
+                    >
+                        <ActionButton onClick={() => setShowDiffEditor((open) => !open)}>
+                            {showDiffEditor ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        </ActionButton>
+                    </MappingSeparator>
+                ) : null}
             </Stack>
-        );
+
+            {showDiffEditor ? (
+                <Box sx={{ width: '100%', height: '7em', margin: '8px 0 8px -15px' }}>
+                    <DSLDiffEditor entitiesA={[]} entitiesB={[]} readOnly />
+                </Box>
+            ) : null}
+        </>
+    );
+};
+
+const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
+    title,
+    source,
+    sourceEntities,
+    target,
+    targetEntities,
+    value,
+    onDataChanged,
+}) => {
+    const { mappingHandler, ...mappingHandlerContext } = useMappingHandlerBuilder(
+        toRESTKindContext(source as RESTResource, sourceEntities),
+        toRESTKindContext(target as RESTResource, targetEntities),
+        value,
+        onDataChanged
+    );
+
+    const isValid = () => mappingHandlerContext.entityIssues.length === 0 && mappingHandler.isValid();
+
+    const syncToClient = () => {
+        // Delete all target methods and copy all source methods to target
+        mappingHandler.methods.forEach((method, ix) => {
+            if (method.target && !method.mapped) {
+                mappingHandler.removeTarget(ix);
+            }
+        });
+        mappingHandler.methods.forEach((method, ix) => {
+            if (method.source && !method.target) {
+                mappingHandler.addToTarget(ix);
+            }
+        });
     };
 
     const methods = mappingHandler.methods.map((method, ix) => [ix, method] as const);
@@ -397,10 +422,26 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                         </Stack>
 
                         <div className={'content'}>
-                            {mappedMethods.map(([ix, method]) => renderMethod(method, ix))}
+                            {mappedMethods.map(([ix, method]) => (
+                                <MethodRow
+                                    key={ix}
+                                    method={method}
+                                    methodId={ix}
+                                    mappingHandler={mappingHandler}
+                                    canAddToSource={mappingHandlerContext.serverWasEmpty}
+                                />
+                            ))}
 
                             {unmappedMethods.length && mappedMethods.length ? <Divider /> : null}
-                            {unmappedMethods.map(([ix, method]) => renderMethod(method, ix))}
+                            {unmappedMethods.map(([ix, method]) => (
+                                <MethodRow
+                                    key={ix}
+                                    method={method}
+                                    methodId={ix}
+                                    mappingHandler={mappingHandler}
+                                    canAddToSource={mappingHandlerContext.serverWasEmpty}
+                                />
+                            ))}
                         </div>
                     </Stack>
                 </DnDContainer>
