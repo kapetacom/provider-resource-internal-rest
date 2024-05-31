@@ -67,11 +67,6 @@ const validateMethod = (method: DSLMethod): string[] => {
         return errors;
     }
 
-    if (!methodAnnotation.argument) {
-        errors.push(`${reader.name} is missing a path. Add a path to solve this issue`);
-        return errors;
-    }
-
     reader.parameters.some((parameter) => {
         if (isVoid(parameter.type)) {
             errors.push(

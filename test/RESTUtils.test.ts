@@ -95,15 +95,14 @@ describe('RESTUtils', () => {
             ]);
         });
 
-        test('fails if path is empty', () => {
+        test('accepts empty path', () => {
             const method = makeMethod('test');
             if (method.annotations?.[0].arguments) {
                 method.annotations[0].arguments = [''];
             }
 
-            expect(validate(makeAPIContext([method], ENTITIES))).toEqual([
-                'test is missing a path. Add a path to solve this issue',
-            ]);
+            const context = makeAPIContext([method], ENTITIES);
+            expect(validate(context)).toEqual([]);
         });
 
         test('fails if method is empty', () => {
