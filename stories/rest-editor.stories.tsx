@@ -4,14 +4,15 @@
  */
 
 import React from 'react';
-import { BlockDefinition, EntityType } from '@kapeta/schemas';
-import { RESTEditorComponent } from '../src/web/RESTEditorComponent';
-import { RESTResource } from '../src/web/types';
-import RestMethodView from '../src/web/RestMethodView';
-import { FormContainer } from '@kapeta/ui-web-components';
-import { DSLControllerMethod } from '../src/web/mapping/types';
 import { DSLConverters, DSLEntityType, KaplangWriter } from '@kapeta/kaplang-core';
+import { BlockDefinition, EntityType } from '@kapeta/schemas';
+import { FormContainer } from '@kapeta/ui-web-components';
+import { RESTEditorComponent } from '../src/web/RESTEditorComponent';
+import RestMethodView from '../src/web/RestMethodView';
+import { DSLControllerMethod } from '../src/web/mapping/types';
+import { RESTResource } from '../src/web/types';
 import './stories.less';
+import { ThemedStoryWrapper } from './utils';
 
 const API_KIND = 'kapeta/resource-type-rest-api';
 
@@ -184,32 +185,40 @@ export default {
 };
 
 export const Editor = () => (
-    <div
-        style={{
-            padding: '10px',
+    <ThemedStoryWrapper
+        sx={{
             width: '100%',
+            flex: 1,
+            minHeight: '400px',
             boxSizing: 'border-box',
-            height: '500px',
-            backgroundColor: 'white',
-            border: '1px solid gray',
         }}
     >
         <FormContainer initialValue={RESTApiResource} onChange={(data) => console.log('Data changed', data)}>
             <RESTEditorComponent block={block} />
         </FormContainer>
-    </div>
+    </ThemedStoryWrapper>
 );
 
-export const MethodView = () => <RestMethodView compact={false} method={getTaskMethod} />;
+export const MethodView = () => (
+    <ThemedStoryWrapper>
+        <RestMethodView compact={false} method={getTaskMethod} />
+    </ThemedStoryWrapper>
+);
 
 export const MethodViewController = () => (
-    <RestMethodView
-        compact={false}
-        method={{
-            ...getTaskMethod,
-            namespace: 'Tasks',
-        }}
-    />
+    <ThemedStoryWrapper>
+        <RestMethodView
+            compact={false}
+            method={{
+                ...getTaskMethod,
+                namespace: 'Tasks',
+            }}
+        />
+    </ThemedStoryWrapper>
 );
 
-export const MethodViewCompact = () => <RestMethodView compact={true} method={getTaskMethod} />;
+export const MethodViewCompact = () => (
+    <ThemedStoryWrapper>
+        <RestMethodView compact={true} method={getTaskMethod} />
+    </ThemedStoryWrapper>
+);

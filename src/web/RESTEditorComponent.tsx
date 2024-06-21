@@ -9,13 +9,14 @@ import {
     DSLConverters,
     DSLMethod,
     DSLTypeHelper,
-    FormField, InfoBox,
+    FormField,
+    InfoBox,
     MethodEditor,
     useFormContextField,
     useIsFormSubmitAttempted,
 } from '@kapeta/ui-web-components';
 
-import {DSLData, DSLDataTypeParser, KAPLANG_ID, KAPLANG_VERSION} from '@kapeta/kaplang-core';
+import { DSLData, DSLDataTypeParser, KAPLANG_ID, KAPLANG_VERSION } from '@kapeta/kaplang-core';
 
 import { IncludeContextType, ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
@@ -23,7 +24,7 @@ import { validateApiName } from './RESTUtils';
 import { Alert, Stack } from '@mui/material';
 import { SourceCode } from '@kapeta/schemas';
 
-const typeNameMapper = (e:DSLData) => {
+const typeNameMapper = (e: DSLData) => {
     return DSLTypeHelper.asFullName(e, true);
 };
 
@@ -43,7 +44,7 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
     };
 
     const validTypes = useMemo(() => {
-        let includeTypes:string[] = [];
+        let includeTypes: string[] = [];
         if (props.context?.languageProvider && props.context?.languageProvider.getDSLIncludes) {
             // The language target might provide some additional types
             const include = props.context.languageProvider.getDSLIncludes(IncludeContextType.REST);
@@ -57,7 +58,7 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
         }
 
         if (props.block?.spec?.entities?.source?.value) {
-            let types:DSLData[] = [];
+            let types: DSLData[] = [];
             try {
                 types = DSLDataTypeParser.parse(props.block.spec.entities.source.value, {
                     validTypes: includeTypes,
@@ -97,7 +98,7 @@ export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
                 }}
                 className={'editor'}
             >
-                <InfoBox readMoreLink={'https://docs.kapeta.com/docs/rest-api-clients'}>
+                <InfoBox readMoreLink={'https://docs.kapeta.com/docs/rest-api-clients'} sx={{ mt: 1, mb: 2 }}>
                     The REST API is a collection of methods that can be called from the outside world. Each method
                     represents a single endpoint that can be called with a specific HTTP verb. The API is defined using
                     Kapeta's Domain Specific Language (DSL).

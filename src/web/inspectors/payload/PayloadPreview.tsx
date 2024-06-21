@@ -4,11 +4,12 @@
  */
 
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { JSONTree } from 'react-json-tree';
 import { usePayloadAccordionContext } from './PayloadAccordionContext';
 import { withErrorBoundary } from 'react-error-boundary';
 import { NoValue } from '../helpers';
+import { useNiceScrollbars } from '@kapeta/ui-web-components';
 
 export interface PayloadPreviewProps {
     contentType: string | undefined;
@@ -17,22 +18,22 @@ export interface PayloadPreviewProps {
 }
 
 const jsonTreeTheme = {
-    base00: '#ffffff',
-    base01: '#303030',
-    base02: '#505050',
-    base03: '#b0b0b0',
-    base04: '#d0d0d0',
-    base05: '#e0e0e0',
-    base06: '#f5f5f5',
-    base07: '#ffffff',
-    base08: '#fb0120',
-    base09: '#fc6d24',
-    base0A: '#fda331',
-    base0B: '#000000de',
-    base0C: '#76c7b7',
-    base0D: '#1976d2',
-    base0E: '#d381c3',
-    base0F: '#be643c',
+    base00: 'transparent',
+    base01: '#383830',
+    base02: '#49483e',
+    base03: '#75715e',
+    base04: '#a59f85',
+    base05: '#f8f8f2',
+    base06: '#f5f4f1',
+    base07: '#f9f8f5',
+    base08: '#f92672',
+    base09: '#fd971f',
+    base0A: '#f4bf75',
+    base0B: '#a6e22e',
+    base0C: '#a1efe4',
+    base0D: '#66d9ef',
+    base0E: '#ae81ff',
+    base0F: '#cc6633',
 };
 
 const prettifyJson = (value: string | undefined) => {
@@ -47,18 +48,20 @@ const renderRawText = (value: string | undefined) => {
     return value ? (
         <Typography
             variant="body2"
-            sx={{
+            sx={(theme) => ({
                 fontFamily: 'monospace',
-                whiteSpace: 'pre',
+                whiteSpace: 'pre-wrap',
                 fontSize: '0.75rem',
-            }}
+                overflow: 'auto',
+                ...useNiceScrollbars(theme.palette.background.paper),
+            })}
         >
             {value}
         </Typography>
     ) : null;
 };
 
-const renderJson = (value: string | undefined) => {
+const renderJson = (value: string | undefined, isDarkMode = false) => {
     try {
         const jsObj = JSON.parse(value || '') as unknown;
         return (
@@ -75,6 +78,7 @@ const renderJson = (value: string | undefined) => {
                 }}
             >
                 <JSONTree
+                    invertTheme={isDarkMode}
                     data={jsObj}
                     theme={jsonTreeTheme}
                     hideRoot
@@ -94,13 +98,15 @@ export const PayloadPreview = withErrorBoundary(
 
         const { raw } = usePayloadAccordionContext();
 
+        const isDarkMode = useTheme().palette.mode === 'dark';
+
         /**
          * Render preview based on content type
          */
         let preview = null;
         switch (contentType) {
             case 'application/json': {
-                preview = raw ? renderRawText(prettifyJson(data)) : renderJson(data);
+                preview = raw ? renderRawText(prettifyJson(data)) : renderJson(data, !isDarkMode);
                 break;
             }
             case 'application/xml':

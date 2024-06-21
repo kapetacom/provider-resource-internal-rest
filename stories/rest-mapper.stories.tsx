@@ -11,6 +11,7 @@ import { ToastContainer } from '@kapeta/ui-web-components';
 import { DSLControllerMethod } from '../src/web/mapping/types';
 import { DSLConverters, DSLData, DSLDataTypeProperty, DSLEntityType, KaplangWriter } from '@kapeta/kaplang-core';
 import './stories.less';
+import { ThemedStoryWrapper } from './utils';
 
 const API_KIND = 'kapeta/resource-type-rest-api';
 const CLIENT_KIND = 'kapeta/resource-type-rest-client';
@@ -291,7 +292,7 @@ export default {
 };
 
 export const APIToClientMapperViewProblem = () => (
-    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+    <ThemedStoryWrapper sx={{ flex: 1 }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -301,11 +302,11 @@ export const APIToClientMapperViewProblem = () => (
             sourceEntities={API_ENTITIES}
             targetEntities={CLIENT_ENTITIES}
         />
-    </div>
+    </ThemedStoryWrapper>
 );
 
 export const APIToClientMapperViewValueProblem = () => (
-    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+    <ThemedStoryWrapper sx={{ flex: 1 }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -329,11 +330,12 @@ export const APIToClientMapperViewValueProblem = () => (
             sourceEntities={API_ENTITIES}
             targetEntities={CLIENT_ENTITIES}
         />
-    </div>
+        {/* </div> */}
+    </ThemedStoryWrapper>
 );
 
 export const APIToClientMapperViewOK = () => (
-    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+    <ThemedStoryWrapper sx={{ flex: 1 }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -343,11 +345,11 @@ export const APIToClientMapperViewOK = () => (
             sourceEntities={API_ENTITIES}
             targetEntities={API_ENTITIES}
         />
-    </div>
+    </ThemedStoryWrapper>
 );
 
 export const APIControllerToClientMapperViewOK = () => (
-    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+    <ThemedStoryWrapper sx={{ flex: 1 }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -357,11 +359,11 @@ export const APIControllerToClientMapperViewOK = () => (
             sourceEntities={API_ENTITIES}
             targetEntities={API_ENTITIES}
         />
-    </div>
+    </ThemedStoryWrapper>
 );
 
 export const APIToClientMapperViewEmptyServerProblem = () => (
-    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+    <ThemedStoryWrapper sx={{ flex: 1 }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -371,11 +373,11 @@ export const APIToClientMapperViewEmptyServerProblem = () => (
             sourceEntities={API_ENTITIES}
             targetEntities={CLIENT_ENTITIES}
         />
-    </div>
+    </ThemedStoryWrapper>
 );
 
 export const APIToClientMapperViewEmptyServerOK = () => (
-    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+    <ThemedStoryWrapper sx={{ flex: 1 }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -385,11 +387,11 @@ export const APIToClientMapperViewEmptyServerOK = () => (
             sourceEntities={[]}
             targetEntities={CLIENT_ENTITIES}
         />
-    </div>
+    </ThemedStoryWrapper>
 );
 
 export const APIToClientMapperViewEmptyClientProblem = () => (
-    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+    <ThemedStoryWrapper sx={{ flex: 1 }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -399,11 +401,11 @@ export const APIToClientMapperViewEmptyClientProblem = () => (
             sourceEntities={API_ENTITIES}
             targetEntities={CLIENT_ENTITIES}
         />
-    </div>
+    </ThemedStoryWrapper>
 );
 
 export const APIToClientMapperViewNullMethodsServerOK = () => (
-    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+    <ThemedStoryWrapper sx={{ flex: 1 }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -419,11 +421,11 @@ export const APIToClientMapperViewNullMethodsServerOK = () => (
             sourceEntities={API_ENTITIES}
             targetEntities={[]}
         />
-    </div>
+    </ThemedStoryWrapper>
 );
 
 export const APIToClientMapperViewNullMethodsClientOK = () => (
-    <div style={{ padding: '25px', width: '750px', height: '100%' }}>
+    <ThemedStoryWrapper sx={{ flex: 1 }}>
         <ToastContainer />
         <APIToClientMapper
             title={'My Connection'}
@@ -439,5 +441,5 @@ export const APIToClientMapperViewNullMethodsClientOK = () => (
             sourceEntities={API_ENTITIES}
             targetEntities={[]}
         />
-    </div>
+    </ThemedStoryWrapper>
 );

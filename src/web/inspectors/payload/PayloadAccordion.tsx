@@ -4,7 +4,16 @@
  */
 
 import React, { ReactNode } from 'react';
-import { AccordionDetails, AccordionProps, Accordion, AccordionSummary, styled, Box, Typography } from '@mui/material';
+import {
+    AccordionDetails,
+    AccordionProps,
+    Accordion,
+    AccordionSummary,
+    styled,
+    Box,
+    Typography,
+    useTheme,
+} from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { PayloadCopyButton } from './PayloadCopyButton';
 import { PayloadRawSwitch } from './PayloadPreviewRawSwitch';
@@ -101,6 +110,8 @@ export const PayloadAccordion = (props: PayloadAccordionProps) => {
         );
     };
 
+    const isDarkMode = useTheme().palette.mode === 'dark';
+
     return (
         <PayloadAccordionContextProvider>
             <StyledAccordion
@@ -113,6 +124,7 @@ export const PayloadAccordion = (props: PayloadAccordionProps) => {
                         },
                     },
                 }}
+                elevation={isDarkMode ? 6 : 0}
             >
                 <StyledAccordionSummary
                     expandIcon={<ChevronRightIcon fontSize="small" />}
@@ -121,7 +133,7 @@ export const PayloadAccordion = (props: PayloadAccordionProps) => {
                         px: 2,
                         py: 1,
                         '&:hover': {
-                            backgroundColor: '#f5f5f5',
+                            backgroundColor: isDarkMode ? '#3D3D3D' : '#F6F6F6',
                         },
                     }}
                 >
@@ -143,7 +155,7 @@ export const PayloadAccordion = (props: PayloadAccordionProps) => {
                                 alignItems: 'center',
                                 gap: 1,
                                 // Fade out the toolbar when the accordion is not hovered
-                                opacity: 0.3,
+                                opacity: isDarkMode ? 0.7 : 0.3,
                                 transition: 'opacity 0.2s ease-in-out',
                             }}
                         >

@@ -14,17 +14,13 @@ import { toRESTKindContext } from '../types';
 import { useMappingHandlerBuilder } from './useMappingHandlerBuilder';
 
 import { DSLData } from '@kapeta/kaplang-core';
-import { Alert, AlertTitle, Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material';
+import { Alert, AlertTitle, Box, Button, Divider, IconButton, Stack, Typography, useTheme } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import AddIcon from '@mui/icons-material/Add';
 import ClearIcon from '@mui/icons-material/Clear';
-
-const colorGrayXLight = '#fafafa';
-const colorGrayLight = '#efefef';
-const colorGreenDark = '#2d8e2b';
 
 interface RestResourceToClientMapperProps
     extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping, DSLData> {}
@@ -85,6 +81,23 @@ const MethodColumnBare = (props: React.ComponentProps<typeof Box>, ref: React.Re
 );
 const MethodColumn = forwardRef(MethodColumnBare);
 
+const useThemedColors = () => {
+    const theme = useTheme();
+    const isDark = theme.palette.mode === 'dark';
+
+    return {
+        unmappedMethodBackgroundColor: theme.palette.error.main,
+        dndZoneDraggingBackgroundColor: isDark ? '#333333' : '#fafafa',
+        dndZoneDraggingBorderColor: theme.palette.success.main,
+        dndZoneHoveringBackgroundColor: isDark ? '#4cd84a' : '#2d8e2b',
+        dndZoneHoveringTextColor: isDark ? 'white' : 'black',
+        draggingSourceBackgroundColor: isDark ? '#333333' : '#fafafa',
+        draggingHandleBackgroundColor: isDark ? '#555555' : '#efefef',
+        draggingHandleShadowColor: isDark ? 'rgba(0, 0, 0, 0.15)' : 'rgba(0, 0, 0, 0.15)',
+        methodHoverBackgroundColor: isDark ? '#333333' : '#fafafa',
+    };
+};
+
 const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     title,
     source,
@@ -117,6 +130,18 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
         });
     };
 
+    const {
+        unmappedMethodBackgroundColor,
+        dndZoneDraggingBackgroundColor,
+        dndZoneDraggingBorderColor,
+        dndZoneHoveringBackgroundColor,
+        dndZoneHoveringTextColor,
+        draggingSourceBackgroundColor,
+        draggingHandleBackgroundColor,
+        draggingHandleShadowColor,
+        methodHoverBackgroundColor,
+    } = useThemedColors();
+
     const renderInnerSourceColumn = (
         ix: number,
         mappedMethod: MappedMethod,
@@ -137,34 +162,34 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                 sx={{
                     opacity: mappedMethod.source ? 1 : 0.3,
                     border: '1px solid',
-                    borderColor: mappedMethod.source ? 'transparent' : '#f28f8c',
+                    borderColor: mappedMethod.source ? 'transparent' : unmappedMethodBackgroundColor,
 
                     cursor: draggable ? 'move' : 'auto',
 
                     '&.dnd-zone-dragging': {
-                        backgroundColor: colorGrayXLight,
-                        borderColor: colorGreenDark,
+                        backgroundColor: dndZoneDraggingBackgroundColor,
+                        borderColor: dndZoneDraggingBorderColor,
                     },
                     '&.dnd-zone-hovering': {
                         opacity: 0.6,
-                        backgroundColor: colorGreenDark,
-                        color: 'white !important',
+                        backgroundColor: dndZoneHoveringBackgroundColor,
+                        color: `${dndZoneHoveringTextColor} !important`,
 
                         '& span': {
-                            color: 'white !important',
+                            color: `${dndZoneHoveringTextColor} !important`,
                         },
                     },
                     // Show light gray outline in place of original item
                     '&.dragging-source': {
-                        backgroundColor: colorGrayXLight,
+                        backgroundColor: draggingSourceBackgroundColor,
                         '& .actions, & .rest-method': {
                             visibility: 'hidden',
                         },
                     },
                     // Add background to make the item visible when dragging
                     '&.dragging-handle': {
-                        backgroundColor: colorGrayLight,
-                        boxShadow: '1px 1px 3px 0px rgba(0, 0, 0, 0.15)',
+                        backgroundColor: draggingHandleBackgroundColor,
+                        boxShadow: `1px 1px 3px 0px ${draggingHandleShadowColor}`,
 
                         // Attempt animate when dragging
                         animation: '0.2s rot forwards',
@@ -248,7 +273,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                     userSelect: 'none',
                     margin: '5px 0',
                     '&:hover': {
-                        backgroundColor: '#f5f5f5',
+                        backgroundColor: methodHoverBackgroundColor,
                     },
                 }}
             >
@@ -317,7 +342,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     const hasIssues = mappingHandlerContext.entityIssues.length > 0 || mappingHandlerContext.warnings.length > 0;
 
     return (
-        <div className={'rest-resource-to-client-mapper-ui'}>
+        <Box className={'rest-resource-to-client-mapper-ui'}>
             <FormReadyHandler name={title} ready={isValid()}>
                 {hasIssues && (
                     <Alert
@@ -359,10 +384,12 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                     </Alert>
                 )}
 
-                <Stack direction={'row'} justifyContent={'space-between'} sx={{ pb: 2 }}>
+                <Stack direction={'row'} justifyContent={'space-between'} sx={{ pb: 2 }} color="text.primary">
                     <Stack direction={'row'} spacing={1} alignItems={'center'}>
-                        <Typography variant={'h6'}>Connection</Typography>
-                        <InfoOutlinedIcon fontSize={'small'} />
+                        <Typography variant="h6" color="inherit">
+                            Connection
+                        </Typography>
+                        <InfoOutlinedIcon fontSize={'small'} color="inherit" />
                     </Stack>
                     <Button
                         variant={'contained'}
@@ -377,7 +404,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                 </Stack>
 
                 <DnDContainer>
-                    <Stack>
+                    <Stack color="text.primary">
                         <Stack
                             direction="row"
                             justifyContent={'space-between'}
@@ -405,7 +432,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                     </Stack>
                 </DnDContainer>
             </FormReadyHandler>
-        </div>
+        </Box>
     );
 };
 
