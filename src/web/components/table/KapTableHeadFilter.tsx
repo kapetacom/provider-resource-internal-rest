@@ -62,10 +62,10 @@ export const KapTableHeadFilter = <Data,>(props: KapTableHeadFilterProps<Data>) 
                 size="small"
                 ref={filterAnchorRef}
                 aria-describedby={filterId}
-                sx={{
-                    opacity: isActive ? 1 : 0.2,
+                sx={(theme) => ({
+                    opacity: isActive ? 1 : theme.palette.mode === 'dark' ? 0.8 : 0.2,
                     transition: 'opacity 0.2s',
-                }}
+                })}
             >
                 <FilterListIcon fontSize="small" />
             </IconButton>

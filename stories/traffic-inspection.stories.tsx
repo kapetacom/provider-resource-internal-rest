@@ -15,6 +15,7 @@ import {
     getUsersNotFound,
     createTraffic,
 } from './trafficDataGenerator';
+import { ThemedStoryWrapper } from './utils';
 
 const mapping: ConnectionMethodsMapping = {
     addMessage: {
@@ -39,7 +40,11 @@ export default {
     title: 'Traffic Inspection',
 };
 
-export const TrafficInspectorView = () => <InspectConnectionContent mapping={mapping} trafficLines={trafficLines} />;
+export const TrafficInspectorView = () => (
+    <ThemedStoryWrapper sx={{ flex: 1 }}>
+        <InspectConnectionContent mapping={mapping} trafficLines={trafficLines} />
+    </ThemedStoryWrapper>
+);
 
 export const WhileRequestsAreArriving = () => {
     const [traffic, setTraffic] = React.useState<Traffic[]>([]);
@@ -90,5 +95,9 @@ export const WhileRequestsAreArriving = () => {
         return () => clearTimeout(timer);
     }, []);
 
-    return <InspectConnectionContent mapping={mapping} trafficLines={traffic} />;
+    return (
+        <ThemedStoryWrapper sx={{ flex: 1 }}>
+            <InspectConnectionContent mapping={mapping} trafficLines={traffic} />
+        </ThemedStoryWrapper>
+    );
 };

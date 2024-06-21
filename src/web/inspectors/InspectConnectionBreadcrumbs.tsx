@@ -48,14 +48,15 @@ export const InspectConnectionBreadcrumbs = (props: InspectConnectionBreadcrumbs
                     <Typography
                         key={index}
                         variant="body2"
-                        sx={{
+                        color="text.primary"
+                        sx={(theme) => ({
                             display: 'inline-block',
                             fontSize: '0.875rem',
                             '&:focus': {
-                                color: 'primary.main',
+                                color: theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main',
                             },
                             ...hoverStyle,
-                        }}
+                        })}
                         onClick={onClick}
                         // Accessibility
                         role="button"

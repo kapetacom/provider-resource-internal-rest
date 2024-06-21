@@ -43,14 +43,14 @@ export const KapTableHead = <Data,>(props: KapTableHeadProps<Data>) => {
                             align={colDef.numeric ? 'right' : 'left'}
                             padding={colDef.disablePadding ? 'none' : 'normal'}
                             sortDirection={orderBy === colDef.id ? order : false}
-                            sx={{
+                            sx={(theme) => ({
                                 '&:hover': {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                    backgroundColor: theme.palette.mode === 'dark' ? '#3D3D3D' : '#F6F6F6',
                                     '.column-filter-button': {
                                         opacity: 1,
                                     },
                                 },
-                            }}
+                            })}
                         >
                             <Box
                                 sx={{
