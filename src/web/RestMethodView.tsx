@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React, { Component, ComponentProps, PropsWithChildren, useMemo } from 'react';
-
+import { ComponentProps, PropsWithChildren, useMemo } from 'react';
 import { DSLTypeHelper, RESTMethodReader } from '@kapeta/kaplang-core';
-import { DSLControllerMethod, toId } from './mapping/types';
 import { Tooltip } from '@kapeta/ui-web-components';
 import { Box, SxProps, useTheme } from '@mui/material';
+import { DSLControllerMethod, toId } from './mapping/types';
 
 interface RestMethodViewProps {
     method: DSLControllerMethod;

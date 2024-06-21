@@ -3,16 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-import React, { PropsWithChildren } from 'react';
-import { BlockDefinition, EntityType } from '@kapeta/schemas';
-import { RESTEditorComponent } from '../src/web/RESTEditorComponent';
-import { RESTResource } from '../src/web/types';
-import RestMethodView from '../src/web/RestMethodView';
-import { FormContainer } from '@kapeta/ui-web-components';
-import { DSLControllerMethod } from '../src/web/mapping/types';
 import { DSLConverters, DSLEntityType, KaplangWriter } from '@kapeta/kaplang-core';
+import { BlockDefinition, EntityType } from '@kapeta/schemas';
+import { FormContainer } from '@kapeta/ui-web-components';
+import { RESTEditorComponent } from '../src/web/RESTEditorComponent';
+import RestMethodView from '../src/web/RestMethodView';
+import { DSLControllerMethod } from '../src/web/mapping/types';
+import { RESTResource } from '../src/web/types';
 import './stories.less';
-import { Box, BoxProps, useTheme } from '@mui/material';
 import { ThemedStoryWrapper } from './utils';
 
 const API_KIND = 'kapeta/resource-type-rest-api';
