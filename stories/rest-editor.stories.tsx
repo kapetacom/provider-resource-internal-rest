@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+import React from 'react';
 import { DSLConverters, DSLEntityType, KaplangWriter } from '@kapeta/kaplang-core';
 import { BlockDefinition, EntityType } from '@kapeta/schemas';
 import { FormContainer } from '@kapeta/ui-web-components';

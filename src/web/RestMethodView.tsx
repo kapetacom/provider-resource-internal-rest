@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+import React from 'react';
 import { ComponentProps, PropsWithChildren, useMemo } from 'react';
 import { DSLTypeHelper, RESTMethodReader } from '@kapeta/kaplang-core';
 import { Tooltip } from '@kapeta/ui-web-components';
