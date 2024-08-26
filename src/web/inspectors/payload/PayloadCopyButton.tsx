@@ -5,7 +5,7 @@
 
 import React, { MouseEventHandler, useCallback, useMemo, useState } from 'react';
 import { Box, BoxProps, IconButton, useTheme } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { ContentCopy as ContentCopyIcon } from '@mui/icons-material';
 import { Tooltip } from '@kapeta/ui-web-components';
 
 type TooltipColor = 'normal' | 'success';

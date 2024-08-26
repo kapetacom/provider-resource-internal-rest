@@ -14,7 +14,7 @@ import {
     Typography,
     useTheme,
 } from '@mui/material';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { ChevronRight as ChevronRightIcon } from '@mui/icons-material';
 import { PayloadCopyButton } from './PayloadCopyButton';
 import { PayloadRawSwitch } from './PayloadPreviewRawSwitch';
 import { PayloadAccordionContextProvider } from './PayloadAccordionContext';

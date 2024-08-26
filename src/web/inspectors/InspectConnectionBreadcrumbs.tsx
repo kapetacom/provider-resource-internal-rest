@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Stack, SxProps, Typography } from '@mui/material';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import { NavigateNext as NavigateNextIcon } from '@mui/icons-material';
 
 export type Breadcrumb = {
     name: string;

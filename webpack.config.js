@@ -1,5 +1,6 @@
 const Path = require('path');
 const packageJson = require('./package.json');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
     entry: {
@@ -67,9 +68,34 @@ module.exports = {
         react: 'React',
         'react-dom': 'ReactDOM',
         lodash: '_',
+        '@mui/material': {
+            commonjs: '@mui/material',
+            commonjs2: '@mui/material',
+            amd: '@mui/material',
+            root: '@mui/material',
+        },
+        '@mui/icons-material': {
+            commonjs: '@mui/icons-material',
+            commonjs2: '@mui/icons-material',
+            amd: '@mui/icons-material',
+            root: '@mui/icons-material',
+        },
+        '@emotion/react': {
+            commonjs: '@emotion/react',
+            commonjs2: '@emotion/react',
+            amd: '@emotion/react',
+            root: '@emotion/react',
+        },
+        '@emotion/styled': {
+            commonjs: '@emotion/styled',
+            commonjs2: '@emotion/styled',
+            amd: '@emotion/styled',
+            root: '@emotion/styled',
+        },
         '@kapeta/ui-web-components': 'Kapeta.Components',
         '@kapeta/ui-web-types': 'Kapeta.Types',
         '@kapeta/ui-web-utils': 'Kapeta.Utils',
         '@kapeta/ui-web-context': 'Kapeta.Context',
     },
+    plugins: [new BundleAnalyzerPlugin()],
 };

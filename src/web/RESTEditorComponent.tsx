@@ -21,7 +21,7 @@ import { DSLData, DSLDataTypeParser, KAPLANG_ID, KAPLANG_VERSION } from '@kapeta
 import { IncludeContextType, ResourceTypeProviderEditorProps } from '@kapeta/ui-web-types';
 
 import { validateApiName } from './RESTUtils';
-import { Alert, Stack } from '@mui/material';
+import { Alert, Stack, useTheme } from '@mui/material';
 import { SourceCode } from '@kapeta/schemas';
 
 const typeNameMapper = (e: DSLData) => {
@@ -29,6 +29,9 @@ const typeNameMapper = (e: DSLData) => {
 };
 
 export const RESTEditorComponent = (props: ResourceTypeProviderEditorProps) => {
+    const theme = useTheme();
+    console.log('RESTEditorComponent theme is:', theme.palette.mode);
+
     const methodField = useFormContextField('spec.methods');
     const methodSource = useFormContextField<SourceCode>('spec.source');
     const [methodsError, setMethodsError] = React.useState<string | null>(null);

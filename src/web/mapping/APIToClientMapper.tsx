@@ -15,12 +15,14 @@ import { useMappingHandlerBuilder } from './useMappingHandlerBuilder';
 
 import { DSLData } from '@kapeta/kaplang-core';
 import { Alert, AlertTitle, Box, Button, Divider, IconButton, Stack, Typography, useTheme } from '@mui/material';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import SyncAltIcon from '@mui/icons-material/SyncAlt';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-import AddIcon from '@mui/icons-material/Add';
-import ClearIcon from '@mui/icons-material/Clear';
+import {
+    InfoOutlined as InfoOutlinedIcon,
+    SyncAlt as SyncAltIcon,
+    CheckCircle as CheckCircleIcon,
+    Error as ErrorIcon,
+    Add as AddIcon,
+    Clear as ClearIcon,
+} from '@mui/icons-material';
 
 interface RestResourceToClientMapperProps
     extends ResourceTypeProviderMappingProps<RESTResourceSpec, RESTResourceSpec, ConnectionMethodsMapping, DSLData> {}
@@ -107,6 +109,9 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     value,
     onDataChanged,
 }) => {
+    const theme = useTheme();
+    console.log('APIToClientMapper theme is:', theme.palette.mode);
+
     const { mappingHandler, ...mappingHandlerContext } = useMappingHandlerBuilder(
         toRESTKindContext(source as RESTResource, sourceEntities),
         toRESTKindContext(target as RESTResource, targetEntities),
@@ -342,7 +347,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
     const hasIssues = mappingHandlerContext.entityIssues.length > 0 || mappingHandlerContext.warnings.length > 0;
 
     return (
-        <Box className={'rest-resource-to-client-mapper-ui'}>
+        <Box className={'rest-resource-to-client-mapper-ui'} color="text.primary">
             <FormReadyHandler name={title} ready={isValid()}>
                 {hasIssues && (
                     <Alert
@@ -384,7 +389,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                     </Alert>
                 )}
 
-                <Stack direction={'row'} justifyContent={'space-between'} sx={{ pb: 2 }} color="text.primary">
+                <Stack direction={'row'} justifyContent={'space-between'} sx={{ pb: 2 }} /* color="text.primary" */>
                     <Stack direction={'row'} spacing={1} alignItems={'center'}>
                         <Typography variant="h6" color="inherit">
                             Connection
@@ -404,7 +409,7 @@ const APIToClientMapper: React.FC<RestResourceToClientMapperProps> = ({
                 </Stack>
 
                 <DnDContainer>
-                    <Stack color="text.primary">
+                    <Stack /* color="text.primary" */>
                         <Stack
                             direction="row"
                             justifyContent={'space-between'}

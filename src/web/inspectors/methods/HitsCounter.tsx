@@ -4,20 +4,20 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import Box from '@mui/material/Box';
-import { keyframes } from '@emotion/react';
+import { Box } from '@mui/material';
+// import { keyframes } from '@mui/system';
 import { getHttpStatusCodeColor } from '../helpers';
 
-const animationRipple = keyframes`
-    from {
-        transform: scale(0);
-        opacity: 0.5;
-    }
-    to {
-        transform: scale(1.75);
-        opacity: 0;
-    }
-`;
+// const animationRipple = keyframes`
+//     from {
+//         transform: scale(0);
+//         opacity: 0.5;
+//     }
+//     to {
+//         transform: scale(1.75);
+//         opacity: 0;
+//     }
+// `;
 
 interface HitsCounterProps {
     /**
@@ -77,7 +77,7 @@ export const HitsCounter = (props: HitsCounterProps) => {
                         marginTop: '-12.5px',
                         borderRadius: '50%',
                         backgroundColor: getHttpStatusCodeColor(statusCode, theme.palette),
-                        animation: `${animationRipple} 1s ease-out forwards`,
+                        /* animation: `${animationRipple} 1s ease-out forwards`, */
                         pointerEvents: 'none',
                     })}
                     onAnimationEnd={() => handleAnimationEnd(number)}

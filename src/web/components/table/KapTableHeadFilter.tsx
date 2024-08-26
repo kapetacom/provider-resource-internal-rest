@@ -5,7 +5,7 @@
 
 import React, { useCallback, useId, useRef, useState } from 'react';
 import { KapTableColDef } from './types';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import { FilterList as FilterListIcon } from '@mui/icons-material';
 import { Box, IconButton, IconButtonProps, Popover } from '@mui/material';
 
 export interface KapTableHeadFilterProps<Data> extends IconButtonProps {
